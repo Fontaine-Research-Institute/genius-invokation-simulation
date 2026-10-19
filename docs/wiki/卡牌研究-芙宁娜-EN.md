@@ -19,8 +19,7 @@ Talent
 > (You must have Furina in your deck to add this card to your deck.)
 
 
-- Implementation meaning: Salon Solitaire has exactly **one skill**. The talent's effect is: immediately use Salon Solitaire once after equipping; and **while this talent is equipped, using Salon Solitaire triggers the talent and applies Center of Attention to the character herself**. The trigger is the talent; what it grants is a status.
-- Note: in the §2.2 design draft each form has its own same-named skill definition (Ousia / Pneuma); that is **form data**, not a new skill created by the talent. The talent creates no new skill.
+Implementation: register a function for "after the equipped character uses Salon Solitaire"; the function body is one step (attach status).
 
 ### 1.2 "Center of Attention"
 
@@ -867,21 +866,27 @@ pub static TALENT: ActionCardDef<(Talent, CombatAction)> = ActionCardDef::new(
 );
 ```
 
-#### 2.2.5.1 Talent trigger (apply the status when Salon Solitaire is used)
+#### 2.2.5.1 Register the "after Salon Solitaire" hook (one step (attach the status))
 
 ```rust
-// 设计稿（未实现）：天赋的触发逻辑 —— 使用「孤心沙龙」时挂状态。
-// 关键口径：孤心沙龙只有一个技能；这里不是「换技能」，而是「装备天赋」的触发。
-pub fn talent_on_salon_solitaire_step -> Vec<KeywordOp> {
-    vec![KeywordOp::Status(StatusArgs {
+// 设计稿（未实现）：装备注册「装备此牌的角色使用孤心沙龙后」的回调。
+// 回调效果 = 一步(对角色自身赋予「万众瞩目」状态)。
+fn talent_after_salon_solitaire() -> Step {
+    Step::new(vec![KeywordOp::Status(StatusArgs {
         targets: TargetSelector::Subject,
         place: StatusPlace::Character,
         card: CENTER_OF_ATTENTION_CARD_ID,
         layers: Some(Nat::new(1)),
         duration: None,
         stack_cap: Some(Nat::new(1)),
-    })]
+    })])
 }
+
+// 装备注册：时机 = 使用孤心沙龙后；效果 = 上面的函数（返回一步）。
+pub static TALENT_HOOK: EquipmentHook = EquipmentHook {
+    timing: EquipmentTiming::AfterSkillUsed(SKILL_SALON_SOLITAIRE_ID),
+    effect: talent_after_salon_solitaire,
+};
 ```
 
 #### 2.2.6 Center of Attention status identity
