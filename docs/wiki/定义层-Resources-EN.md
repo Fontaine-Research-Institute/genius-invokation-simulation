@@ -36,10 +36,10 @@ The resources layer owns "things that get spent": the dice pool is pure counting
 | `validate_cost` / `apply_delta` | same | Validate a cost (panics on illegal combinations); apply one delta |
 | `CurrentCost::{new, base, deltas, current, total, with_delta, with_increase, with_decrease}` | `families/action_card/areas/cost.rs` | Pure data for the current cost |
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
-> Real source excerpts for the dice pool and costs (signatures and doc comments verbatim; bodies omitted).
+> Real source excerpts for the dice pool and costs (signatures and doc comments; bodies omitted).
 
 **`crates/definitions/src/resources/dice/mod.rs (FoldedGroup / DicePool / DiceSnapshot)`**
 

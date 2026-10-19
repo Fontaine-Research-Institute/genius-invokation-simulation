@@ -55,20 +55,20 @@ HandCardStates { entries: Vec<HandCardStateEntry> }   // one StateList per hand 
 HandCardStateTiming { StateAdded, StateRemoved }
 ```
 
-Six hand-card statuses (D116; K3003–K3008):
+Six hand-card statuses (D116; Electric Shock–Invalidation):
 
 | K code | Name | Identity | Form | Definition |
 |---|---|---|---|---|
-| K3003 | Electric Shock | `ELECTRIC_SHOCK` | boolean | `families/character/damage_chain/statuses.rs` (legacy entry) |
-| K3004 | Cost Increase | `HAND_COST_INCREASE` | layered (to be verified) | `families/action_card/areas/hand_state.rs` |
-| K3005 | Cost Reduction | `COST_REDUCTION` | layered | `families/character/damage_chain/statuses.rs` (legacy entry) |
-| K3006 | Empowerment | `HAND_EMPOWERMENT` | boolean | `areas/hand_state.rs` |
-| K3007 | Untunable | `HAND_UNTUNABLE` | boolean | `areas/hand_state.rs` |
-| K3008 | Invalidation | `HAND_INVALIDATION` | boolean | `areas/hand_state.rs` |
+| Electric Shock | Electric Shock | `ELECTRIC_SHOCK` | boolean | `families/character/damage_chain/statuses.rs` (legacy entry) |
+| Cost Increase | Cost Increase | `HAND_COST_INCREASE` | layered (to be verified) | `families/action_card/areas/hand_state.rs` |
+| Cost Reduction | Cost Reduction | `COST_REDUCTION` | layered | `families/character/damage_chain/statuses.rs` (legacy entry) |
+| Empowerment | Empowerment | `HAND_EMPOWERMENT` | boolean | `areas/hand_state.rs` |
+| Untunable | Untunable | `HAND_UNTUNABLE` | boolean | `areas/hand_state.rs` |
+| Invalidation | Invalidation | `HAND_INVALIDATION` | boolean | `areas/hand_state.rs` |
 
 - Enum `reactions::effect::HandCardStatus` (6 variants with `ALL` / `k_code` / `from_k_code`); bridge `hand_status_identity(HandCardStatus) -> &'static dyn StateIdentity` and the reverse `hand_status_of_identity` live in `damage_chain/statuses.rs` (Z13).
 - Add / remove reuse `StateList` (boolean idempotent, layers add) and dispatch `StateAdded` / `StateRemoved`; `remove_card(entity)` clears a card's states when it leaves the hand.
-- The four new identities (K3004/K3006/K3007/K3008) have **null descriptions → left empty** (D118 / 留空.md #10); their forms are symmetric / inferred (to be verified).
+- The four new identities (Cost Increase/Empowerment/Untunable/Invalidation) have **null descriptions → left empty** (D118 / 留空.md #10); their forms are symmetric / inferred (to be verified).
 
 ### 2.5 Pile (`zones/pile/`)
 
@@ -100,20 +100,21 @@ CurrentCost::{new, base, deltas, current, total, with_delta, with_deltas, with_i
 
 ### 2.7 Arcane edict (`families/status/arcane_edict.rs` + `rules/ops/arcane.rs`)
 
+*Keyword codes in comments were replaced with names; code lines unchanged*
 ```text
 ArcaneEdict { available: bool, played: Nat }     // one per player (D264)
 ArcanePlay { Allowed, AlreadyPlayed, NoEdict }
-ARCANE_EDICT                                     // state identity (boolean; K311 text; no StatusDef / no card id)
+ARCANE_EDICT                                     // state identity (boolean; 秘传揭令 text; no StatusDef / no card id)
 ```
 
-- Rulebook "each player may use only one Arcane Legend card" + K311 "playable only while the edict exists; playing consumes it"; `can_play` checks the played count first, then the edict; `record_play` increments and consumes when allowed.
+- Rulebook "each player may use only one Arcane Legend card" + Arcane Edict "playable only while the edict exists; playing consumes it"; `can_play` checks the played count first, then the edict; `record_play` increments and consumes when allowed.
 - The container is **held by the caller** (留空.md #68 / #98): normal `play_card_*` signatures stay unchanged; arcane cards go through `play_card_*_arcane`.
 - There is **no status card row** for the arcane edict in the data → shared identity only, no fabricated `StatusDef`.
 
 ## 3. Public entry points
 
 > [!NOTE]
-> Code below is copied verbatim from the current repository (including use, derive, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
+> Code below is copied from the current repository (including use, derive, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
 
 ### 3.1 Definition carriers
 
@@ -250,7 +251,7 @@ pub enum SupportValue {
 /// 支援牌的**持续回合表达**（Z14：显式区分「有限回合」与「整局」）。
 ///
 /// 规则书·特殊词条「持续回合」：「每个结束阶段，都会使『持续回合』-1。『持续回合』耗尽后，
-/// 会立刻弃置这张牌。」整局状态（K60 / 无持续回合的支援牌）不参与递减，所以用
+/// 会立刻弃置这张牌。」整局状态（整局 / 无持续回合的支援牌）不参与递减，所以用
 /// SupportDuration::WholeGame **显式**表达，而不是靠 duration = None 隐含。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum SupportDuration {
@@ -492,16 +493,16 @@ pub struct HandCardStates {
 **`ExtraHandCardStatus`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
 
 ```rust
-/// 本文件补的 4 个手牌状态（K3004 / K3006 / K3007 / K3008）。
+/// 本文件补的 4 个手牌状态（费用增加 / 赋能 / 不可调和 / 无效化）。
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum ExtraHandCardStatus {
-    /// K3004 费用增加。
+    /// 费用增加 费用增加。
     CostIncrease,
-    /// K3006 赋能。
+    /// 赋能 赋能。
     Empowerment,
-    /// K3007 不可调和。
+    /// 不可调和 不可调和。
     Untunable,
-    /// K3008 无效化。
+    /// 无效化 无效化。
     Invalidation,
 }
 ```
@@ -543,7 +544,7 @@ macro_rules! impl_hand_status_identity {
 **`hand_status_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
 
 ```rust
-/// 手牌状态枚举 -> 状态身份（月感电 / 月绽放用；K3003–K3008 共 6 种）。
+/// 手牌状态枚举 -> 状态身份（月感电 / 月绽放用；电击–无效化 共 6 种）。
 pub fn hand_status_identity(status: HandCardStatus) -> &'static dyn StateIdentity {
     match status {
         HandCardStatus::ElectricShock => &ELECTRIC_SHOCK,
@@ -865,7 +866,7 @@ pub struct ArcaneEdict {
 **`record_play`** — `crates/definitions/src/families/status/arcane_edict.rs`
 
 ```rust
-    /// 打出秘传：允许时记录「已打出 +1」并按 K311 消耗揭令；不允许 -> None（状态不变）。
+    /// 打出秘传：允许时记录「已打出 +1」并按 秘传揭令 消耗揭令；不允许 -> None（状态不变）。
     pub fn record_play(&self) -> Option<ArcaneEdict> {
         match self.can_play() {
             ArcanePlay::Allowed => Some(ArcaneEdict {
@@ -884,7 +885,7 @@ pub struct ArcaneEdict {
 ### 3.7 Keyword and rules-ops interfaces referenced by this page
 
 > [!NOTE]
-> Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied verbatim).
+> Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied as-is).
 
 **`apply_delta`** — `crates/definitions/src/resources/dice/mod.rs`
 
@@ -1010,8 +1011,8 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 | Queries: `CardMeta` injection, three excluded categories, per-segment grouping | D20 / D101 |
 | Current cost = base + increases/decreases; increase/decrease order | D11 / D168 / D169 / D170 / D172 / D178 |
 | Play condition before payment | D217 |
-| One arcane edict per player | Rulebook "Special Entry: Arcane Legend" + K311; D264; 留空.md #68 / #98 / #99 |
-| Six hand-card state identities | D116; K3003–K3008; 留空.md #10 / #106 / #115 |
+| One arcane edict per player | Rulebook "Special Entry: Arcane Legend" + Arcane Edict; D264; 留空.md #68 / #98 / #99 |
+| Six hand-card state identities | D116; Electric Shock–Invalidation; 留空.md #10 / #106 / #115 |
 
 ### 5.1 Documentation vs code mismatches (for review)
 

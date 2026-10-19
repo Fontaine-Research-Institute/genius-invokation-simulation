@@ -18,7 +18,7 @@
 | Unimplemented cards | the implementation section shows **the planned full code** with `[!WARNING] not implemented` and lists what is missing by capability |
 
 > [!IMPORTANT]
-> Card text is copied verbatim; implementation code is pasted in full (including `use`, constants, tests and other boilerplate), never key-line excerpts.
+> Describe card-face content in our own words; paste implementation code in full (including `use`, constants, tests and other boilerplate), never key-line excerpts.
 
 ## 2. Writing Requirements
 
@@ -26,8 +26,8 @@
 
 | Section | What must be written |
 |---|---|
-| `## 1. Card text` | Chinese / English originals verbatim; keyword expansion (K code -> description); related rulebook excerpts |
-| `## 2. Implementation code` | the **full** implementation code (real source verbatim, file path, no excerpts); if unimplemented, planned full code + `[!WARNING] not implemented` + missing work by capability |
+| `## 1. Card text` | Chinese / English descriptions (skills / modes in three-line form); keyword expansion (keyword name -> description); related rulebook excerpts |
+| `## 2. Implementation code` | the **full** implementation code (real source, file path, no excerpts); if unimplemented, planned full code + `[!WARNING] not implemented` + missing work by capability |
 | `## 3. Tests` | table: `Item / Position + operation / In-game result / Our result / Conclusion`; untested items say "pending test" with reproducible steps |
 | `## 4. Notes` (optional) | pitfalls / related D numbers / related pages |
 
@@ -41,8 +41,16 @@
 | 4 | **Metadata one item per line**: type, tags, cost, etc. each on its own line (or list row); never crammed into one line |
 | 5 | **Paste implementation code in place**: when a capability is discussed, paste that real source immediately after; do not pile it at the page end / last section, and do not just link |
 | 6 | No emoji; tables with alignment rows; critical notes use `[!NOTE]` / `[!IMPORTANT]` / `[!WARNING]` |
-| 7 | Fence code as `rust` (commands `bash`, config `toml`); source must match the current repository verbatim and be re-pasted when interfaces change |
+| 7 | Fence code as `rust` (commands `bash`, config `toml`); source must match the current repository exactly and be re-pasted when interfaces change |
 | 8 | Footer: `---` + `Last verified: YYYY-MM-DD (code: <file>:<symbol>)` |
+| 9 | **Half-width punctuation only**: commas / periods / colons / semicolons / exclamation marks / question marks / parentheses / brackets / quotes / angle brackets / hyphens; never full-width punctuation |
+| 10 | **Copy the card-face text**: keep the original punctuation; quoted blocks are the only place that keeps full-width punctuation (our own prose stays half-width) |
+| 11 | **No keyword ids**: keyword ids are ids too; use the keyword name (Energy / Physical DMG / Usage(s) / Arcane Legend / Undiscoverable, etc.) or a one-line description |
+| 12 | **Do not merge forms**: 始基力：荒性形态 and 始基力：芒性形态 get separate tables and full names |
+| 13 | **No cost for passive skills**: there is no cost field; do not write a cost line at all, just omit it |
+| 14 | **No tables for skills**: each skill is three lines: skill name / skill type (Normal Attack / Elemental Skill / Elemental Burst / Passive Skill / Talent, no prefix) / '>' the card-face text copied exactly; passive skills list no cost, cost numbers go on their own line |
+| 15 | **Code-block comments**: replace keyword ids in comments with names and add a one-line note above the block; code lines stay as in the repository |
+| 16 | **Full cost wording**: no shorthand; write 'x Hydro Elemental Dice + n Any Elemental Dice / n Same Elemental Dice'; dice cost and Energy on separate lines; omit Energy when none; omit both lines for passive skills |
 
 Evidence order: rulebook > card text / authoritative keywords > reference implementation (technique only; `RULES.md` section 3, items 2 and 3).
 
@@ -64,17 +72,17 @@ Copy [[卡牌研究-模板-EN]] for a new card; add a row to section 4 of this p
 |---|---|
 | Settlement and insertion order (authority for order conclusions) | workspace-root `结算顺序.md` (sections 1 / 3) |
 | Rulebook text | in-game rules text (Game Areas / Taking Actions / Special Terms / Other Rules) |
-| Authoritative keyword data | in-game keyword text (142 K codes x 4 languages) |
+| Authoritative keyword data | in-game keyword text (142 keywords x 4 languages) |
 | Decision records | workspace-root `决策日志.md` (append-only) |
 | Pending measurement / integration list | workspace-root `留空.md` |
 | Concrete-card crate | [[Crate-Cards-EN]] |
-| Action cards / pile / hand | [[定义层-Action-Card-EN]]、[[定义层-State-EN]] |
+| Action cards / pile / hand | [[定义层-Action-Card-EN]], [[定义层-State-EN]] |
 | Character family | [[定义层-Character-EN]] |
 | Dice and cost | [[定义层-Resources-EN]] |
 
 ## 6. Maintenance Conventions
 
-- **Re-paste code when it changes**: section-2 source is verbatim from the repository; re-paste and update the footer.
+- **Re-paste code when it changes**: section-2 source is copied from the repository exactly; re-paste and update the footer.
 - **New cards**: template + one row in section 4; Chinese page `卡牌研究-<name>.md`, English page `卡牌研究-<name>-EN.md`.
 - **Test results** only use: match / mismatch / pending test; a mismatch states the exact difference (punctuation, number, etc.).
 - **Order conclusions**: one sentence + reproducible steps in section 3, D numbers in 4.2; no long interaction chains.

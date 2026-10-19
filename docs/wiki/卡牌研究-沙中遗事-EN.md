@@ -2,7 +2,7 @@
 
 > [[卡牌研究-沙中遗事|中文]] · English
 
-*Scope: the event card Lost Legacies in the Sand - card text (Chinese / English originals + keyword expansion + related rulebook entries), implementation code (current real source + missing work), test records, and notes.*
+*Scope: the event card Lost Legacies in the Sand - card text (Chinese / English + keyword expansion + related rulebook entries), implementation code (current real source + missing work), test records, and notes.*
 
 ---
 
@@ -20,35 +20,29 @@
 > [!NOTE]
 > Type, tags, and cost are listed one item per row; this section contains only card-face text and essential metadata.
 
-### 1.2 Card text (Chinese / English verbatim)
+### 1.2 Description
 
-> Chinese original:
-> 挑选一项：
-> 将敌方1张当前元素骰费用最高的手牌置于牌组底。
-> 或
-> 将我方所有手牌置于牌组底，然后抓相同数量+1张手牌。
-> （整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中）
+The two card modes are written in three lines: mode name / role and condition / the card description as a `>` quote (copied exactly, original punctuation kept).
 
-> English original:
-> Select one of the following:
+Mode 1
+Affects the opponent's hand; condition: highest Current Elemental Dice Cost
 > Place 1 card with the highest Current Elemental Dice Cost from your opponent's Hand at the bottom of their deck.
-> Or
-> Place all cards from your Hand at the bottom of your deck and then draw the same number of cards plus 1.
-> (Only one "Arcane Legend" card can be played per match. This card will be in your starting hand.)
 
-| Mode | Chinese | English |
-|---|---|---|
-| Mode 1 | 将敌方1张当前元素骰费用最高的手牌置于牌组底。 | Place 1 card with the highest Current Elemental Dice Cost from your opponent's Hand at the bottom of their deck. |
-| Mode 2 | 将我方所有手牌置于牌组底，然后抓相同数量+1张手牌。 | Place all cards from your Hand at the bottom of your deck and then draw the same number of cards plus 1. |
-| Restriction | 整局游戏只能打出一张「秘传」卡牌；这张牌一定在你的起始手牌中。 | Only one Arcane Legend card can be played per match. This card will be in your starting hand. |
+Mode 2
+Affects your hand
+> Place all cards from your Hand at the bottom of your deck and then draw the same number of cards plus 1.
+
+Restriction
+Arcane Legend: one per player per match, guaranteed in the starting hand
+> (Only one "Arcane Legend" card can be played per match. This card will be in your starting hand.)
 
 ### 1.3 Keyword expansion
 
-| K code | Name | Keyword description | Where it appears |
-|---|---|---|---|
-| K59 | Select | Choose 1 card from a specific set and activate its effect. | choose one of the two modes |
-| K3002 | Current Elemental Dice Cost | Cost Increase / Cost Reduction attached to an Action Card changes its current cost; play-time dice-cost reductions do not affect it. | the value compared by mode 1 |
-| K311 | Arcane Edict | Each player can only use 1 Arcane Legend card per match; an Arcane Legend can only be played while the Edict exists; playing it consumes the chance. | per-match limit |
+| Keyword | Description | Where it appears |
+|---|---|---|
+| Select | Choose 1 card from a specific set and activate its effect. | choose one of the two modes |
+| Current Elemental Dice Cost | Cost Increase / Cost Reduction attached to an Action Card changes its current cost; play-time dice-cost reductions do not affect it. | the value compared by mode 1 |
+| Arcane Edict | Each player can only use 1 Arcane Legend card per match; an Arcane Legend can only be played while the Edict exists; playing it consumes the chance. | per-match limit |
 
 ### 1.4 Related rulebook entries (excerpts)
 
@@ -395,6 +389,8 @@ pub fn draw_cards(state: &DefState, env: &EffectEnv<'_>, args: &DrawCardsArgs) -
 
 `new/crates/definitions/src/families/status/arcane_edict.rs` - the per-player Arcane Edict container:
 
+*Keyword codes in comments were replaced with names; code lines unchanged.*
+
 ```rust
 /// 每位牌手一份的**秘传揭令容器**（使用机会 + 已打出张数）。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -406,7 +402,7 @@ pub struct ArcaneEdict {
 }
 
 impl ArcaneEdict {
-    /// 整局每位牌手最多打出 1 张秘传（规则书 + K311；复用规则层常量）。
+    /// 整局每位牌手最多打出 1 张秘传（规则书 + 秘传揭令；复用规则层常量）。
     pub const PER_GAME: Nat = ARCANE_LEGEND_PER_GAME;
 
     /// 开局状态：揭令存在、还没有打出过秘传。
@@ -446,7 +442,7 @@ impl ArcaneEdict {
         }
     }
 
-    /// 打出秘传：允许时记录「已打出 +1」并按 K311 消耗揭令；不允许 -> None（状态不变）。
+    /// 打出秘传：允许时记录「已打出 +1」并按 秘传揭令 消耗揭令；不允许 -> None（状态不变）。
     pub fn record_play(&self) -> Option<ArcaneEdict> {
         match self.can_play() {
             ArcanePlay::Allowed => Some(ArcaneEdict {
@@ -527,17 +523,19 @@ pub fn consumes_edict() -> bool {
 
 `new/crates/definitions/src/flow/play_card.rs` - Arcane play entry (pre-check + bookkeeping only on success):
 
+*Keyword codes in comments were replaced with names; code lines unchanged.*
+
 ```rust
-/// **秘传打出的结果**（Z12 / K311）：打牌结果 + **打出后**的秘传揭令容器。
+/// **秘传打出的结果**（Z12 / 秘传揭令）：打牌结果 + **打出后**的秘传揭令容器。
 #[derive(Clone, Debug)]
 pub struct ArcanePlayOutcome {
     /// 普通打牌流程的完整结果（分支 / 前后派发 / 时机 / 记录）。
     pub play: PlayCardOutcome,
-    /// 打出后的秘传揭令容器（已 record_play：本局张数 +1、按 K311 消耗揭令）。
+    /// 打出后的秘传揭令容器（已 record_play：本局张数 +1、按 秘传揭令 消耗揭令）。
     pub edict: ArcaneEdict,
 }
 
-/// **打出「秘传」行动牌**（我方；Z12 / K311）。
+/// **打出「秘传」行动牌**（我方；Z12 / 秘传揭令）。
 ///
 /// - 打牌**前置**：edict.can_play() 必须是 Allowed（揭令仍存在 + 本局未打出过）；
 ///   否则 Err(ArcaneNotPlayable(原因))、入参不变；
@@ -586,7 +584,7 @@ pub fn play_card_opp_arcane_with_timing(
     play_card_arcane(state, env, request, edict, false, has_combat_action_tag)
 }
 
-/// 秘传打牌的共用实现：前置判定（K311）-> 普通打牌流程 -> 后置 record_play。
+/// 秘传打牌的共用实现：前置判定（秘传揭令）-> 普通打牌流程 -> 后置 record_play。
 fn play_card_arcane(
     state: &DefState,
     env: &PlayCardEnv<'_>,
@@ -600,7 +598,7 @@ fn play_card_arcane(
     if !user.hand().contains(request.entity) {
         return Err(PlayCardError::NotInHand);
     }
-    // 1) 前置：秘传揭令仍存在 + 本局该牌手还没打出过秘传（规则书·特殊词条 秘传 + K311）。
+    // 1) 前置：秘传揭令仍存在 + 本局该牌手还没打出过秘传（规则书·特殊词条 秘传 + 秘传揭令）。
     let verdict = edict.can_play();
     if verdict != ArcanePlay::Allowed {
         return Err(PlayCardError::ArcaneNotPlayable(verdict));
@@ -617,8 +615,10 @@ fn play_card_arcane(
 
 `play_card.rs::play_card_arcane` - shared implementation (whole function):
 
+*Keyword codes in comments were replaced with names; code lines unchanged.*
+
 ```rust
-/// 秘传打牌的共用实现：前置判定（K311）-> 普通打牌流程 -> 后置 record_play。
+/// 秘传打牌的共用实现：前置判定（秘传揭令）-> 普通打牌流程 -> 后置 record_play。
 fn play_card_arcane(
     state: &DefState,
     env: &PlayCardEnv<'_>,
@@ -632,7 +632,7 @@ fn play_card_arcane(
     if !user.hand().contains(request.entity) {
         return Err(PlayCardError::NotInHand);
     }
-    // 1) 前置：秘传揭令仍存在 + 本局该牌手还没打出过秘传（规则书·特殊词条 秘传 + K311）。
+    // 1) 前置：秘传揭令仍存在 + 本局该牌手还没打出过秘传（规则书·特殊词条 秘传 + 秘传揭令）。
     let verdict = edict.can_play();
     if verdict != ArcanePlay::Allowed {
         return Err(PlayCardError::ArcaneNotPlayable(verdict));
@@ -670,7 +670,7 @@ fn play_card_arcane(
 | Draw-count timing | Hand H=4 (including Lost Legacies), pile 10; play mode 2 | pending test (expected to draw 4 = H) | `HandAtStepStartPlus(1)` captures N=3 at step start -> draws 4; no card-level test (code derivation only) | code derivation matches; **pending test** |
 | Does the draw include just-placed cards | Hand H=4, pile only 2; play mode 2 | pending test | deterministically draws just-placed c and b (enters the bottom region when the pile above is insufficient, starting with later-acquired cards) | **pending test** |
 | Empty-hand degenerate | Hand contains only Lost Legacies; play mode 2 | pending test (expected draw 1) | N=0 -> draw 0+1=1 (code derivation) | **pending test** |
-| Arcane frequency | One Arcane already played this match; try to play another | rejected (one per player per match, K311) | `flow/play_card.rs` test `arcane_play_consumes_the_edict_and_rejects_the_second_play` passes | match (engineering verified) |
+| Arcane frequency | One Arcane already played this match; try to play another | rejected (one per player per match, 秘传揭令) | `flow/play_card.rs` test `arcane_play_consumes_the_edict_and_rejects_the_second_play` passes | match (engineering verified) |
 | Arcane in opening hand | Deck contains 1 Arcane | guaranteed in the starting hand | `HandState::draw_opening` draws it first; `opening_hand_prefers_arcane_cards` passes | match (engineering verified) |
 | Mode 1 tie for highest | Opponent has 2 cards tied at the highest current cost; play mode 1 | pending test | not implemented | **pending test / not implemented** |
 | Arcane cost | Inspect playcost | `GCG_COST_LEGEND` x 1; payment method pending test | no `CostComponent` mapping | **pending test / not implemented** |
@@ -724,3 +724,4 @@ fn play_card_arcane(
 ---
 
 Last verified: 2026-10-19 (code: `new/crates/definitions/src/families/action_card/zones/pile/mod.rs:put_bottom_many`)
+

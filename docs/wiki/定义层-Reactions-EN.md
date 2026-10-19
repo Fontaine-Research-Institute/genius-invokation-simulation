@@ -33,7 +33,7 @@ Fourteen elemental reaction identities + an effect table + pure-function effects
 | `resolve(event, context) -> Option<ReactionEffectResult>` | same | Compute the effect of an already determined reaction |
 | `is_lunar(reaction)` / `rule_matches(rule, attachment, attack)` | same | Whether it is lunar; whether a rule condition matches |
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
 > Real reaction-layer source excerpts (types / trait / table function signatures + doc comments; bodies omitted).
@@ -77,34 +77,36 @@ pub fn same_reaction_identity(
 
 **`crates/definitions/src/reactions/effect.rs (HandCardStatus / EffectOp / branch and result types)`**
 
+*Keyword codes in comments have been replaced with names; code lines are unchanged.*
+
 ```rust
 /// 反应赋予**手牌**的状态（关键字，不是卡牌）。
 ///
 /// 依据：规则书·元素反应·效果 月感电「赋予敌方随机1张手牌[电击]」、
 /// 月绽放「赋予我方随机1张手牌[费用降低]」；关键字表 `tcgkeywords_4lang.json`
-/// K3003 = 电击 / K3005 = 费用降低（手牌状态，具体状态块待接入）。
+/// 关键字「电击」/「费用降低」（手牌状态，具体状态块待接入）。
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum HandCardStatus {
-    /// 电击（K3003）：月感电的雷暴云入场 / 可用次数增加时赋予敌方手牌。
+    /// 电击：月感电的雷暴云入场 / 可用次数增加时赋予敌方手牌。
     ElectricShock,
-    /// 费用增加（K3004）。
+    /// 费用增加。
     ///
     /// 关键字数据只有名字（description 为 null），语义 / 形态待实测；身份见
     /// families::action_card::areas::hand_state::HAND_COST_INCREASE。
     CostIncrease,
-    /// 费用降低（K3005）：月绽放赋予我方手牌。
+    /// 费用降低：月绽放赋予我方手牌。
     CostReduction,
-    /// 赋能（K3006）。
+    /// 赋能。
     ///
     /// 关键字数据只有名字（description 为 null），语义 / 形态待实测；身份见
     /// families::action_card::areas::hand_state::HAND_EMPOWERMENT。
     Empowerment,
-    /// 不可调和（K3007）。
+    /// 不可调和。
     ///
     /// 关键字数据只有名字（description 为 null），语义 / 形态待实测；身份见
     /// families::action_card::areas::hand_state::HAND_UNTUNABLE。
     Untunable,
-    /// 无效化（K3008）。
+    /// 无效化。
     ///
     /// 关键字数据只有名字（description 为 null），语义 / 形态待实测；身份见
     /// families::action_card::areas::hand_state::HAND_INVALIDATION。
@@ -310,7 +312,7 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 | Lunar-Charged / Lunar-Bloom / Lunar-Crystallize | Hydro/Electro, Hydro/Dendro, Hydro/Geo | Lunar reactions (see `reactions/lunar_*.rs`) |
 
 - D132: reaction trigger conditions; D167: attachment consumption; D184: the damage-modifier chain / reaction execution is still wired by the caller.
-- D190 / D191: observation expansion + temporariness; D14 / D128 / D129: lunar overrides; keywords K3001 / K3009 / K3010.
+- D190 / D191: observation expansion + temporariness; D14 / D128 / D129: lunar overrides; keywords "Lunar-Charged" / "Lunar-Bloom" / "Lunar-Crystallize".
 
 ## 6. Common misuse
 

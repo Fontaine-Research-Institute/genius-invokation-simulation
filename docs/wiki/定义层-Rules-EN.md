@@ -1,4 +1,4 @@
-# Definitions Layer: Rules
+﻿# Definitions Layer: Rules
 
 > [[定义层-Rules|中文]] · English
 
@@ -31,10 +31,10 @@ Unify the **basic operations** of the three layers (family / type / tag) into on
 | `trait BaseRule` | same | `layer/name/kind/ops/stages/query_roles/evidence/basis/tag/slots/nums/opening/support_cap/damage/query_policy` |
 | `rules::ops::*` | `rules/ops/` | Pure-function modules mapping one-to-one to `RuleOp` |
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
-> Real source excerpts for the rule table and ops (signatures and doc comments verbatim; function bodies omitted).
+> Real source excerpts for the rule table and ops (signatures and doc comments; function bodies omitted).
 
 **`crates/definitions/src/rules/mod.rs (Layer / RuleKind / Stage / QueryRole / RuleOp)`**
 
@@ -99,7 +99,7 @@ pub enum QueryRole {
     EnemyClass,
     /// 召唤物分类（效果按此筛选）。
     SummonClass,
-    /// 始基力极性（荒 / 芒，荒芒湮灭效应）。
+    /// 始基力:荒性形态 / 始基力:芒性形态（荒芒湮灭效应）。
     Arkhe,
 }
 
@@ -129,7 +129,7 @@ pub enum RuleOp {
     Adventure,
     /// 希穆兰卡集合 / 随机生成范围（ops::simulanka）。
     Simulanka,
-    /// 始基力荒 / 芒对立（ops::arkhe）。
+    /// 始基力:荒性形态 / 始基力:芒性形态对立（ops::arkhe）。
     Arkhe,
     /// 可用次数 / 持续回合（ops::lifetime；规则书·特殊词条）。
     Lifetime,

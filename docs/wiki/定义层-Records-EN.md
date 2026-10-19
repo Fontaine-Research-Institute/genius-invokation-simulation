@@ -41,7 +41,7 @@ Per-module content types (one `record.rs` per module, D225):
 | `trait ShowRecord` | same | Content types implement display themselves |
 | `type XRecorder = Recorder<XRecord>` and `*_recorded` entries | each module's `record.rs` | Module-specific recorders / recorded entry points |
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
 > The core definitions of `records/mod.rs` are reproduced below (`Record` / `ShowRecord` / both `Recorder` variants and their impls, including `cfg` and `derive` lines).

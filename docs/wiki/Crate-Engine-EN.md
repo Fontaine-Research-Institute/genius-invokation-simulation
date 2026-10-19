@@ -71,8 +71,7 @@ The mechanism-primitive crate: it provides only the low-level pieces that carry 
 | weight length mismatch / total weight zero | empty `Vec` (no panic) |
 | fraction denominator 0 / division by zero / `next_below_u128(0)` | panic (a logic error, D44) |
 
-### 3.1 Real Source Excerpts (verbatim from the current repository)
-
+### 3.1 Real Source Excerpts
 **Nat family and its generation macro**
 
 `new/crates/engine/src/nat.rs:23-137`

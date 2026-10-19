@@ -2,43 +2,43 @@
 
 > 中文 · [[定义层-Source-Version-Generated-EN|English]]
 
-*本页范围：源码嵌入（每文件自声明源码 + 依赖）、版本声明宏、「不删旧版本」口径，以及生成数据与富文本渲染。*
+*本页范围: 源码嵌入 (每文件自声明源码 + 依赖) , 版本声明宏, '不删旧版本'口径, 以及生成数据与富文本渲染.*
 
 ---
 
 ## 1. 职责
 
-三件非规则基础设施：① 每文件自声明源码（编译期嵌入全文 + 依赖 + 归属，可裁剪）；② 游戏版本声明宏（只写「本卡 / 本模块已同步到的版本」）；③ 生成数据与富文本渲染（`generated/`，运行期不读文件）。
+三件非规则基础设施: ① 每文件自声明源码 (编译期嵌入全文 + 依赖 + 归属, 可裁剪) ; ② 游戏版本声明宏 (只写'本卡 / 本模块已同步到的版本') ; ③ 生成数据与富文本渲染 (`generated/`, 运行期不读文件) .
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| `card_source!` / `module_source!` | `crates/definitions/src/source/mod.rs` | 文件头声明「本文件 ↔ 归属」；卡牌宏绑定本模块 `pub const ID: CardId`，不写 id |
-| `SourceFile` | 同上 | `owner` / `path` / `segments` / `content`（`include_str!` 原文）/ `dependencies`；`dependencies()` 零分配视图 |
-| `SOURCE_FILES` / `source_files` / `source_of` / `source_files_under` | 同上 | 汇总入口；`SOURCE_FILES` 是手写清单，漏加不报错但查不到 |
-| `GameVersion` / `card_game_version!` | `crates/definitions/src/version/mod.rs`、`version/macros.rs` | `major.minor`；宏生成 `GAME_VERSION`，语义 = 已同步到的最新游戏版本 |
-| 生成数据 | `crates/definitions/build.rs` + `generated/data/*.json` | 编译期读 JSON 生成静态表，运行期不读文件 |
-| `Localized` / `Resolved` / `TagText` / `TAGS` | `generated/localized.rs`、`build.rs` | 文本三态与标签唯一数据（见 [[定义层-Tags]]） |
-| 富文本两段式 | `generated/text/mod.rs`、`generated/text/render.rs`、richtext crate | 解析（严格、无游戏语义）与渲染（名字表 + 伤害值 + 缺失策略）分离 |
+| `card_source!` / `module_source!` | `crates/definitions/src/source/mod.rs` | 文件头声明'本文件 ↔ 归属'; 卡牌宏绑定本模块 `pub const ID: CardId`, 不写 id |
+| `SourceFile` | 同上 | `owner` / `path` / `segments` / `content` (`include_str!` 源码文本) / `dependencies`; `dependencies()` 零分配视图 |
+| `SOURCE_FILES` / `source_files` / `source_of` / `source_files_under` | 同上 | 汇总入口; `SOURCE_FILES` 是手写清单, 漏加不报错但查不到 |
+| `GameVersion` / `card_game_version!` | `crates/definitions/src/version/mod.rs`, `version/macros.rs` | `major.minor`; 宏生成 `GAME_VERSION`, 语义 = 已同步到的最新游戏版本 |
+| 生成数据 | `crates/definitions/build.rs` + `generated/data/*.json` | 编译期读 JSON 生成静态表, 运行期不读文件 |
+| `Localized` / `Resolved` / `TagText` / `TAGS` | `generated/localized.rs`, `build.rs` | 文本三态与标签唯一数据 (见 [[定义层-Tags]])  |
+| 富文本两段式 | `generated/text/mod.rs`, `generated/text/render.rs`, richtext crate | 解析 (严格, 无游戏语义) 与渲染 (名字表 + 伤害值 + 缺失策略) 分离 |
 
 ## 3. 公开入口
 
 | 入口 | 文件 | 说明 |
 |---|---|---|
-| `source_files()` / `source_of(path)` / `source_files_under(prefix)` | `source/mod.rs` | 汇总表的只读查询（手写清单） |
-| `SourceFile::dependencies()` / `Dependency::{kind, is_parsed, path, members, alias, raw}` | 同上 | 依赖只存原文字节区间；解析失败记 `Unparsed` 并保留原文 |
-| `GameVersion::{new, major, minor}` | `version/mod.rs` | `const`，`Ord`，`Display` 输出 `major.minor` |
+| `source_files()` / `source_of(path)` / `source_files_under(prefix)` | `source/mod.rs` | 汇总表的只读查询 (手写清单)  |
+| `SourceFile::dependencies()` / `Dependency::{kind, is_parsed, path, members, alias, raw}` | 同上 | 依赖只存源码文本字节区间; 解析失败记 `Unparsed` 并保留源码文本 |
+| `GameVersion::{new, major, minor}` | `version/mod.rs` | `const`, `Ord`, `Display` 输出 `major.minor` |
 | `card_game_version!(major, minor)` | `version/macros.rs` | 生成 `pub const GAME_VERSION` |
 | `keyword` / `keywords_all` / `action_card_type_text` / `status_type_text` | `generated/mod.rs` | 生成表查询 |
-| `render` / `render_segments` / `TextSources` / `MissingPolicy` | `generated/text/render.rs` | 严格解析后渲染；缺失策略默认保留占位符 |
+| `render` / `render_segments` / `TextSources` / `MissingPolicy` | `generated/text/render.rs` | 严格解析后渲染; 缺失策略默认保留占位符 |
 
-### 源码（逐字）
+### 源码 
 
 > [!NOTE]
-> 以下为源码嵌入、版本宏与生成数据的真实源码摘录（含宏定义；函数体从略）。
+> 以下为源码嵌入, 版本宏与生成数据的真实源码摘录 (含宏定义; 函数体从略) .
 
-**`crates/definitions/src/source/mod.rs（SourceOwner / SourceFile）`**
+**`crates/definitions/src/source/mod.rs(SourceOwner / SourceFile)`**
 
 ```rust
 
@@ -68,7 +68,7 @@ pub struct SourceFile {
 }
 ```
 
-**`crates/definitions/src/source/mod.rs（card_source! 宏，embed-source 开启版）`**
+**`crates/definitions/src/source/mod.rs(card_source! 宏, embed-source 开启版)`**
 
 ```rust
 #[cfg(feature = "embed-source")]
@@ -99,7 +99,7 @@ macro_rules! card_source {
 }
 ```
 
-**`crates/definitions/src/source/mod.rs（module_source! 宏，embed-source 开启版）`**
+**`crates/definitions/src/source/mod.rs(module_source! 宏, embed-source 开启版)`**
 
 ```rust
 #[cfg(feature = "embed-source")]
@@ -125,7 +125,7 @@ macro_rules! module_source {
 }
 ```
 
-**`crates/definitions/src/source/mod.rs（公开查询函数签名）`**
+**`crates/definitions/src/source/mod.rs(公开查询函数签名)`**
 
 ```rust
     /// 从原文切出这一段（区间来自编译期解析，安全；span 越界会 panic 而不是返回错数据）。
@@ -176,7 +176,7 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 pub const fn parse_dependencies(source: &str) -> ParsedDependencies
 ```
 
-**`crates/definitions/src/version/mod.rs（GameVersion）`**
+**`crates/definitions/src/version/mod.rs(GameVersion)`**
 
 ```rust
 ///
@@ -216,7 +216,7 @@ impl fmt::Display for GameVersion {
 }
 ```
 
-**`crates/definitions/src/version/macros.rs（card_game_version!）`**
+**`crates/definitions/src/version/macros.rs(card_game_version!)`**
 
 ```rust
 /// 声明「本卡 / 本模块已同步（核对）到的最新游戏版本」（D245 / D246）。
@@ -245,7 +245,7 @@ macro_rules! card_game_version {
 }
 ```
 
-**`crates/definitions/src/generated/mod.rs（生成表查询函数签名）`**
+**`crates/definitions/src/generated/mod.rs(生成表查询函数签名)`**
 
 ```rust
     /// const 构造（生成表 / 代码里的常量用）。
@@ -271,7 +271,7 @@ pub fn action_card_type_text(card_type: ActionCardType) -> Option<&'static TextE
 pub fn status_type_text(status_type: StatusType) -> Option<&'static TextEntry>
 ```
 
-**`crates/definitions/src/generated/text/render.rs（MissingPolicy / TextSources / render）`**
+**`crates/definitions/src/generated/text/render.rs(MissingPolicy / TextSources / render)`**
 
 ```rust
 /// 注意：这不是解析兜底 —— 解析阶段的未匹配一律 ParseError（D63）；
@@ -334,57 +334,57 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> `SOURCE_FILES` 是手写清单：漏加不会编译失败，但汇总入口找不到；直接读文件自己的 `SOURCE` 常量不受影响（D242）。
-> 版本宏只表示「本卡 / 本模块已同步到的版本」，没有全仓最新版本常量（D245）。
+> `SOURCE_FILES` 是手写清单: 漏加不会编译失败, 但汇总入口找不到; 直接读文件自己的 `SOURCE` 常量不受影响 (D242) .
+> 版本宏只表示'本卡 / 本模块已同步到的版本', 没有全仓最新版本常量 (D245) .
 
-- `SourceFile.content` 是宏调用文件原文（不展开宏、不解析）；卡牌宏自动绑定 `ID`，不写 id。
-- feature `embed-source` 默认开启；关闭时 `SOURCE_FILES` 为空、各文件 `content` 为空串、依赖表为空，访问器照常可调用。
-- 生成数据运行期不读文件；标签 / 类型文本只有一份在 `generated`（D67）；新增标签必须同时改 `terms.json` 与标签文件。
-- 富文本：数据层保留原文标记；解析严格失败返回 `ParseError`，渲染默认不静默丢字。
+- `SourceFile.content` 是宏调用文件源码文本 (不展开宏, 不解析) ; 卡牌宏自动绑定 `ID`, 不写 id.
+- feature `embed-source` 默认开启; 关闭时 `SOURCE_FILES` 为空, 各文件 `content` 为空串, 依赖表为空, 访问器照常可调用.
+- 生成数据运行期不读文件; 标签 / 类型文本只有一份在 `generated` (D67) ; 新增标签必须同时改 `terms.json` 与标签文件.
+- 富文本: 数据层保留源码文本标记; 解析严格失败返回 `ParseError`, 渲染默认不静默丢字.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 > [!NOTE]
-> 本节是基础设施依据，不直接对应规则书条文；版本 / 源码策略来自用户口径与决策日志。
+> 本节是基础设施依据, 不直接对应规则书条文; 版本 / 源码策略来自用户口径与决策日志.
 
 | 编号 | 结论 |
 |---|---|
-| D213 / D214 / D215 / D216 | 每文件自声明源码、编译期解析依赖、卡牌宏不写 id、两种宏 |
-| D242 | 通用机制留 definitions，卡牌源码表在 cards crate；`SOURCE_FILES` 手写清单 |
-| D244 / D245 / D246 | 版本宏与「只写同步版本」；D247 阶段收口 |
-| D248 / D249 / D250 / D251 | 卡牌多版本区间（仅设计、未实现）；按卡独立选择、默认最新、已实现旧版本不删除 |
-| D62 / D75 / D76 | 富文本两段式：解析在 richtext crate、渲染在 definitions |
-| D67 | 标签数据唯一一份、字段访问 |
-| D240 / D241 / D243 | 具体卡牌在 cards crate（可选 feature）；simulation 默认不含卡牌 |
+| D213 / D214 / D215 / D216 | 每文件自声明源码, 编译期解析依赖, 卡牌宏不写 id, 两种宏 |
+| D242 | 通用机制留 definitions, 卡牌源码表在 cards crate; `SOURCE_FILES` 手写清单 |
+| D244 / D245 / D246 | 版本宏与'只写同步版本'; D247 阶段收口 |
+| D248 / D249 / D250 / D251 | 卡牌多版本区间 (仅设计, 未实现) ; 按卡独立选择, 默认最新, 已实现旧版本不删除 |
+| D62 / D75 / D76 | 富文本两段式: 解析在 richtext crate, 渲染在 definitions |
+| D67 | 标签数据唯一一份, 字段访问 |
+| D240 / D241 / D243 | 具体卡牌在 cards crate (可选 feature) ; simulation 默认不含卡牌 |
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 把版本宏当「最新版本判断」或期望旧版本区间已实现，都会得到错误结论。
+> 把版本宏当'最新版本判断'或期望旧版本区间已实现, 都会得到错误结论.
 
-1. 用了 `module_source!` 但忘了在 `SOURCE_FILES` 加行：汇总查询不到（测试只保证已登记清单的路径顺序）。
-2. 在卡牌宏里手写 id：宏自动绑定本模块 `ID`；缺 `ID` 或类型不对会编译报错。
-3. 把版本宏当最新版本判断：它只表示「已同步到」；没有 `is_synced_to` / 最新常量（D245 已删）。
-4. 期望旧版本区间已实现：D248 只是设计；当前没有多版本定义 / 加载器。
-5. 绕过 `generated::TAGS` 写文案：数据必须唯一一份。
-6. 把解析器兜底当渲染缺失策略：解析未匹配 = `ParseError`；`MissingPolicy` 只管名字表缺失。
+1. 用了 `module_source!` 但忘了在 `SOURCE_FILES` 加行: 汇总查询不到 (测试只保证已登记清单的路径顺序) .
+2. 在卡牌宏里手写 id: 宏自动绑定本模块 `ID`; 缺 `ID` 或类型不对会编译报错.
+3. 把版本宏当最新版本判断: 它只表示'已同步到'; 没有 `is_synced_to` / 最新常量 (D245 已删) .
+4. 期望旧版本区间已实现: D248 只是设计; 当前没有多版本定义 / 加载器.
+5. 绕过 `generated::TAGS` 写文案: 数据必须唯一一份.
+6. 把解析器兜底当渲染缺失策略: 解析未匹配 = `ParseError`; `MissingPolicy` 只管名字表缺失.
 
 ## 7. 测试
 
 | 文件 | 测试 |
 |---|---|
-| `source/mod.rs` | `registry_lists_onboarded_module_files_in_path_order`、`prefix_helper_filters_by_path_prefix`、`module_owner_keeps_multilingual_name`、`disabled_embed_means_empty_registry`、`parses_single_alias_brace_and_keeps_unparsed_raw`、`parses_multi_line_brace_import`、`unsupported_forms_are_unparsed_with_raw_text` |
-| `version/mod.rs` | `version_compares_and_displays`、`macro_generates_a_readable_constant`、`different_cards_can_declare_different_versions` |
-| `generated/mod.rs` | `keyword_table_is_non_empty_sorted_and_complete`、`type_texts_cover_all_four_languages`、`damage_element_names_are_complete`、`tag_data_is_one_field_per_tag_and_pointers_are_distinct`、`descriptions_corpus_is_non_empty` |
-| `generated/text/render.rs` | `strips_color_and_sprite_markers`、`replaces_names_by_language`、`replaces_keyword_and_ignores_variant`、`replaces_damage_and_element`、`missing_names_keep_placeholder_or_empty`、`runtime_placeholders_are_kept`、`definitions_sources_uses_generated_keyword_table` |
-| `generated/text/tests.rs` | `every_generated_text_parses_strictly`、`keyword_descriptions_parse_strictly` |
+| `source/mod.rs` | `registry_lists_onboarded_module_files_in_path_order`, `prefix_helper_filters_by_path_prefix`, `module_owner_keeps_multilingual_name`, `disabled_embed_means_empty_registry`, `parses_single_alias_brace_and_keeps_unparsed_raw`, `parses_multi_line_brace_import`, `unsupported_forms_are_unparsed_with_raw_text` |
+| `version/mod.rs` | `version_compares_and_displays`, `macro_generates_a_readable_constant`, `different_cards_can_declare_different_versions` |
+| `generated/mod.rs` | `keyword_table_is_non_empty_sorted_and_complete`, `type_texts_cover_all_four_languages`, `damage_element_names_are_complete`, `tag_data_is_one_field_per_tag_and_pointers_are_distinct`, `descriptions_corpus_is_non_empty` |
+| `generated/text/render.rs` | `strips_color_and_sprite_markers`, `replaces_names_by_language`, `replaces_keyword_and_ignores_variant`, `replaces_damage_and_element`, `missing_names_keep_placeholder_or_empty`, `runtime_placeholders_are_kept`, `definitions_sources_uses_generated_keyword_table` |
+| `generated/text/tests.rs` | `every_generated_text_parses_strictly`, `keyword_descriptions_parse_strictly` |
 
 ## 8. 待接入与待实测
 
-- `留空.md#24`：卡牌多版本区间（D248）未实现；按卡独立选择 / 默认最新 / 旧版本不删除（D249–D251）目前只是设计约定，没有代码路径。
-- `留空.md#11`：卡面文案只填中文，其它语言留空（渲染走 `Resolved::Fallback`）；补 4 语未定。
-- 源码嵌入 / 生成数据本身无规则语义，没有专属 `留空` 条目；`SOURCE_FILES` 手写清单是已知限制（D242 已写明）。
+- `留空.md#24`: 卡牌多版本区间 (D248) 未实现; 按卡独立选择 / 默认最新 / 旧版本不删除 (D249–D251) 目前只是设计约定, 没有代码路径.
+- `留空.md#11`: 卡面文案只填中文, 其它语言留空 (渲染走 `Resolved::Fallback`) ; 补 4 语未定.
+- 源码嵌入 / 生成数据本身无规则语义, 没有专属 `留空` 条目; `SOURCE_FILES` 手写清单是已知限制 (D242 已写明) .
 
 ---
 
-最后核对：2026-10-19（代码：crates/definitions/src/source/mod.rs:SourceFile）
+最后核对: 2026-10-19 (代码: crates/definitions/src/source/mod.rs:SourceFile) 

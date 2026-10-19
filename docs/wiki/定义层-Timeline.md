@@ -2,44 +2,44 @@
 
 > 中文 · [[定义层-Timeline-EN|English]]
 
-*本页范围：通用触发 / 事件调度机制——时机键、触发器注册表、`dispatch` / `resolve` 排序，以及插入式结算的帧 / 中断 / 恢复。*
+*本页范围: 通用触发 / 事件调度机制——时机键, 触发器注册表, `dispatch` / `resolve` 排序, 以及插入式结算的帧 / 中断 / 恢复.*
 
 ---
 
 ## 1. 职责
 
-通用**触发 / 事件调度机制**：不认识任何具体时机，只提供「时机键 + 条件函数指针 + 效果函数指针」的注册表、按结算顺序的有序派发，以及插入式结算的帧 / 中断 / 恢复。本层**只派发、不执行**（D185 / D186 / D194 / D196）。
+通用**触发 / 事件调度机制**: 不认识任何具体时机, 只提供'时机键 + 条件函数指针 + 效果函数指针'的注册表, 按结算顺序的有序派发, 以及插入式结算的帧 / 中断 / 恢复.本层**只派发, 不执行** (D185 / D186 / D194 / D196) .
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| `Event` | `crates/definitions/src/timeline/event.rs` | 纯数据事件（谁 / 目标 / 数值 / 元素 / 来源），不解释语义 |
+| `Event` | `crates/definitions/src/timeline/event.rs` | 纯数据事件 (谁 / 目标 / 数值 / 元素 / 来源) , 不解释语义 |
 | `Trigger<K, E>` | `timeline/trigger.rs` | 时机键 + `owner` + `EffectSource` + `entry` + `fn(&Event) -> bool` + 执行函数指针 |
-| `TriggerRegistry<K, E>` | 同上 | 普通值（非全局单例）：`register` / `register_all` / `entries` / `clear` |
-| `dispatch` / `resolve` | `timeline/dispatch.rs` | 单侧 / 双方派发；按来源类别 -> 进场先后 -> 稳定登记顺序；返回 `Pending`，不执行 |
-| `Pending` / `Queued` | `dispatch.rs` / `suspend.rs` | 待执行 = 效果函数指针 + 事件 + owner / source_kind / entry；`Queued` 为 owned |
-| `Frame` / `Resolution` | `timeline/suspend.rs` | 结算帧 + cursor；`Resolution` 支持插入子结算、逐条取、丢弃、只读快照；不是 LIFO 栈 |
+| `TriggerRegistry<K, E>` | 同上 | 普通值 (非全局单例) : `register` / `register_all` / `entries` / `clear` |
+| `dispatch` / `resolve` | `timeline/dispatch.rs` | 单侧 / 双方派发; 按来源类别 -> 进场先后 -> 稳定登记顺序; 返回 `Pending`, 不执行 |
+| `Pending` / `Queued` | `dispatch.rs` / `suspend.rs` | 待执行 = 效果函数指针 + 事件 + owner / source_kind / entry; `Queued` 为 owned |
+| `Frame` / `Resolution` | `timeline/suspend.rs` | 结算帧 + cursor; `Resolution` 支持插入子结算, 逐条取, 丢弃, 只读快照; 不是 LIFO 栈 |
 
-时机键由需要的区块自己定义（如 `CharacterZoneTiming` / `SummonTiming` / `SupportTiming` / 阶段广播枚举）；timeline 不提供具体时机枚举。
+时机键由需要的区块自己定义 (如 `CharacterZoneTiming` / `SummonTiming` / `SupportTiming` / 阶段广播枚举) ; timeline 不提供具体时机枚举.
 
 ## 3. 公开入口
 
 | 入口 | 文件 | 说明 |
 |---|---|---|
-| `Trigger::{new, with_condition, applies}` | `timeline/trigger.rs` | `new` 条件恒真；`with_condition` 带谓词 |
+| `Trigger::{new, with_condition, applies}` | `timeline/trigger.rs` | `new` 条件恒真; `with_condition` 带谓词 |
 | `TriggerRegistry::{new, entries, register, register_all, clear}` | 同上 | 注册表是状态里的普通字段 |
 | `dispatch(registry, timing, event)` | `timeline/dispatch.rs` | 单侧有序派发 |
-| `resolve(current, other, timing, event)` | 同上 | 当前牌手注册表在前，双方各自内部有序 |
-| `Resolution::{new, empty, insert, next_step, discard, snapshot}` | `timeline/suspend.rs` | 插入式结算 / 中断 / 恢复；`Frame` 保留 cursor |
-| `Pending::into_queued` | `timeline/dispatch.rs` | 借用事件转 owned，便于组成帧 |
+| `resolve(current, other, timing, event)` | 同上 | 当前牌手注册表在前, 双方各自内部有序 |
+| `Resolution::{new, empty, insert, next_step, discard, snapshot}` | `timeline/suspend.rs` | 插入式结算 / 中断 / 恢复; `Frame` 保留 cursor |
+| `Pending::into_queued` | `timeline/dispatch.rs` | 借用事件转 owned, 便于组成帧 |
 
-### 源码（逐字）
+### 源码 
 
 > [!NOTE]
-> 以下为 timeline 的真实源码摘录（类型 + 公开方法签名 + 文档注释；函数体从略）。
+> 以下为 timeline 的真实源码摘录 (类型 + 公开方法签名 + 文档注释; 函数体从略) .
 
-**`crates/definitions/src/timeline/trigger.rs（Condition / Effect 与 Trigger / TriggerRegistry）`**
+**`crates/definitions/src/timeline/trigger.rs(Condition / Effect 与 Trigger / TriggerRegistry)`**
 
 ```rust
 /// 触发条件：`fn(&Event) -> bool` 的函数指针（D186：函数指针，不是闭包 / trait object）。
@@ -147,7 +147,7 @@ pub struct TriggerRegistry<K, E = Effect> {
     pub fn clear(&mut self)
 ```
 
-**`crates/definitions/src/timeline/dispatch.rs（Pending / dispatch / resolve）`**
+**`crates/definitions/src/timeline/dispatch.rs(Pending / dispatch / resolve)`**
 
 ```rust
 /// 一条**待执行**（D186）：效果函数指针 + 触发它的事件，外加「该谁 / 按什么顺序」的标识。
@@ -196,7 +196,7 @@ where
 
 ```
 
-**`crates/definitions/src/timeline/suspend.rs（Queued / Frame / Resolution）`**
+**`crates/definitions/src/timeline/suspend.rs(Queued / Frame / Resolution)`**
 
 ```rust
 /// 一条 **owned 的待执行**：函数指针 + 事件 + 「谁 / 按什么顺序」标识。
@@ -311,52 +311,52 @@ pub struct Resolution<E> {
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> 派发不执行效果：`dispatch` / `resolve` 只产出有序列表，执行由注册方 / 调用方做（D186）。
-> 顺序常量只在 `rules::ops::order` 一份；timeline 不另存来源顺序表。
+> 派发不执行效果: `dispatch` / `resolve` 只产出有序列表, 执行由注册方 / 调用方做 (D186) .
+> 顺序常量只在 `rules::ops::order` 一份; timeline 不另存来源顺序表.
 
-- 不用 TypeId / 字符串时机键 / 全局单例；时机键是区块定义的 `Copy` 值。
-- 插入式结算不重排原帧步骤：子结算完成回到插入点 cursor 继续。
-- 中断 = 保留帧与 cursor；确实被击倒 = 丢弃帧；不要用 LIFO 模拟。
-- 条件只吃事件；实例级过滤放效果函数里（`Pending::owner`），不要给条件加 owner 参数。
+- 不用 TypeId / 字符串时机键 / 全局单例; 时机键是区块定义的 `Copy` 值.
+- 插入式结算不重排原帧步骤: 子结算完成回到插入点 cursor 继续.
+- 中断 = 保留帧与 cursor; 确实被击倒 = 丢弃帧; 不要用 LIFO 模拟.
+- 条件只吃事件; 实例级过滤放效果函数里 (`Pending::owner`) , 不要给条件加 owner 参数.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 > [!NOTE]
-> 结算顺序唯一权威为工作区根 `结算顺序.md`（暂定）；顺序常量只复用 `rules::ops::order`。
+> 结算顺序唯一权威为工作区根 `结算顺序.md` (暂定) ; 顺序常量只复用 `rules::ops::order`.
 
 | 编号 | 结论 |
 |---|---|
-| D185 | 时机键由对应 families/types 定义，区块主动派发 |
-| D186 | 登记执行函数指针，不登记效果数据；派发不执行 |
-| D194 / D196 | 插入式结算（新帧）、中断 / 恢复 / 丢弃、debug 快照 |
-| D258 | 通用 `Resolution` 与反应专用帧类型并存（技术债） |
+| D185 | 时机键由对应 families/types 定义, 区块主动派发 |
+| D186 | 登记执行函数指针, 不登记效果数据; 派发不执行 |
+| D194 / D196 | 插入式结算 (新帧) , 中断 / 恢复 / 丢弃, debug 快照 |
+| D258 | 通用 `Resolution` 与反应专用帧类型并存 (技术债)  |
 
-规则书·其他规则·结算顺序：① 当前牌手先；② 角色牌 -> 角色装备和状态 -> 阵营出战状态 -> 召唤物 -> 支援牌；③ 同来源按进场先后；完全同序稳定排序。
+规则书·其他规则·结算顺序: ① 当前牌手先; ② 角色牌 -> 角色装备和状态 -> 阵营出战状态 -> 召唤物 -> 支援牌; ③ 同来源按进场先后; 完全同序稳定排序.
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 以下前两条会把「已排好的顺序」改掉，导致结算顺序与规则书不一致。
+> 以下前两条会把'已排好的顺序'改掉, 导致结算顺序与规则书不一致.
 
-1. 以为 `dispatch` 会执行效果：它只返回函数指针列表。
-2. 用「触发器栈」实现插入式结算：应使用 `Resolution::insert` 新帧；LIFO 会改变原结算顺序。
-3. 给条件闭包捕获状态：`Condition` 是函数指针，闭包捕获不了。
-4. 把时机键做成字符串 / `TypeId`：由区块定义具体类型。
-5. 另写一份来源顺序表：必须复用 `rules::ops::order`。
+1. 以为 `dispatch` 会执行效果: 它只返回函数指针列表.
+2. 用'触发器栈'实现插入式结算: 应使用 `Resolution::insert` 新帧; LIFO 会改变原结算顺序.
+3. 给条件闭包捕获状态: `Condition` 是函数指针, 闭包捕获不了.
+4. 把时机键做成字符串 / `TypeId`: 由区块定义具体类型.
+5. 另写一份来源顺序表: 必须复用 `rules::ops::order`.
 
 ## 7. 测试
 
 | 文件 | 测试 |
 |---|---|
-| `timeline/dispatch.rs` | `dispatch_only_matches_the_requested_timing`、`same_timing_multiple_sources_follow_rulebook_order`、`same_source_orders_by_entry_order`、`ties_keep_registration_order_and_are_stable`、`resolve_puts_current_player_effects_first_even_for_later_source_kinds`、`dispatch_does_not_execute_effects`、`same_card_two_instances_only_the_owner_responds` |
-| `timeline/trigger.rs` | `applies_requires_the_same_timing`、`register_all_copies_a_static_table`、`duplicate_registrations_are_not_deduplicated` |
-| `timeline/suspend.rs` | `inserted_sub_resolution_returns_to_the_insertion_point`、`nested_insertions_return_level_by_level`、`interruption_keeps_frames_and_cursor_then_resumes`、`truly_defeated_discards_frames`、`snapshot_exposes_current_frame_remaining_steps_and_cursor` |
+| `timeline/dispatch.rs` | `dispatch_only_matches_the_requested_timing`, `same_timing_multiple_sources_follow_rulebook_order`, `same_source_orders_by_entry_order`, `ties_keep_registration_order_and_are_stable`, `resolve_puts_current_player_effects_first_even_for_later_source_kinds`, `dispatch_does_not_execute_effects`, `same_card_two_instances_only_the_owner_responds` |
+| `timeline/trigger.rs` | `applies_requires_the_same_timing`, `register_all_copies_a_static_table`, `duplicate_registrations_are_not_deduplicated` |
+| `timeline/suspend.rs` | `inserted_sub_resolution_returns_to_the_insertion_point`, `nested_insertions_return_level_by_level`, `interruption_keeps_frames_and_cursor_then_resumes`, `truly_defeated_discards_frames`, `snapshot_exposes_current_frame_remaining_steps_and_cursor` |
 
 ## 8. 待接入与待实测
 
-- `留空.md#51`：`timeline::Resolution`（通用）与 `keywords::reaction::ReactionFrames`（反应专用）同语义但不同类型；后续把 `Resolution` 泛型化到「帧数据」后合并。
-- 各区块是否把所有规则书时机都定义成时机键、是否全部主动派发：逐块见各自页面与 `留空.md#15` / `#66`。
+- `留空.md#51`: `timeline::Resolution` (通用) 与 `keywords::reaction::ReactionFrames` (反应专用) 同语义但不同类型; 后续把 `Resolution` 泛型化到'帧数据'后合并.
+- 各区块是否把所有规则书时机都定义成时机键, 是否全部主动派发: 逐块见各自页面与 `留空.md#15` / `#66`.
 
 ---
 
-最后核对：2026-10-19（代码：crates/definitions/src/timeline/dispatch.rs:dispatch）
+最后核对: 2026-10-19 (代码: crates/definitions/src/timeline/dispatch.rs:dispatch) 

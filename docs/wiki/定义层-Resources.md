@@ -2,46 +2,46 @@
 
 > 中文 · [[定义层-Resources-EN|English]]
 
-*本页范围：骰池（纯计数）、三类费用、够不够付 / 扣减、折叠组的按需展开与查询快照，以及行动牌的当前元素骰费用。*
+*本页范围: 骰池 (纯计数) , 三类费用, 够不够付 / 扣减, 折叠组的按需展开与查询快照, 以及行动牌的当前元素骰费用.*
 
 ---
 
 ## 1. 职责
 
-资源层管「被花的东西」：骰池是纯计数（不是实体）；提供三类费用、`can_afford` / `pay`、折叠组的按需展开与查询快照；行动牌的「当前元素骰费用」在同目录的 cost 块。id / 元素约定见 [[定义层-Base]]。
+资源层管'被花的东西': 骰池是纯计数 (不是实体) ; 提供三类费用, `can_afford` / `pay`, 折叠组的按需展开与查询快照; 行动牌的'当前元素骰费用'在同目录的 cost 块.id / 元素约定见 [[定义层-Base]].
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| `DieFace` | `crates/definitions/src/resources/dice/mod.rs` | 8 种骰面（7 元素 + 万能），含 `element` / `is_omni` / `from_element` |
-| `DicePool` | 同上 | 三块表示：`omni` + `folded`（颜色未知同色组）+ `known`（已展开具体色）；字段私有 |
-| `FoldedGroup` | 同上 | `size` + `color_mass: [ExactNat128; 7]`（真实条件概率质量）+ `source` 同源标记；同源组必须一起展开 |
-| `DiceSnapshot` | 同上 | 查询固定快照：`omni` / `known` / `folded` + 本次采样展开的 `expanded` |
-| `CostComponent` / `CostDelta` | 同上 | 费用三类（指定元素 / 同色 / 任意）与增减费 |
+| `DieFace` | `crates/definitions/src/resources/dice/mod.rs` | 8 种骰面 (7 元素 + 万能) , 含 `element` / `is_omni` / `from_element` |
+| `DicePool` | 同上 | 三块表示: `omni` + `folded` (颜色未知同色组) + `known` (已展开具体色) ; 字段私有 |
+| `FoldedGroup` | 同上 | `size` + `color_mass: [ExactNat128; 7]` (真实条件概率质量) + `source` 同源标记; 同源组必须一起展开 |
+| `DiceSnapshot` | 同上 | 查询固定快照: `omni` / `known` / `folded` + 本次采样展开的 `expanded` |
+| `CostComponent` / `CostDelta` | 同上 | 费用三类 (指定元素 / 同色 / 任意) 与增减费 |
 | `CurrentCost` | `crates/definitions/src/families/action_card/areas/cost.rs` | 行动牌的当前费用 = 基础费用 + 加费 / 减费 |
 
 > [!NOTE]
-> 骰池不占实体区、不发号（D47）；上限 16；全模块不用浮点，概率量为 `ExactNat128` / `Fraction`。
-> 随机生成只给分支与概率；**采样只发生在 `all_dice` 查询**（D146 / D149）。
+> 骰池不占实体区, 不发号 (D47) ; 上限 16; 全模块不用浮点, 概率量为 `ExactNat128` / `Fraction`.
+> 随机生成只给分支与概率; **采样只发生在 `all_dice` 查询** (D146 / D149) .
 
 ## 3. 公开入口
 
 | 入口 | 文件 | 说明 |
 |---|---|---|
-| `DicePool::{empty, new, total, add, remove, convert}` | `resources/dice/mod.rs` | 构造 / 计数 / 增减 / 转化；`add` 与 `new` 按上限 16 截断 |
-| `DicePool::{expand_source, condition}` | 同上 | 同源组一起展开；按谓词条件化，均返回分支 + 精确概率 |
-| `DicePool::{can_afford, pay, all_dice}` | 同上 | 「可能够」判定；确定性扣减；查询快照 |
+| `DicePool::{empty, new, total, add, remove, convert}` | `resources/dice/mod.rs` | 构造 / 计数 / 增减 / 转化; `add` 与 `new` 按上限 16 截断 |
+| `DicePool::{expand_source, condition}` | 同上 | 同源组一起展开; 按谓词条件化, 均返回分支 + 精确概率 |
+| `DicePool::{can_afford, pay, all_dice}` | 同上 | '可能够'判定; 确定性扣减; 查询快照 |
 | `DicePool::{generate_random, generate}` | 同上 | 随机 n 颗 / 按有序内容表达式生成 |
-| `validate_cost` / `apply_delta` | 同上 | 校验费用（非法组合 panic）；叠加一次增减费 |
+| `validate_cost` / `apply_delta` | 同上 | 校验费用 (非法组合 panic) ; 叠加一次增减费 |
 | `CurrentCost::{new, base, deltas, current, total, with_delta, with_increase, with_decrease}` | `families/action_card/areas/cost.rs` | 当前费用纯数据 |
 
-### 源码（逐字）
+### 源码 
 
 > [!NOTE]
-> 以下为骰池与费用的真实源码摘录（签名 + 文档注释逐字；函数体从略，完整实现见文件）。
+> 以下为骰池与费用的真实源码摘录 (签名 + 文档注释; 函数体从略, 完整实现见文件) .
 
-**`crates/definitions/src/resources/dice/mod.rs（FoldedGroup / DicePool / DiceSnapshot）`**
+**`crates/definitions/src/resources/dice/mod.rs(FoldedGroup / DicePool / DiceSnapshot)`**
 
 ```rust
 /// 一个颜色未知的**同色组**（D49 第 2 块）。
@@ -94,7 +94,7 @@ pub struct DiceSnapshot {
     pub expanded: Vec<(Element, Nat)>,
 }
 ```
-**`crates/definitions/src/resources/dice/mod.rs（DicePool 的公开方法签名，含 impl 行与文档注释）`**
+**`crates/definitions/src/resources/dice/mod.rs(DicePool 的公开方法签名, 含 impl 行与文档注释)`**
 
 ```rust
 impl DicePool {
@@ -183,7 +183,7 @@ impl DicePool {
     pub fn generate(&self, content: &[DiceSlot], limited_to_basic: bool) -> Vec<(DicePool, Fraction)>
 }
 ```
-**`crates/definitions/src/families/action_card/areas/cost.rs（CurrentCost 定义与方法签名）`**
+**`crates/definitions/src/families/action_card/areas/cost.rs(CurrentCost 定义与方法签名)`**
 
 ```rust
 
@@ -268,56 +268,56 @@ impl CurrentCost {
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> `pay` 是确定性扣减：折叠组必须先展开才能用于指定色 / 同色，因此 `can_afford == true` 不保证 `pay` 成功。
-> `SameColor` 费用必须由调用方给 `same_color`；不给就返回 `None`（不猜颜色）。
+> `pay` 是确定性扣减: 折叠组必须先展开才能用于指定色 / 同色, 因此 `can_afford == true` 不保证 `pay` 成功.
+> `SameColor` 费用必须由调用方给 `same_color`; 不给就返回 `None` (不猜颜色) .
 
-- 骰池是纯计数：不要发实体号 / 放进实体区。
-- 上限 16：`add` / `new` / 生成都截断；`new` 规范化顺序为万能 -> 具体色（元素序）-> 折叠组（source, size）。
-- 同一次随机的多个折叠组必须一起展开、视为同色（D148），不能独立采样。
-- 概率一律精确分数 / 整数质量，禁止浮点；抽样只经引擎 `Rng`。
-- 所有操作返回新 `DicePool`，不改入参。
+- 骰池是纯计数: 不要发实体号 / 放进实体区.
+- 上限 16: `add` / `new` / 生成都截断; `new` 规范化顺序为万能 -> 具体色 (元素序) -> 折叠组 (source, size) .
+- 同一次随机的多个折叠组必须一起展开, 视为同色 (D148) , 不能独立采样.
+- 概率一律精确分数 / 整数质量, 禁止浮点; 抽样只经引擎 `Rng`.
+- 所有操作返回新 `DicePool`, 不改入参.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 > [!NOTE]
-> 依据优先级：规则书 > 权威关键字 > 卡面文本 > 参考实现；本页编号均可查 `决策日志.md`。
+> 依据优先级: 规则书 > 权威关键字 > 卡面文本 > 参考实现; 本页编号均可查 `决策日志.md`.
 
 | 编号 | 结论 |
 |---|---|
-| D46 / D47 | 骰子用计数表示、按需展开；上限 16；支付只扣计数 |
-| D48 / D49 | 非万能按颜色分组；三块表示 + 展开规则 |
-| D117 / D121 | 调和 = 转化（不是获得），必须指定目标 |
-| D139 / D140 / D141 / D148 | 生成给 n、可限定基础；有序表达式；同源折叠组 |
-| D146 / D149 | 查询按当前局面的真实条件概率采样展开，快照保留折叠组 |
-| D156 / D158 / D159 | 概率精确族，全程不经过浮点 |
+| D46 / D47 | 骰子用计数表示, 按需展开; 上限 16; 支付只扣计数 |
+| D48 / D49 | 非万能按颜色分组; 三块表示 + 展开规则 |
+| D117 / D121 | 调和 = 转化 (不是获得) , 必须指定目标 |
+| D139 / D140 / D141 / D148 | 生成给 n, 可限定基础; 有序表达式; 同源折叠组 |
+| D146 / D149 | 查询按当前局面的真实条件概率采样展开, 快照保留折叠组 |
+| D156 / D158 / D159 | 概率精确族, 全程不经过浮点 |
 | D168 / D169 | 费用三类与扣减顺序 ① -> ② -> ③ |
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 以下写法会让「看起来够」变成运行时 `None` / panic；先检查折叠组与费用合法性。
+> 以下写法会让'看起来够'变成运行时 `None` / panic; 先检查折叠组与费用合法性.
 
-1. `can_afford` 成功后直接 `expect` `pay`：折叠组未展开时 `pay` 返回 `None`。
-2. 给 `SameColor` 传 `None` 并期望自动挑色：本模块不猜，由调用方给。
-3. 把 `all_dice` 的 `expanded` 当稳定值：每次查询都会重新采样；`folded` 才保留原状。
-4. 直接改 `DicePool` 字段：字段私有，必须走 `add/remove/convert/pay/new`。
-5. 费用里放两个不同元素的 ①：`validate_cost` 会 panic（逻辑错误）。
+1. `can_afford` 成功后直接 `expect` `pay`: 折叠组未展开时 `pay` 返回 `None`.
+2. 给 `SameColor` 传 `None` 并期望自动挑色: 本模块不猜, 由调用方给.
+3. 把 `all_dice` 的 `expanded` 当稳定值: 每次查询都会重新采样; `folded` 才保留原状.
+4. 直接改 `DicePool` 字段: 字段私有, 必须走 `add/remove/convert/pay/new`.
+5. 费用里放两个不同元素的 ①: `validate_cost` 会 panic (逻辑错误) .
 
 ## 7. 测试
 
 | 文件 | 测试 |
 |---|---|
-| `resources/dice/mod.rs` | `add_stops_at_cap`、`constructor_normalizes_and_caps`、`can_afford_uses_omni_and_possible_folded`、`pay_is_deterministic_and_needs_same_color`、`all_dice_returns_owned_snapshot`、`expand_source_uses_stored_mass_not_uniform`、`condition_enumerates_hidden_joint_colors`、`delta_*` |
-| `resources/dice/parse.rs` | `random_two_basic_folds_into_count_vectors`、`content_slot_order_does_not_change_result`、`fold_branches_merges_equivalent_pools` |
+| `resources/dice/mod.rs` | `add_stops_at_cap`, `constructor_normalizes_and_caps`, `can_afford_uses_omni_and_possible_folded`, `pay_is_deterministic_and_needs_same_color`, `all_dice_returns_owned_snapshot`, `expand_source_uses_stored_mass_not_uniform`, `condition_enumerates_hidden_joint_colors`, `delta_*` |
+| `resources/dice/parse.rs` | `random_two_basic_folds_into_count_vectors`, `content_slot_order_does_not_change_result`, `fold_branches_merges_equivalent_pools` |
 
 ## 8. 待接入与待实测
 
-- `留空.md#1`：加费 / 减费同时存在时的支付优先顺序规则书未写，由调用方定序列。
-- `留空.md#9`：调和未指定目标时的自动选择算法明确不做。
-- `留空.md#37`：目标非法 vs 骰不够的优先级未写（flow 先校验目标再支付）。
-- `留空.md#38`：来源骰是否允许万能 / 同面转换未写，当前不限制。
-- `留空.md#45` / `#58`：新抓手牌 / 反应写回时的当前费用表同步缺口。
+- `留空.md#1`: 加费 / 减费同时存在时的支付优先顺序规则书未写, 由调用方定序列.
+- `留空.md#9`: 调和未指定目标时的自动选择算法明确不做.
+- `留空.md#37`: 目标非法 vs 骰不够的优先级未写 (flow 先校验目标再支付) .
+- `留空.md#38`: 来源骰是否允许万能 / 同面转换未写, 当前不限制.
+- `留空.md#45` / `#58`: 新抓手牌 / 反应写回时的当前费用表同步缺口.
 
 ---
 
-最后核对：2026-10-19（代码：crates/definitions/src/resources/dice/mod.rs:DicePool）
+最后核对: 2026-10-19 (代码: crates/definitions/src/resources/dice/mod.rs:DicePool) 

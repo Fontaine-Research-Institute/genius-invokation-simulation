@@ -32,10 +32,10 @@ Raw marked-up text -> neutral segment sequence. It recognizes syntax structure o
 | Form | Example | Output |
 |---|---|---|
 | Color | `<color=#FFFFFFFF>` / `</color>` | `ColorStart("#FFFFFFFF")` / `ColorEnd` (color value is the only any-match) |
-| Keyword | `$[K53]`, `$[K54|s1]` | `Keyword { code, variant }` (variant may only be `s1`) |
+| Keyword | `$[K<id>]`, `$[K<id>|s1]` | `Keyword { code, variant }` (variant may only be `s1`) |
 | Name reference | `$[C114181]` / `$[A1418]` / `$[S14181]` | `Card` / `Character` / `Skill` |
 | Damage placeholder | `$[D__KEY__ELEMENT]` / `$[D__KEY__DAMAGE_1]` | `Damage(DamageKey)` |
-| Runtime variable | `$[G16121]` | `Variable` (kept verbatim) |
+| Runtime variable | `$[G16121]` | `Variable` (kept as-is) |
 | Token value | `${[GCG_TOKEN_SHIELD]}` | `TokenValue` (name must be in `TOKEN_VALUES`) |
 | Icon | `{SPRITE_PRESET#3503}` | `Icon` (preset must be in `SPRITE_PRESETS`) |
 
@@ -53,48 +53,7 @@ Raw marked-up text -> neutral segment sequence. It recognizes syntax structure o
 > [!NOTE]
 > The definitions side only `pub use`s this crate's parser (`generated::text`) and keeps no second parser (D75 / D76); rendering lives in `definitions/src/generated/text/render.rs`.
 
-### 3.1 Real Source Excerpts (verbatim from the current repository)
-
-**Segment `Segment`**
-
-`new/crates/richtext/src/parse.rs:80-112`
-
-```rust
-/// 解析后的一段（渲染器只吃这些，不再看原文）。
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum Segment {
-    /// 普通文本。
-    Text(String),
-    /// `<color=#RRGGBBAA>`：颜色开始（色值原样，含 #）。**唯一的 any 匹配点**。
-    ColorStart(String),
-    /// `</color>`：颜色结束。
-    ColorEnd,
-    /// `$[K53]` / `$[K54|s1]`：关键字（K 码 + 变体后缀，变体是固定允许集）。
-    Keyword {
-        /// K 码（数值；这是参数不是 any：不同 K 码取不同名字）。
-        ///
-        /// 本 crate 不认识关键字表，所以这里只是裸数值；definitions 侧再映射。
-        code: u32,
-        /// `|s1` 这类变体后缀（去掉竖线后原样保留；渲染时由 definitions 侧忽略，按同一 K 码取名字）。
-        variant: Option<String>,
-    },
-    /// `$[C114181]`：卡牌名引用（C 号；参数不是 any）。
-    Card(u32),
-    /// `$[A1418]`：角色名引用（A 号）。
-    Character(u32),
-    /// `$[S14181]`：技能名引用（S 号）。
-    Skill(u32),
-    /// `$[D__KEY__…]`：伤害/元素占位。
-    Damage(DamageKey),
-    /// `$[G16121]`：运行期数值变量；结构认识，但没有静态值可填（渲染时原样保留）。
-    Variable(String),
-    /// `${[GCG_TOKEN_SHIELD]}`：运行期 token 数值；同上，原样保留。
-    TokenValue(String),
-    /// `{SPRITE_PRESET#3503}`：图标（预设名按**固定允许集**精确匹配）。
-    Icon(String),
-}
-```
-
+### 3.1 Real Source Excerpts
 **Damage placeholder `DamageKey`**
 
 `new/crates/richtext/src/parse.rs:58-67`
@@ -181,6 +140,48 @@ pub fn parse(raw: &str) -> Result<Vec<Segment>, ParseError> {
 ```
 
 
+**Segment `Segment`**
+
+`new/crates/richtext/src/parse.rs:80-112`
+
+Keyword codes in comments were replaced with names; code lines are unchanged.
+
+```rust
+/// 解析后的一段（渲染器只吃这些，不再看原文）。
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Segment {
+    /// 普通文本。
+    Text(String),
+    /// `<color=#RRGGBBAA>`：颜色开始（色值原样，含 #）。**唯一的 any 匹配点**。
+    ColorStart(String),
+    /// `</color>`：颜色结束。
+    ColorEnd,
+    /// 关键字占位符（如 `准备技能` / `免于被击倒`，可带变体后缀；变体是固定允许集）。
+    Keyword {
+        /// 关键字标识（数值；这是参数不是 any：不同 关键字标识取不同名字）。
+        ///
+        /// 本 crate 不认识关键字表，所以这里只是裸数值；definitions 侧再映射。
+        code: u32,
+        /// `|s1` 这类变体后缀（去掉竖线后原样保留；渲染时由 definitions 侧忽略，按同一 关键字标识取名字）。
+        variant: Option<String>,
+    },
+    /// `$[C114181]`：卡牌名引用（C 号；参数不是 any）。
+    Card(u32),
+    /// `$[A1418]`：角色名引用（A 号）。
+    Character(u32),
+    /// `$[S14181]`：技能名引用（S 号）。
+    Skill(u32),
+    /// `$[D__KEY__…]`：伤害/元素占位。
+    Damage(DamageKey),
+    /// `$[G16121]`：运行期数值变量；结构认识，但没有静态值可填（渲染时原样保留）。
+    Variable(String),
+    /// `${[GCG_TOKEN_SHIELD]}`：运行期 token 数值；同上，原样保留。
+    TokenValue(String),
+    /// `{SPRITE_PRESET#3503}`：图标（预设名按**固定允许集**精确匹配）。
+    Icon(String),
+}
+```
+
 ## 4. Invariants and Prohibitions
 
 > [!IMPORTANT]
@@ -188,7 +189,7 @@ pub fn parse(raw: &str) -> Result<Vec<Segment>, ParseError> {
 
 - Head/tail anchored matching (D65): every pattern anchors its prefix and suffix; the only wildcard is the color value.
 - Whole-input consumption: on success the input is fully segmented; plain text, color structure, and placeholders can be rebuilt into the original text.
-- Zero game semantics (D76): no `Lang` / `Localized`, no name/card/tag/keyword tables; K / C / A / S codes are bare numbers here.
+- Zero game semantics (D76): no `Lang` / `Localized`, no name/card/tag/keyword tables; keyword / card / character / skill placeholders are bare numbers here.
 - Zero dependencies (D75); internal `usize` slicing of `&str` is allowed.
 - No `unsafe` (`#![forbid(unsafe_code)]`).
 - Whitelists expand only with proof: a new any-match class must document its proof in `AnyMatch`; new icons/tokens/variants only extend the constant lists.
@@ -214,7 +215,7 @@ pub fn parse(raw: &str) -> Result<Vec<Segment>, ParseError> {
 
 - Adding "any-match" for icons/tokens/keyword variants: unproven, forbidden (D66).
 - Expecting `{SPRITE_PRESET#...}` to be stripped at parse time: it is a `Segment::Icon`; stripping happens in the renderer.
-- Expecting `Variable` / `TokenValue` to carry static values: they are kept verbatim.
+- Expecting `Variable` / `TokenValue` to carry static values: they are kept as-is.
 - Writing a second parser inside definitions: only `pub use` this crate.
 - Loosening matching when new data appears: gather evidence and register first; the full-text test will flag it.
 

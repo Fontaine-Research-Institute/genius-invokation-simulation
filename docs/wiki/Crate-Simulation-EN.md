@@ -32,8 +32,7 @@ Dependencies: engine, definitions, and richtext are required; cards is optional 
 | `... features = ["cards"]` | enable when concrete cards are needed |
 | `use gi_genius_invokation_simulation::{engine, definitions, richtext};` | the uniform path for cross-crate types |
 
-### 3.1 Real Source Excerpts (verbatim from the current repository)
-
+### 3.1 Real Source Excerpts
 **The whole facade crate `src/lib.rs`**
 
 `new/crates/simulation/src/lib.rs:1-23`

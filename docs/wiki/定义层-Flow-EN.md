@@ -56,7 +56,7 @@
 
 ### Index
 
-Source blocks are copied verbatim from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
+The source blocks below are the implementation source from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
 
 | Module | Notes |
 |---|---|
@@ -200,6 +200,8 @@ pub fn is_terminal(state: &DefState) -> bool {
 
 ### Source: `flow/skill_use.rs`
 
+*Keyword codes in comments have been replaced with names; code lines unchanged.*
+
 ```rust
 use crate::families::character::attachment::{AttachmentAllowSet, ReactionRegistry};
 use crate::families::character::damage::{
@@ -303,7 +305,7 @@ pub struct SkillFlowEnv<'a> {
 pub struct SkillUseRequest<'a> {
     /// 技能定义。
     pub skill: &'a SkillDef,
-    /// 使用方出战角色身上的准备技能槽（K53）。
+    /// 使用方出战角色身上的准备技能槽（准备技能）。
     pub prepared: &'a PreparedSkills,
     /// 效果体（默认走关键字一步；旧的效果体计划保留为兼容）。
     pub effect: SkillEffectBody<'a>,
@@ -472,7 +474,7 @@ pub struct SkillFlowEnv<'a> {
 pub struct SkillUseRequest<'a> {
     /// 技能定义。
     pub skill: &'a SkillDef,
-    /// 使用方出战角色身上的准备技能槽（K53）。
+    /// 使用方出战角色身上的准备技能槽（准备技能）。
     pub prepared: &'a PreparedSkills,
     /// 效果体（默认走关键字一步；旧的效果体计划保留为兼容）。
     pub effect: SkillEffectBody<'a>,
@@ -587,6 +589,8 @@ pub fn use_skill_opp_with_plunging(
 ```
 
 ### Source: `flow/play_card.rs`
+
+*Keyword codes in comments have been replaced with names; code lines unchanged.*
 
 ```rust
 use crate::base::CardId;
@@ -764,12 +768,12 @@ pub struct FoodPlayOutcome {
     pub revived_this_round: Option<Nat>,
 }
 
-/// **秘传打出的结果**（Z12 / K311）：打牌结果 + **打出后**的秘传揭令容器。
+/// **秘传打出的结果**（Z12 / 秘传）：打牌结果 + **打出后**的秘传揭令容器。
 #[derive(Clone, Debug)]
 pub struct ArcanePlayOutcome {
     /// 普通打牌流程的完整结果（分支 / 前后派发 / 时机 / 记录）。
     pub play: PlayCardOutcome,
-    /// 打出后的秘传揭令容器（已 record_play：本局张数 +1、按 K311 消耗揭令）。
+    /// 打出后的秘传揭令容器（已 record_play：本局张数 +1、按秘传规则消耗揭令）。
     pub edict: ArcaneEdict,
 }
 
@@ -791,7 +795,7 @@ pub enum PlayCardError {
     /// 只读检查、**入参不变**；它发生在「比较是否付得起」**之前**，所以同一张牌
     /// 「条件不通过 + 骰子也不够」时，本层报的是这个错误，不是 [PlayCardError::NotEnoughDice]。
     ConditionNotMet(&'static str),
-    /// 秘传（Z12 / K311）：揭令不存在，或本局已经打出过秘传（每人 1 张）。
+    /// 秘传（Z12 / 秘传）：揭令不存在，或本局已经打出过秘传（每人 1 张）。
     ArcaneNotPlayable(ArcanePlay),
     /// 料理目标不合法（S8.1 第 2 条）：目标角色不在场，或已处于「饱腹」
     /// （不能成为其他料理的目标 / 不受其效果）。只发生在 [play_card_me_food] 等料理入口。
@@ -920,7 +924,7 @@ pub fn play_card_opp_food_with_timing(
     )
 }
 
-/// **打出「秘传」行动牌**（我方；Z12 / K311）。
+/// **打出「秘传」行动牌**（我方；Z12 / 秘传）。
 ///
 /// - 打牌**前置**：edict.can_play() 必须是 Allowed（揭令仍存在 + 本局未打出过）；
 ///   否则 Err(ArcaneNotPlayable(原因))、入参不变；
@@ -971,6 +975,8 @@ pub fn play_card_opp_arcane_with_timing(
 ```
 
 ### Source: `flow/turn.rs`
+
+*Keyword codes in comments have been replaced with names; code lines unchanged.*
 
 ```rust
 use crate::families::action_card::areas::support::{SupportPending, SupportTriggers};
@@ -1102,10 +1108,10 @@ pub struct RoundBeginOutcome {
     pub outcome: Outcome,
 }
 
-/// **元素幻变（K67）对投掷阶段的接入开关**（卡面 331004–331012「投掷阶段：总是投出 2 个 X
+/// **元素幻变对投掷阶段的接入开关**（卡面 331004–331012「投掷阶段：总是投出 2 个 X
 /// 和 2 个 Y」）。
 ///
-/// **显式开关 / 条件**：调用方只在「对应的元素幻变卡在场 + 队伍元素集合恰等于 {X,Y}（K23）」时
+/// **显式开关 / 条件**：调用方只在「对应的元素幻变卡在场 + 队伍元素集合恰等于 {X,Y}（队伍元素集合）」时
 /// 传 `Some`；`None` = 没有对应卡 / 条件不满足 -> 走**普通投掷**，现有流程完全不变。
 #[derive(Clone, Copy, Debug)]
 pub struct RollTransmutation {
@@ -1588,6 +1594,8 @@ pub fn revive_opp(
 
 ### Source: `flow/technique.rs`
 
+*Keyword codes in comments have been replaced with names; code lines unchanged.*
+
 ```rust
 use crate::families::character::skill_flow::technique::{
 use crate::families::character::skill_flow::{SkillPending, SkillTriggers};
@@ -1599,7 +1607,7 @@ use gi_genius_invokation_engine::EntityId;
 
 /// 特技流程的**外部依赖**（只借不拥有）。
 pub struct TechniqueEnv<'a> {
-    /// 「使用技能时 / 后」的注册表 —— 只用来调用 dispatch_technique 证明**恒空**（K58）。
+    /// 「使用技能时 / 后」的注册表 —— 只用来调用 dispatch_technique 证明**恒空**（特技）。
     pub skill_triggers: &'a SkillTriggers,
 }
 
@@ -1643,7 +1651,7 @@ pub struct TechniqueOutcome {
     pub used: TechniqueUse,
     /// 行动权：战斗行动（S8.4 第 2 条；= used.timing，方便直接读）。
     pub timing: Timing,
-    /// K58 第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
+    /// 特技第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
     pub skill_used: Vec<SkillPending>,
     /// 是否真的从骰池收了卡面费用（cost 为 None -> false）。
     pub paid_cost: bool,
@@ -1716,7 +1724,7 @@ pub struct TechniqueOutcome {
     pub used: TechniqueUse,
     /// 行动权：战斗行动（S8.4 第 2 条；= used.timing，方便直接读）。
     pub timing: Timing,
-    /// K58 第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
+    /// 特技第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
     pub skill_used: Vec<SkillPending>,
     /// 是否真的从骰池收了卡面费用（cost 为 None -> false）。
     pub paid_cost: bool,
@@ -1750,6 +1758,8 @@ pub fn use_technique_opp(
 
 ### Source: `flow/elemental_transmutation.rs`
 
+*Keyword codes in comments have been replaced with names; code lines unchanged.*
+
 ```rust
 use crate::rules::ops::opening::{is_opening_round, ElementalTransmutation};
 use crate::state::DefState;
@@ -1772,7 +1782,7 @@ pub fn transmute_roll_phase_opp(
     Some(with_dice(state, false, converted))
 }
 
-/// **「首次生成」4 骰 -> 2+2（我方）**：只在**第 1 轮**生效（K67 / 留空 #64 的判据）。
+/// **「首次生成」4 骰 -> 2+2（我方）**：只在**第 1 轮**生效（留空 #64 的判据）。
 ///
 /// 调用时点：第 1 轮行动阶段开始时（具体在抓牌 / 弃牌 / 上场前后的哪一步待实测，见模块 TODO）。
 /// 非第 1 轮 / 骰子不足 4 -> None（不改入参）。
@@ -1831,8 +1841,8 @@ pub fn timing_of_card_play(has_combat_action_tag: bool) -> Timing {
 | S7.5 settlement order (current player -> source kind -> entry order) | dispatch ordering in `skill_use` / `play_card` / `turn` |
 | S8.10 Plunging Attack | `use_skill_*_with_plunging` + `battle_action_end_*` (D256 / D261) |
 | S8.1 Food (Satiated / one revive per round) | `play_card_*_food` + `flow::revive` (L1 / L2) |
-| K58 Technique (Combat Action, no SkillUsed dispatch, damage not dealt by the character) | `flow::technique` (L4) |
-| Z12 / K311 Arcane (one per player / edict consumption) | `play_card_*_arcane` (D264) |
+| Technique (Combat Action, no SkillUsed dispatch, damage not dealt by the character) | `flow::technique` (L4) |
+| Z12 / Arcane (one per player / edict consumption) | `play_card_*_arcane` (D264) |
 | Z6 support-card duration | `CardPlacement::Support{duration}` + support tick |
 | L9 Elemental Transmutation | `roll_*_with_transmutation` + `flow::elemental_transmutation` |
 | D186 dispatch only orders, does not execute | `pending.rs` + the per-entry documentation |
@@ -1856,7 +1866,7 @@ pub fn timing_of_card_play(has_combat_action_tag: bool) -> Timing {
 > Correct cost table after drawing: inject `TurnEnv::draw = DrawHooks::with_base_cost(...)` for the End Phase; opening draws in `state/flows/opening` already include `base_cost`.
 
 - Playing a Food card without `FoodReviveEnv` while expecting a target in the defeat zone: you will get `FoodTargetNotAllowed`.
-- Treating `TechniqueOutcome::skill_used` as dispatchable: it is always empty (K58).
+- Treating `TechniqueOutcome::skill_used` as dispatchable: it is always empty (a technique does not trigger skill-use timings).
 - Using `transmute_roll_phase_*` instead of `roll_*_with_transmutation`: the direct hook only converts 4 dice and does not generate 8-die branches.
 
 ## 7. Tests

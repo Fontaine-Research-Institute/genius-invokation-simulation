@@ -66,7 +66,7 @@ File: `crates/definitions/src/state/terminal.rs`. Order: `round == 0` -> `Ongoin
 
 ### Index
 
-Source blocks are copied verbatim from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
+The source blocks below are the implementation source from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
 
 | Entry / type | Notes |
 |---|---|
@@ -196,7 +196,7 @@ impl DefState {
 }
 ```
 
-### Source: `state/player.rs` (excerpt: `PlayerDefs` and key derivations; the `impl` line and selected methods are verbatim)
+### Source: `state/player.rs` (excerpt: `PlayerDefs` and key derivations)
 
 ```rust
 use crate::base::CardId;

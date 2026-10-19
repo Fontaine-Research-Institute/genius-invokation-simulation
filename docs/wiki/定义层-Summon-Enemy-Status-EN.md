@@ -35,7 +35,7 @@ Summon-zone rules:
 - `max_hp: Nat`: definition data (source of the cap).
 - `skills: &'static [&'static SkillDef]`: reuses character skill definitions (D121 / D162).
 - `tags`: element / faction / weapon subclass / other weapons (D55).
-- **Verbatim source: §3.3** (`crates/definitions/src/families/enemy/def.rs`).
+- **real source: §3.3** (`crates/definitions/src/families/enemy/def.rs`).
 
 - Enemy cards have **no zone and no operations** in this round: definition carrier only; runtime bearing and concrete enemies are pending (code marks `待接入`; 留空.md has no dedicated entry, recommend adding one).
 - The data has a `maxenergy` field but this block does not collect it (energy caps belong to the energy block, pending).
@@ -48,7 +48,7 @@ Summon-zone rules:
 | `StatusType` | `status/mod.rs` | `CharacterStatus` / `CombatStatus`; **both types share one status id region** (D51) and are told apart by type |
 | `StatusDef<Tags>` | `status/def.rs` | `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>` (None = boolean) / `duration: Option<Nat>` / `tags`; `form()` is derived from `default_layers` |
 | Formal identities (5) | `status/known.rs` | 203 combat shield / 134 character shield / 106 frozen / 116 dendro core / 117 catalyzing field; each identity holds a `&'static StatusDef` (pointer-sized, **not a ZST**: ZST static addresses can coincide, D200) |
-| `ArcaneEdict` + `ARCANE_EDICT` | `status/arcane_edict.rs` | Arcane edict (K311): **no status card row → no fabricated StatusDef**; only a state identity (boolean) plus a per-player usage container |
+| `ArcaneEdict` + `ARCANE_EDICT` | `status/arcane_edict.rs` | Arcane edict (Arcane Edict): **no status card row → no fabricated StatusDef**; only a state identity (boolean) plus a per-player usage container |
 
 Status types and bearing (D51 / D105 / D201):
 
@@ -67,13 +67,13 @@ the status family has no zone: StatusDef is definition data, identity = static p
 | Status | Identity | Form | Data / basis | Definition |
 |---|---|---|---|---|
 | Frozen | `FROZEN` | boolean (duration 1, to be reviewed) | status 106; S6.6 "cannot use skills" | `families/status/known.rs` |
-| Stun | `STUN` | boolean | K55 + data 100001 | `families/character/skill_flow/forbidden.rs` (shared identity) |
+| Stun | `STUN` | boolean | Stunned + data 100001 | `families/character/skill_flow/forbidden.rs` (shared identity) |
 | Petrified | `PETRIFIED` | boolean | data 116033 / 176033 (two entries, same effect) | same |
 | Satiety | `SATIATED` | boolean | data 303300; S8.1 | `families/character/satiated.rs` (shared identity) |
 | Shield (combat / character) | `SHIELD_COMBAT` / `SHIELD_CHARACTER` | layered | status 203 / 134 | `families/status/known.rs` |
 | Dendro core / catalyzing field | `DENDRO_CORE` / `CATALYZING_FIELD` | layered (usage) | status 116 / 117 | `families/status/known.rs` |
 | Damage negation | `DAMAGE_NEGATION` | layered | rulebook special entry; no standalone card | `families/character/damage_chain/statuses.rs` (shared identity) |
-| Damage immunity | `DAMAGE_IMMUNITY` | boolean | K5 + card text "immune to all DMG"; no standalone card | same (shared identity) |
+| Damage immunity | `DAMAGE_IMMUNITY` | boolean | Piercing DMG + card text "immune to all DMG"; no standalone card | same (shared identity) |
 
 Bridge table (`families/character/damage_chain/statuses.rs`):
 
@@ -94,7 +94,7 @@ Bridge table (`families/character/damage_chain/statuses.rs`):
 ## 3. Public entry points
 
 > [!NOTE]
-> Code below is copied verbatim from the current repository (including use, derive, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
+> Code below is copied from the current repository (including use, derive, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
 
 ### 3.1 Summon definitions
 
@@ -534,7 +534,7 @@ pub const SHIELD_STATUSES: &[&'static dyn StateIdentity] = &[&SHIELD_COMBAT, &SH
 ### 3.6 Rules-ops interfaces referenced by this page
 
 > [!NOTE]
-> Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied verbatim).
+> Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied as-is).
 
 **`USES_PER_TRIGGER`** — `crates/definitions/src/rules/ops/lifetime.rs`
 
@@ -617,8 +617,8 @@ pub fn ticks_in_end_phase() -> bool {
 | Same-name summon merge | Plan §4.4.15 (Lead ruling) |
 | Two status types share one id region | D51; rulebook "Game Zones II" |
 | Shared status list / boolean presence / pointer identity | D95 / D96 / D104 / D105 / D108 / D110 / D200 |
-| One arcane edict per player | Rulebook special entry "Arcane Legend" + K311; D264; 留空.md #68 / #98 / #99 |
-| Satiety / frozen / stun / petrified | S8.1 / S6.6 / K55 / K58 / S8.4; 留空.md #31 / #79 / #80 / #82 |
+| One arcane edict per player | Rulebook special entry "Arcane Legend" + Arcane Edict; D264; 留空.md #68 / #98 / #99 |
+| Satiety / frozen / stun / petrified | S8.1 / S6.6 / Stunned / Technique / S8.4; 留空.md #31 / #79 / #80 / #82 |
 | Enemy cards | data `tcgenemycards`; runtime bearing not designed (pending) |
 
 ### 5.1 Documentation vs code mismatches (for review)

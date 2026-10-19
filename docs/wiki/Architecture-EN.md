@@ -70,8 +70,7 @@ Inside `definitions`: `base/` (L1 families + ids + elements + perspective), `fam
 
 **Text data flow**: `generated/data/*.json` -> `build.rs` (generates static tables into `OUT_DIR` at compile time) -> `generated` accessors -> `richtext::parse` (strict) -> `generated::text::render` (sources -> final string).
 
-### 3.1 Interface Source Excerpts (verbatim from the current repository)
-
+### 3.1 Interface Source Excerpts
 **Root state `DefState`**
 
 `new/crates/definitions/src/state/def_state.rs:58-82`

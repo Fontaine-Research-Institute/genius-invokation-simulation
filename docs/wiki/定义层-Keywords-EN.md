@@ -33,7 +33,7 @@
 | `Subject` | The effect subject itself; the entity id comes from `ResolveContext::subject` (D205/D206) |
 | `Reacted` | The reaction-bearing character (via `with_reacted`; absent -> empty set) |
 | `Active(side)` / `Characters(side)` / `Standby(side)` | Active / all / standby characters (character-zone slot order) |
-| `NearestToActive { reference, candidates }` | Nearest (K7 / L12): smallest absolute difference between the reference side's active slot index and each candidate's slot index; ties go to the foremost slot; defeated characters excluded (hp==0). Preset: `nearest_opponent_to_own_active()`. To be verified: mirrored positions, defeated-slot occupancy (留空 #62/#69) |
+| `NearestToActive { reference, candidates }` | Nearest (L12): smallest absolute difference between the reference side's active slot index and each candidate's slot index; ties go to the foremost slot; defeated characters excluded (hp==0). Preset: `nearest_opponent_to_own_active()`. To be verified: mirrored positions, defeated-slot occupancy (留空 #62/#69) |
 | `AfterActive{side,offset}` / `BeforeActive{side,offset}` | The n-th character after / before the active character, cycling through slots; offset=0 = the active character itself; whether defeated characters are skipped is to be verified |
 | `HpRank{side,order,n,tie}` | n-th by current HP (1-based): three-level ordering HP -> active-first (`tie.active_first`) -> slot direction (D228/D229/D230) |
 | `LostHpRank{side,order,n,tie}` | n-th by damage taken (actual Max HP − current HP; must use runtime `max_hp`, D237); same three-level ordering; defeated characters excluded |
@@ -98,7 +98,7 @@ Uniform paired signature: `fn(state: &DefState, env: &EffectEnv<'_>, args: &XxxA
 
 ### Index
 
-Source blocks are copied verbatim from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
+The source blocks below are the implementation source from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
 
 | Module | Notes |
 |---|---|
@@ -111,6 +111,8 @@ Source blocks are copied verbatim from the current repository (`use` / `derive` 
 | Migration | `keywords/migrate.rs`: `MigratedStep` / `step_from_skill_effect_plan` / `keyword_op_from_effect_op` / `step_from_effect_ops` / `step_from_reaction_ops` / `discard_self_step` |
 
 ### Source: `keywords/target.rs`
+
+*Keyword codes in comments have been replaced with names; code lines unchanged.*
 
 ```rust
 use crate::families::character::character::CharacterState;
@@ -222,9 +224,9 @@ pub enum TargetSelector {
     /// **所有后台角色**（出战角色以外的角色）。
     Standby(SideScope),
     /// **距离最近**：从 reference 方的出战角色出发，选 candidates 方**位置最接近**的角色
-    /// （权威关键字 K7 / L12）。
+    /// （距离最近 / L12）。
     ///
-    /// 依据：权威关键字 K7「距离我方出战角色最近的角色」——「对方场上距离我方出战角色
+    /// 依据：权威关键字「距离我方出战角色最近的角色」——「对方场上距离我方出战角色
     /// 『最近』的角色，指的是位置与我方出战角色最接近的敌方角色。如果存在多个位置最接近的
     /// 角色，则其中靠前的角色被视为『最近』。」（tcgkeywords 4lang；英文 foremost /
     /// 日文 一番左側）。规则书正文**没有**这个词条（L12 = C 档），所以：
@@ -235,9 +237,9 @@ pub enum TargetSelector {
     /// **待实测 / TODO**：规则书没写这个词条；距离是否按镜像位置（我方下标 i <-> 对方
     /// len-1-i）计算、被击倒角色是否仍占位导致并列，均无权威依据 —— 见 留空 记录。
     NearestToActive {
-        /// 参照方：用这一方的出战角色位置作参照（K7 = Own）。
+        /// 参照方：用这一方的出战角色位置作参照（距离最近 = Own）。
         reference: SideScope,
-        /// 候选方：从这一方的角色里选最近的（K7 = Opponent）。
+        /// 候选方：从这一方的角色里选最近的（距离最近 = Opponent）。
         candidates: SideScope,
     },
     /// 出战角色**之后第 n 个**角色（卡面「(下)(n)个角色」）。
@@ -1618,7 +1620,7 @@ pub fn discard_self_step() -> Step {
 |---|---|
 | Game zone I / Use Skill (attack the opponent's active character) | `Active(Opponent)` / `opponent_active()` |
 | Card text "(down) (n)-th character", "all opponent standby characters", "lowest HP" | `AfterActive` / `Standby` / `HpRank` |
-| Authoritative keyword K7 "nearest" (not in the rulebook body, L12) | `NearestToActive` (留空 #62/#69) |
+| Authoritative keyword "nearest" (not in the rulebook body, L12) | `NearestToActive` (留空 #62/#69) |
 | S5.2 elemental reactions / non-damage attachments also trigger reactions (damage effects ignored) | `attach_element` + `ReactionRequest.non_damage` |
 | Settlement Order §2 insertion-based settlement (not a stack) | `ReactionFrames` / `timeline::Resolution` |
 | S7.5 settlement order | ordering in `flow`; the keyword layer only dispatches |
@@ -1665,7 +1667,7 @@ pub fn discard_self_step() -> Step {
 > [!NOTE]
 > Every convention the rulebook does not define is marked "to be verified" and never invented; numbers refer to `留空.md`.
 
-- "Nearest" (K7): mirrored distance, defeated-slot occupancy, tie convention (留空 #62/#69).
+- "Nearest": mirrored distance, defeated-slot occupancy, tie convention (留空 #62/#69).
 - HP / damage-taken ranking tie conventions (active-first, left/right direction) are not specified by the rulebook (留空; D229/D230 already record "to be verified").
 - `stack_cap` over-cap handling (留空 #70); summon `stack_limit` interpreted as usages (留空 #71); hand-card states have no stack_cap (留空 #72).
 - "How the attachment is consumed after a non-damage reaction" follows the D167 convention, to be verified; Anemo / Geo cannot be attached natively and do not determine a reaction (`reaction.rs` pending review).

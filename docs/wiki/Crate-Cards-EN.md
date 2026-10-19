@@ -22,7 +22,7 @@ The concrete-card layer: only "what this exact card is" — each card's own data
 | Family entry | `src/cards/character/mod.rs` | one directory per card (D163); no central registry yet |
 | First sample card | `src/cards/character/aino/mod.rs` | Aino (character card 1216): `ID` / `MAX_HP = 10` / `MAX_ENERGY = 2` / tag tuple `(Hydro, Claymore, NodKrai)` / four `SkillDef` / `AINO: CharacterDef<Tags>` |
 | Version sync | same file: `card_game_version!(6, 2);` | generates `GAME_VERSION: GameVersion` (D244-D246); bump the number when nothing else changes |
-| Source self-declaration | same file: `card_source!(path: ["character", "aino"]);` | generates `pub static SOURCE: SourceFile` (verbatim text + compile-time use dependencies; D214-D216) |
+| Source self-declaration | same file: `card_source!(path: ["character", "aino"]);` | generates `pub static SOURCE: SourceFile` (source text + compile-time use dependencies; D214-D216) |
 | Card source table | `src/source/mod.rs` | `SOURCE_FILES` (hand-written list), `source_files()` / `source_of(path)` / `source_files_under(prefix)` |
 | Source mechanism | `definitions/src/source/mod.rs` | `card_source!` / `module_source!`, `SourceFile` / `SourceOwner`, dependency parser stay in definitions (D242) |
 | Effect bodies | same Aino file | the four `fn ..._effect()` are `todo!("missing: ...")` placeholders right now |
@@ -41,8 +41,7 @@ The tag-set representation is still undecided; the sample uses a type-level zero
 > [!NOTE]
 > Card definitions use `static` (stable address); `SkillDef` contains id / name / description / `kind` / `cost` / `effect` function pointer.
 
-### 3.1 Real Source Excerpts (verbatim from the current repository)
-
+### 3.1 Real Source Excerpts
 **Card id `ID`**
 
 `new/crates/cards/src/cards/character/aino/mod.rs:30-31`
@@ -191,7 +190,7 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 - Numeric rules: `Nat` / constants; the crate denies `clippy::arithmetic_side_effects`.
 
 > [!WARNING]
-> Taking concrete card data from the reference implementation is forbidden (D122); card data is copied verbatim from in-game text descriptions.
+> Taking concrete card data from the reference implementation is forbidden (D122); card data is copied from in-game text descriptions.
 
 ## 5. Basis (Rulebook and D Numbers)
 
@@ -231,7 +230,7 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 | `...::aino_tags_are_three_zero_sized_tags` | zero-sized tag tuple |
 | `...::aino_skills_match_in_game_text` | four skills / costs / text |
 | `...::game_version_matches_declared_sync_version` | version macro |
-| `...::source_embeds_this_file_verbatim` | verbatim source embedding |
+| `...::source_embeds_this_file_verbatim` | source text embedding |
 | `...::source_is_registered_in_source_registry` | source table registration |
 | `cards/src/source/mod.rs::source::tests::registry_lists_card_files_in_path_order` | list ordering |
 | `cards/src/source/mod.rs::source::tests::dependency_direction_is_cards_to_definitions` | dependency-direction guard |

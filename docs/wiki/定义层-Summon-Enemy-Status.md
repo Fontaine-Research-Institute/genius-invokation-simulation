@@ -2,55 +2,55 @@
 
 > 中文 · [[定义层-Summon-Enemy-Status-EN|English]]
 
-*本页范围：`crates/definitions/src/families/{summon,enemy,status}/` —— 召唤物（定义 + 召唤物区）、敌人（仅定义）、状态（定义 + 身份 + 秘传揭令容器；承载在角色族）。*
+*本页范围: `crates/definitions/src/families/{summon,enemy,status}/` —— 召唤物 (定义 + 召唤物区) , 敌人 (仅定义) , 状态 (定义 + 身份 + 秘传揭令容器; 承载在角色族) .*
 
 ---
 
 ## 1. 职责
 
-三个「没有类型树」的牌族：**召唤物**（定义 + 召唤物区）、**敌人**（只有定义）、**状态**（定义 + 状态身份 + 秘传揭令容器）。状态的**承载不在本族**：角色状态进 `CharacterState.states`，出战状态进 `CombatStatusZone`。
+三个'没有类型树'的牌族: **召唤物** (定义 + 召唤物区) , **敌人** (只有定义) , **状态** (定义 + 状态身份 + 秘传揭令容器) .状态的**承载不在本族**: 角色状态进 `CharacterState.states`, 出战状态进 `CombatStatusZone`.
 
 ## 2. 关键概念与类型
 
-### 2.1 召唤物（`summon/`）
+### 2.1 召唤物 (`summon/`) 
 
 | 类型 | 文件 | 要点 |
 |---|---|---|
-| `SummonDef<Tags>` | `summon/def.rs` | `id` / `name` / `description` / `effect_kind: SummonEffectKind` / `effect_points: Nat` / `default_uses: Option<Nat>` / `tags`；`entry(summon) -> SummonEntry` 纯搬运 |
-| `SummonEffectKind` | `summon/def.rs` | 最小集合：`Damage` / `Heal` / `Status` / `Other`（数据没有结构化字段，反推；待复核） |
-| `SummonEntry` | `summon/zones/mod.rs` | `summon`（实体）/ `card`（卡 id）/ `uses: Option<Nat>`（可用次数）/ `points: Option<Nat>`（效果量）/ `effect_kind: Option<SummonEffectKind>` |
-| `SummonZone` | `summon/zones/mod.rs` | `entries`（顺序 = 召唤先后）+ `stats`；`SUMMON_CAP = 4` |
+| `SummonDef<Tags>` | `summon/def.rs` | `id` / `name` / `description` / `effect_kind: SummonEffectKind` / `effect_points: Nat` / `default_uses: Option<Nat>` / `tags`; `entry(summon) -> SummonEntry` 纯搬运 |
+| `SummonEffectKind` | `summon/def.rs` | 最小集合: `Damage` / `Heal` / `Status` / `Other` (数据没有结构化字段, 反推; 待复核)  |
+| `SummonEntry` | `summon/zones/mod.rs` | `summon` (实体) / `card` (卡 id) / `uses: Option<Nat>` (可用次数) / `points: Option<Nat>` (效果量) / `effect_kind: Option<SummonEffectKind>` |
+| `SummonZone` | `summon/zones/mod.rs` | `entries` (顺序 = 召唤先后) + `stats`; `SUMMON_CAP = 4` |
 
-召唤物区规则：
+召唤物区规则: 
 
-- 上限 4，满员**无法生成新召唤物**；但**同名召唤物仍先尝试合并**（合并不新增占位，不违反上限，待复核）。
-- **同名合并**：次数与效果量取**最大**、效果类型取**最新**、**保留原位置**（分工计划 §4.4.15）。
-- **可用次数按触发次数递减**（D12）：`tick_with_triggers` 每次触发 -1，到 0 **立刻弃置**（复用 `rules::ops::lifetime`）。
-- 时机键：`SummonTiming::{Summoned, Merged, Triggered, Depleted, Discarded}`（D185）；`execute_summon` 执行待执行。
-- 待接入：具体执行动作（`SummonAction` / `SummonMeasure`）留给召唤物执行块，本块只给计量 + 正式效果类型。
+- 上限 4, 满员**无法生成新召唤物**; 但**同名召唤物仍先尝试合并** (合并不新增占位, 不违反上限, 待复核) .
+- **同名合并**: 次数与效果量取**最大**, 效果类型取**最新**, **保留原位置** (分工计划 §4.4.15) .
+- **可用次数按触发次数递减** (D12) : `tick_with_triggers` 每次触发 -1, 到 0 **立刻弃置** (复用 `rules::ops::lifetime`) .
+- 时机键: `SummonTiming::{Summoned, Merged, Triggered, Depleted, Discarded}` (D185) ; `execute_summon` 执行待执行.
+- 待接入: 具体执行动作 (`SummonAction` / `SummonMeasure`) 留给召唤物执行块, 本块只给计量 + 正式效果类型.
 
-### 2.2 敌人（`enemy/`）
+### 2.2 敌人 (`enemy/`) 
 
-- `id` / `name` / `description: Localized`：数据没有顶层描述 → `Localized::EMPTY`（D56 显式缺失）。
-- `max_hp: Nat`：定义数据（上限来源）。
-- `skills: &'static [&'static SkillDef]`：复用角色技能定义（D121 / D162）。
-- `tags`：元素 / 势力 / 武器子类 / 其他武器（D55 唯一定义）。
-- **逐字源码见 §3.3**（`crates/definitions/src/families/enemy/def.rs`）。
+- `id` / `name` / `description: Localized`: 数据没有顶层描述 → `Localized::EMPTY` (D56 显式缺失) .
+- `max_hp: Nat`: 定义数据 (上限来源) .
+- `skills: &'static [&'static SkillDef]`: 复用角色技能定义 (D121 / D162) .
+- `tags`: 元素 / 势力 / 武器子类 / 其他武器 (D55 唯一定义) .
+- **源码见 §3.3** (`crates/definitions/src/families/enemy/def.rs`) .
 
-- 敌人牌**没有区、没有操作**：本轮只做定义载体；运行期承载与具体敌人实现待接入（代码注释标 `待接入`，留空.md 尚无专条，建议补登）。
-- 数据有 `maxenergy` 字段但本块未收（充能上限归充能块，待接入）。
-- 描述不从技能文案拼（那会是第二份数据）。
+- 敌人牌**没有区, 没有操作**: 本轮只做定义载体; 运行期承载与具体敌人实现待接入 (代码注释标 `待接入`, 留空.md 尚无专条, 建议补登) .
+- 数据有 `maxenergy` 字段但本块未收 (充能上限归充能块, 待接入) .
+- 描述不从技能文案拼 (那会是第二份数据) .
 
-### 2.3 状态（`status/`）
+### 2.3 状态 (`status/`) 
 
 | 类型 | 文件 | 要点 |
 |---|---|---|
-| `StatusType` | `status/mod.rs` | `CharacterStatus` / `CombatStatus`；**两个类型共用状态牌族的同一个 id 区域**（D51），靠类型区分 |
-| `StatusDef<Tags>` | `status/def.rs` | `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>`（None = 布尔）/ `duration: Option<Nat>` / `tags`；`form()` 由 `default_layers` 推导 |
-| 正式身份（5 个） | `status/known.rs` | 203 出战护盾 / 134 角色护盾 / 106 冻结 / 116 草原核 / 117 激化领域；身份实例持有 `&'static StatusDef`（指针大小，**不是 ZST**：ZST 静态地址会重合，D200） |
-| `ArcaneEdict` + `ARCANE_EDICT` | `status/arcane_edict.rs` | 秘传揭令（K311）：**没有状态卡行 → 不伪造 StatusDef**；只给状态身份（布尔）+ 每位牌手一份的使用机会容器 |
+| `StatusType` | `status/mod.rs` | `CharacterStatus` / `CombatStatus`; **两个类型共用状态牌族的同一个 id 区域** (D51) , 靠类型区分 |
+| `StatusDef<Tags>` | `status/def.rs` | `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>` (None = 布尔) / `duration: Option<Nat>` / `tags`; `form()` 由 `default_layers` 推导 |
+| 正式身份 (5 个)  | `status/known.rs` | 203 出战护盾 / 134 角色护盾 / 106 冻结 / 116 草原核 / 117 激化领域; 身份实例持有 `&'static StatusDef` (指针大小, **不是 ZST**: ZST 静态地址会重合, D200)  |
+| `ArcaneEdict` + `ARCANE_EDICT` | `status/arcane_edict.rs` | 秘传揭令 (秘传揭令) : **没有状态卡行 → 不伪造 StatusDef**; 只给状态身份 (布尔) + 每位牌手一份的使用机会容器 |
 
-状态类型与承载（D51 / D105 / D201）：
+状态类型与承载 (D51 / D105 / D201) : 
 
 ```text
 角色状态 -> CharacterState.states（公共 StateList；位置 CHARACTER_STATE_POS = 0）
@@ -58,43 +58,43 @@
 状态牌族本身没有区：StatusDef 只是定义数据，身份 = 指向定义数据的静态指针
 ```
 
-- 状态**共用一个公共列表** `StateList`（D104 / D105）：`StateEntry { state, pos, layers }`；布尔类 `layers = None`（在列表里即代表「有」）。
-- **不建第三类状态**：数据里的「角色装备」（276 条）与 D51 冲突 → 不建（D201，待复核）。
-- **标签**：`tags/status/` 本轮为空，状态定义只导入别处已有的唯一定义（护盾 / 草元素产物），其余 `()`。
+- 状态**共用一个公共列表** `StateList` (D104 / D105) : `StateEntry { state, pos, layers }`; 布尔类 `layers = None` (在列表里即代表'有') .
+- **不建第三类状态**: 数据里的'角色装备' (276 条) 与 D51 冲突 → 不建 (D201, 待复核) .
+- **标签**: `tags/status/` 本轮为空, 状态定义只导入别处已有的唯一定义 (护盾 / 草元素产物) , 其余 `()`.
 
-### 2.4 关键状态身份（跨文件）
+### 2.4 关键状态身份 (跨文件) 
 
 | 状态 | 身份实例 | 形态 | 数据 / 依据 | 定义位置 |
 |---|---|---|---|---|
-| 冻结 | `FROZEN` | 布尔（duration 1，待复核） | 状态 106；S6.6「角色无法使用技能」 | `families/status/known.rs` |
-| 眩晕 | `STUN` | 布尔 | K55 + 数据 100001 | `families/character/skill_flow/forbidden.rs`（共享身份） |
-| 石化 | `PETRIFIED` | 布尔 | 数据 116033 / 176033（同效果两份） | 同上 |
-| 饱腹 | `SATIATED` | 布尔 | 数据 303300；S8.1 | `families/character/satiated.rs`（共享身份） |
-| 护盾（出战 / 角色） | `SHIELD_COMBAT` / `SHIELD_CHARACTER` | 层数 | 状态 203 / 134 | `families/status/known.rs` |
-| 草原核 / 激化领域 | `DENDRO_CORE` / `CATALYZING_FIELD` | 层数（可用次数） | 状态 116 / 117 | `families/status/known.rs` |
-| 伤害抵消（减伤） | `DAMAGE_NEGATION` | 层数 | 规则书·特殊词条；无独立卡牌实体 | `families/character/damage_chain/statuses.rs`（共享身份） |
-| 伤害免疫 | `DAMAGE_IMMUNITY` | 布尔 | K5 + 卡面「免疫所有伤害」；无独立卡牌实体 | 同上（共享身份） |
+| 冻结 | `FROZEN` | 布尔 (duration 1, 待复核)  | 状态 106; S6.6'角色无法使用技能' | `families/status/known.rs` |
+| 眩晕 | `STUN` | 布尔 | 眩晕 + 数据 100001 | `families/character/skill_flow/forbidden.rs` (共享身份)  |
+| 石化 | `PETRIFIED` | 布尔 | 数据 116033 / 176033 (同效果两份)  | 同上 |
+| 饱腹 | `SATIATED` | 布尔 | 数据 303300; S8.1 | `families/character/satiated.rs` (共享身份)  |
+| 护盾 (出战 / 角色)  | `SHIELD_COMBAT` / `SHIELD_CHARACTER` | 层数 | 状态 203 / 134 | `families/status/known.rs` |
+| 草原核 / 激化领域 | `DENDRO_CORE` / `CATALYZING_FIELD` | 层数 (可用次数)  | 状态 116 / 117 | `families/status/known.rs` |
+| 伤害抵消 (减伤)  | `DAMAGE_NEGATION` | 层数 | 规则书·特殊词条; 无独立卡牌实体 | `families/character/damage_chain/statuses.rs` (共享身份)  |
+| 伤害免疫 | `DAMAGE_IMMUNITY` | 布尔 | 穿透伤害 + 卡面'免疫所有伤害'; 无独立卡牌实体 | 同上 (共享身份)  |
 
-桥表（`families/character/damage_chain/statuses.rs`）：
+桥表 (`families/character/damage_chain/statuses.rs`) : 
 
-- `STATUS_ENTITIES: [StatusEntity; 8]` = 106 / 203 / 116 / 117 / 134 + 100001 眩晕 / 116033 石化 / 303300 饱腹。
-- `status_of_card(CardId) -> Option<&'static dyn StateIdentity>`；`same_identity` / `identity_in` 只比 `identity_address()`（D57 / D58 / D200）。
-- 集合：`SHIELD_STATUSES` / `REDUCTION_STATUSES` / `IMMUNITY_STATUSES`；手牌 6 状态有 `hand_status_identity` / `hand_status_of_identity`（见 [[定义层-Action-Card]]）。
+- `STATUS_ENTITIES: [StatusEntity; 8]` = 106 / 203 / 116 / 117 / 134 + 100001 眩晕 / 116033 石化 / 303300 饱腹.
+- `status_of_card(CardId) -> Option<&'static dyn StateIdentity>`; `same_identity` / `identity_in` 只比 `identity_address()` (D57 / D58 / D200) .
+- 集合: `SHIELD_STATUSES` / `REDUCTION_STATUSES` / `IMMUNITY_STATUSES`; 手牌 6 状态有 `hand_status_identity` / `hand_status_of_identity` (见 [[定义层-Action-Card]]) .
 
-### 2.5 状态持续时间（D13 与规则书的冲突）
+### 2.5 状态持续时间 (D13 与规则书的冲突) 
 
-- 规则书·特殊词条「持续回合」：**每个结束阶段** -1，耗尽立刻弃置（英文 "Each End Phase"）。
-- 代码 `rules/ops/lifetime.rs` 按**规则书**实现（`ticks_in_end_phase() = true`、`duration_after_end_phase`），并在注释里写明「与 D13 的旧写法（回合开始递减）冲突、已按规则书为准」。
-- 出战状态区的 `tick_end_phase_with_triggers` 与支援区的同名操作都按结束阶段实现。
+- 规则书·特殊词条'持续回合': **每个结束阶段** -1, 耗尽立刻弃置 (英文 "Each End Phase") .
+- 代码 `rules/ops/lifetime.rs` 按**规则书**实现 (`ticks_in_end_phase() = true`, `duration_after_end_phase`) , 并在注释里写明'与 D13 的旧写法 (回合开始递减) 冲突, 已按规则书为准'.
+- 出战状态区的 `tick_end_phase_with_triggers` 与支援区的同名操作都按结束阶段实现.
 
 > [!IMPORTANT]
-> 可用次数 ≠ 持续回合：可用次数按**触发次数**递减（D12）；持续回合按**结束阶段**递减（规则书，D13 旧口径已被覆盖）。
-> 不要把两者混成一个字段，也不要按「行动阶段开始 -1」实现（参考实现的老 bug，D12）。
+> 可用次数 ≠ 持续回合: 可用次数按**触发次数**递减 (D12) ; 持续回合按**结束阶段**递减 (规则书, D13 旧口径已被覆盖) .
+> 不要把两者混成一个字段, 也不要按'行动阶段开始 -1'实现 (参考实现的老 bug, D12) .
 
 ## 3. 公开入口
 
 > [!NOTE]
-> 本节代码逐字取自当前仓库（含 use / derive / 文档注释等样板）。超长函数体截断为「签名 + 开头几行」并注明从略；未截断的即为全文。
+> 本节代码取自当前仓库 (含 use / derive / 文档注释等样板) .超长函数体截断为'签名 + 开头几行'并注明从略; 未截断的即为全文.
 
 ### 3.1 召唤物定义
 
@@ -534,7 +534,7 @@ pub const SHIELD_STATUSES: &[&'static dyn StateIdentity] = &[&SHIELD_COMBAT, &SH
 ### 3.6 本页引用的规则 ops
 
 > [!NOTE]
-> 以下为本文引用的关键字层 / 规则 ops 的真实源码（签名与文档注释逐字取自仓库）。
+> 以下为本文引用的关键字层 / 规则 ops 的真实源码 (签名与文档注释取自仓库) .
 
 **`USES_PER_TRIGGER`** — `crates/definitions/src/rules/ops/lifetime.rs`
 
@@ -591,83 +591,83 @@ pub fn ticks_in_end_phase() -> bool {
 
 ## 4. 不变量与禁止
 
-- **可用次数 ≠ 持续回合**（D12 / 规则书「持续回合」）。
-- **召唤物上限 4**：满员不生成新占位；同名合并不新增占位、**保留原位置**；次数 / 效果量取最大、效果类型取最新（分工计划 §4.4.15）。
-- **状态只有一个公共列表**（D104 / D105）：不建第二套容器 / 编号表 / 分区列表。
-- **身份 = 定义数据地址**（D57 / D58 / D200）：比较用 `same_identity`，不要比 `&dyn` 胖指针或 ZST 自身地址。
-- **框架不解释状态语义**（D108）：`StateList` / `CombatStatusZone` 只存身份 + 层数 + duration。
-- **状态只有两个类型**（D51 / D201）：不建「角色装备」第三类。
-- **共享身份不伪造卡 id / StatusDef**（秘传揭令、伤害抵消、伤害免疫）：没有卡牌数据的身份只给静态文本。
-- **敌人牌本轮只定义、不建区**：不要把角色区逻辑复制给敌人。
-- 纯函数、失败不改状态；全 `Nat` / `Fraction`；零 `f64`、零 `HashMap`。
+- **可用次数 ≠ 持续回合** (D12 / 规则书'持续回合') .
+- **召唤物上限 4**: 满员不生成新占位; 同名合并不新增占位, **保留原位置**; 次数 / 效果量取最大, 效果类型取最新 (分工计划 §4.4.15) .
+- **状态只有一个公共列表** (D104 / D105) : 不建第二套容器 / 编号表 / 分区列表.
+- **身份 = 定义数据地址** (D57 / D58 / D200) : 比较用 `same_identity`, 不要比 `&dyn` 胖指针或 ZST 自身地址.
+- **框架不解释状态语义** (D108) : `StateList` / `CombatStatusZone` 只存身份 + 层数 + duration.
+- **状态只有两个类型** (D51 / D201) : 不建'角色装备'第三类.
+- **共享身份不伪造卡 id / StatusDef** (秘传揭令, 伤害抵消, 伤害免疫) : 没有卡牌数据的身份只给静态文本.
+- **敌人牌本轮只定义, 不建区**: 不要把角色区逻辑复制给敌人.
+- 纯函数, 失败不改状态; 全 `Nat` / `Fraction`; 零 `f64`, 零 `HashMap`.
 
 > [!WARNING]
-> 给状态建编号 / 分区表 / 第二套列表，或用 ZST 自身地址做身份，都会让状态合并与反应命中失效（D42 / D105 / D200）。
+> 给状态建编号 / 分区表 / 第二套列表, 或用 ZST 自身地址做身份, 都会让状态合并与反应命中失效 (D42 / D105 / D200) .
 
 > [!NOTE]
-> 「饱腹 / 眩晕 / 石化」当前是角色牌族的**共享身份**；正式 `StatusDef` 归状态块，二选一（留空 #79），不要两套并存。
+> '饱腹 / 眩晕 / 石化'当前是角色牌族的**共享身份**; 正式 `StatusDef` 归状态块, 二选一 (留空 #79) , 不要两套并存.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 | 主题 | 依据 |
 |---|---|
-| 召唤物区上限 4 / 满员无法生成 / 按排列顺序结算 | 规则书「游戏区域 IV」 |
-| 可用次数按触发次数递减、耗尽弃置 | 规则书·特殊词条「可用次数」；D12 |
-| 持续回合每个结束阶段 -1 | 规则书·特殊词条「持续回合」；代码按规则书，D13 旧写法已覆盖 |
-| 同名召唤物合并口径 | 分工计划 §4.4.15（Lead 已定） |
-| 状态两个类型共用 id 区域 | D51；规则书「游戏区域 II」 |
+| 召唤物区上限 4 / 满员无法生成 / 按排列顺序结算 | 规则书'游戏区域 IV' |
+| 可用次数按触发次数递减, 耗尽弃置 | 规则书·特殊词条'可用次数'; D12 |
+| 持续回合每个结束阶段 -1 | 规则书·特殊词条'持续回合'; 代码按规则书, D13 旧写法已覆盖 |
+| 同名召唤物合并口径 | 分工计划 §4.4.15 (Lead 已定)  |
+| 状态两个类型共用 id 区域 | D51; 规则书'游戏区域 II' |
 | 状态公共列表 / 布尔存在即真 / 身份指针 | D95 / D96 / D104 / D105 / D108 / D110 / D200 |
-| 秘传揭令每人一份 | 规则书「特殊词条 秘传」+ K311；D264；留空 #68 / #98 / #99 |
-| 饱腹 / 冻结 / 眩晕 / 石化 | S8.1 / S6.6 / K55 / K58 / S8.4；留空 #31 / #79 / #80 / #82 |
-| 敌人牌 | 数据 `tcgenemycards`；运行期承载未设计（待接入） |
+| 秘传揭令每人一份 | 规则书'特殊词条 秘传'+ 秘传揭令; D264; 留空 #68 / #98 / #99 |
+| 饱腹 / 冻结 / 眩晕 / 石化 | S8.1 / S6.6 / 眩晕 / 特技 / S8.4; 留空 #31 / #79 / #80 / #82 |
+| 敌人牌 | 数据 `tcgenemycards`; 运行期承载未设计 (待接入)  |
 
-### 5.1 文档与代码不一致（供复核）
+### 5.1 文档与代码不一致 (供复核) 
 
 > [!NOTE]
-> 本轮复核发现以下偏差；以当前代码 + 规则书为准。
+> 本轮复核发现以下偏差; 以当前代码 + 规则书为准.
 
-1. `决策日志.md` **D13** 写「duration 在回合开始递减」，规则书原文是「每个结束阶段 -1」；`rules/ops/lifetime.rs` 已按规则书实现并在注释声明覆盖 D13 —— 建议决策日志补一条修正记录。
-2. `结构.md` 把状态写成 `families/status/` 自带区；实际状态承载在角色族（`CharacterState.states` / `CombatStatusZone`），`families/status/` 只有定义与身份。
-3. 眩晕 / 石化 / 饱腹的正式状态定义尚未进 `families/status/known.rs`，当前由角色牌族给共享身份；与「状态牌族管状态」的文档口径不完全一致，属已知技术债（留空 #79）。
+1. `决策日志.md` **D13** 写'duration 在回合开始递减', 规则书原文是'每个结束阶段 -1'; `rules/ops/lifetime.rs` 已按规则书实现并在注释声明覆盖 D13 —— 建议决策日志补一条修正记录.
+2. `结构.md` 把状态写成 `families/status/` 自带区; 实际状态承载在角色族 (`CharacterState.states` / `CombatStatusZone`) , `families/status/` 只有定义与身份.
+3. 眩晕 / 石化 / 饱腹的正式状态定义尚未进 `families/status/known.rs`, 当前由角色牌族给共享身份; 与'状态牌族管状态'的文档口径不完全一致, 属已知技术债 (留空 #79) .
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 以下写法在类型层面大多不报错，但会直接改变结算结果。
+> 以下写法在类型层面大多不报错, 但会直接改变结算结果.
 
-1. **把「可用次数 -1」写在行动阶段开始**：参考实现的老 bug（D12 点名），正确是按触发次数；duration 才按结束阶段。
-2. **同名召唤物新建占位**：应合并（次数 / 效果量取最大、类型最新、位置不变）。
-3. **给状态建编号 / 分区表 / 第二套列表**：违反 D42 / D105。
-4. **用 ZST 自身地址身份**：不同 ZST 静态实例地址可能相同 → 状态合并 / 反应命中失效（D200）；一律用 `identity_address()`。
-5. **把秘传揭令当状态卡**：没有卡 id、没有 `StatusDef`；判定用 `ArcaneEdict::can_play`。
-6. **给「饱腹 / 眩晕 / 石化」再建一套身份**：当前是共享身份，正式定义归状态块且不许两套并存（留空 #79）。
-7. **把状态类型当第三类「角色装备」**：数据里有但决策不建（D201）。
-8. **敌人牌复制角色区**：敌人运行期承载尚未设计。
+1. **把'可用次数 -1'写在行动阶段开始**: 参考实现的老 bug (D12 点名) , 正确是按触发次数; duration 才按结束阶段.
+2. **同名召唤物新建占位**: 应合并 (次数 / 效果量取最大, 类型最新, 位置不变) .
+3. **给状态建编号 / 分区表 / 第二套列表**: 违反 D42 / D105.
+4. **用 ZST 自身地址身份**: 不同 ZST 静态实例地址可能相同 → 状态合并 / 反应命中失效 (D200) ; 一律用 `identity_address()`.
+5. **把秘传揭令当状态卡**: 没有卡 id, 没有 `StatusDef`; 判定用 `ArcaneEdict::can_play`.
+6. **给'饱腹 / 眩晕 / 石化'再建一套身份**: 当前是共享身份, 正式定义归状态块且不许两套并存 (留空 #79) .
+7. **把状态类型当第三类'角色装备'**: 数据里有但决策不建 (D201) .
+8. **敌人牌复制角色区**: 敌人运行期承载尚未设计.
 
 ## 7. 测试
 
 | 文件 | 代表测试 |
 |---|---|
-| `summon/def.rs` | `summon_def_carries_id_text_kind_points_uses_and_tags`、`entry_carries_the_def_measurements_into_the_zone_entry` |
-| `summon/zones/mod.rs` | `cap_is_four_and_fifth_is_rejected_without_state_change`、`same_card_merges_uses_points_and_keeps_kind_newest`、`merge_keeps_position_and_works_when_full`、`tick_decrements_uses_and_discards_at_zero` |
-| `enemy/def.rs` | `enemy_def_carries_id_name_description_hp_tags_and_skills`、`enemy_def_reuses_skill_defs_in_data_order` |
-| `status/def.rs` | `status_def_carries_id_type_text_layers_duration_and_tags`、`form_is_derived_from_default_layers_only` |
-| `status/known.rs` | `known_status_defs_use_the_data_ids_and_types`、`identities_are_distinct_static_instances_with_one_text_copy` |
-| `status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`、`consumed_edict_blocks_arcane_with_no_edict` |
-| `families/character/damage_chain/statuses.rs` | `keyword_and_card_statuses_are_registered_by_their_data_ids`（100001 / 116033 / 303300 桥登记） |
-| `families/character/satiated.rs` | `satiated_identity_comes_from_the_status_data`、`food_effect_grants_satiated_once_and_blocks_food_targeting` |
+| `summon/def.rs` | `summon_def_carries_id_text_kind_points_uses_and_tags`, `entry_carries_the_def_measurements_into_the_zone_entry` |
+| `summon/zones/mod.rs` | `cap_is_four_and_fifth_is_rejected_without_state_change`, `same_card_merges_uses_points_and_keeps_kind_newest`, `merge_keeps_position_and_works_when_full`, `tick_decrements_uses_and_discards_at_zero` |
+| `enemy/def.rs` | `enemy_def_carries_id_name_description_hp_tags_and_skills`, `enemy_def_reuses_skill_defs_in_data_order` |
+| `status/def.rs` | `status_def_carries_id_type_text_layers_duration_and_tags`, `form_is_derived_from_default_layers_only` |
+| `status/known.rs` | `known_status_defs_use_the_data_ids_and_types`, `identities_are_distinct_static_instances_with_one_text_copy` |
+| `status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict` |
+| `families/character/damage_chain/statuses.rs` | `keyword_and_card_statuses_are_registered_by_their_data_ids` (100001 / 116033 / 303300 桥登记)  |
+| `families/character/satiated.rs` | `satiated_identity_comes_from_the_status_data`, `food_effect_grants_satiated_once_and_blocks_food_targeting` |
 
 ## 8. 待接入与待实测
 
-- **敌人牌运行期承载 / 充能上限**：代码标「待接入」；留空.md 尚无专条（建议补登）。
-- **饱腹 / 眩晕 / 石化的正式 `StatusDef`**：当前为共享身份，#79 要求二选一（不许两套并存）；描述与规则书措辞差异 #80；石化两份数据共用身份 #82。
-- **具体护罩状态身份**（冰/雷/水/火元素护罩、涌流/轰霆/涌火、弱点暴露条件免疫）：#31。
-- **状态第三类「角色装备」**：不建，待复核 #23。
-- **手牌状态身份与描述**：#10 / #106 / #115。
-- **秘传揭令**：容器持有方 / 判定与打牌条件先后 / 是否显示为状态：#68 / #98 / #99。
-- **召唤物 / 手牌状态的叠加上限**（`stack_cap` / `stack_limit`）：#70 / #71 / #72。
-- **元素幻变**：#108 / #118。
-- **持续回合与 D13**：代码按规则书（结束阶段），D13 旧口径已覆盖 —— 建议决策日志补修正记录。
+- **敌人牌运行期承载 / 充能上限**: 代码标'待接入'; 留空.md 尚无专条 (建议补登) .
+- **饱腹 / 眩晕 / 石化的正式 `StatusDef`**: 当前为共享身份, #79 要求二选一 (不许两套并存) ; 描述与规则书措辞差异 #80; 石化两份数据共用身份 #82.
+- **具体护罩状态身份** (冰/雷/水/火元素护罩, 涌流/轰霆/涌火, 弱点暴露条件免疫) : #31.
+- **状态第三类'角色装备'**: 不建, 待复核 #23.
+- **手牌状态身份与描述**: #10 / #106 / #115.
+- **秘传揭令**: 容器持有方 / 判定与打牌条件先后 / 是否显示为状态: #68 / #98 / #99.
+- **召唤物 / 手牌状态的叠加上限** (`stack_cap` / `stack_limit`) : #70 / #71 / #72.
+- **元素幻变**: #108 / #118.
+- **持续回合与 D13**: 代码按规则书 (结束阶段) , D13 旧口径已覆盖 —— 建议决策日志补修正记录.
 
 ---
-最后核对：2026-10-19（代码：`crates/definitions/src/rules/ops/lifetime.rs::duration_after_end_phase`）
+最后核对: 2026-10-19 (代码: `crates/definitions/src/rules/ops/lifetime.rs::duration_after_end_phase`) 

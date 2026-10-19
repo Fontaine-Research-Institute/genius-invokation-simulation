@@ -54,8 +54,7 @@ For each case the script actually runs: `cargo run --offline --release -p gi-gen
 
 **CI**: `workflow_dispatch` inputs `name` (optional; empty = all configured computations) and `timeout-minutes` (default 30). `discover` scans with `--configs` and emits a JSON array; `compute` is a matrix with one runner per computation and `fail-fast: false`; artifacts are `compute-output-<compute-name>` (stdout / stderr / exit-code files). Adding a computation does not require workflow changes.
 
-### 3.1 Real Source Excerpts (verbatim from the current repository)
-
+### 3.1 Real Source Excerpts
 **Sample compute entry `main.rs`**
 
 `new/crates/compute/src/bin/ftk_state_count/main.rs:1-43`

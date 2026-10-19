@@ -29,7 +29,7 @@ The character card family: **definition carriers** (`CharacterDef` / `SkillDef`)
 - `energy: Nat` / `max_energy: Nat`: "spend all energy" for bursts is expressed by card data.
 - `states: StateList`: D105 all statuses share one list; booleans use `layers=None`.
 - `attachment: Attachment`: D167 boolean element set (multi-element, no stacks; not a status).
-- **Verbatim source: §3.2** (`crates/definitions/src/families/character/character.rs`).
+- **real source: §3.2** (`crates/definitions/src/families/character/character.rs`).
 
 - Pure functions: `hp_add / hp_sub / hp_set`, `energy_add / energy_sub / energy_set`, `from_def`; all saturating `Nat`, inputs untouched.
 - **Does not do** "energy gain (boolean)" or "HP changed = defeated" semantics (D138 / D133); triggered operations live in `trigger.rs`.
@@ -57,7 +57,7 @@ type_override: Option<DamageType>  // type override (physical -> element etc.; b
 
 | Stage | Implementation | Notes |
 |---|---|---|
-| 0 Immunity | `statuses::IMMUNITY_STATUSES` + `step_immunity` | "immune to all damage" → short-circuits into "base → immune → HP loss 0"; **piercing ignores immunity** (K5) |
+| 0 Immunity | `statuses::IMMUNITY_STATUSES` + `step_immunity` | "immune to all damage" → short-circuits into "base → immune → HP loss 0"; **piercing ignores immunity** (Piercing DMG) |
 | 1 Bonuses | `bonus::DamageBonus` + `step_bonus` | generic increases + reaction bonus + elemental mastery (`MASTERY_DAMAGE_PER_POINT` to be measured); piercing skips the whole stage |
 | 2 Multiplication / division | `bonus::{AmountOp, MulMode, MultiplierZone, Rounding}` + `step_scale` | Four-stage model (plan §4.4.5): in-zone add/subtract → standalone multipliers + multiplier zone (multipliers added) → multiply all divisors into one denominator, divide and round → out-of-zone add/subtract; division by zero panics (D44) |
 | 3 Shields | `rules::ops::damage::mitigate` + `step_shield` | combat status 203 + character status 134 points are summed; piercing ignores |
@@ -79,15 +79,16 @@ type_override: Option<DamageType>  // type override (physical -> element etc.; b
 | `forbidden.rs` | R5 query "which skills does a status forbid": `SKILL_FORBIDDING_STATUSES` (frozen / stun / petrified), `ForbiddenUses`, `ForbiddenState`, `forbidden_by` / `skill_allowed` / `technique_allowed` |
 | `technique.rs` | L4 technique flow: `SkillUseClass` + `UseFlow`, `TechniqueContext`, `can_use_technique` / `use_technique`, `TechniqueUse`, `dispatch_technique` (**always empty**) |
 | `usage.rs` | `SkillUses` (per-skill per-round limit + used count, `engine::stats::Counter`; **a rules state, not under stats/**, D198) |
-| `prepared.rs` | Prepared skills (K53): `PreparedSkills` (begin / complete / interrupt / tick_action_round / pending_action); blocks active skill selection |
+| `prepared.rs` | Prepared skills (Prepare Skill): `PreparedSkills` (begin / complete / interrupt / tick_action_round / pending_action); blocks active skill selection |
 | `timing.rs` | `dispatch_skill`: dispatches `SkillTiming::SkillUsed` across the three scopes "any → a kind → a specific skill", merges, returns pending effects (D186) |
 
 **`can_use` check order** (fixed; returns the first matching `CannotUse`):
 
+*Keyword codes in comments were replaced with names; code lines unchanged*
 ```text
 1 PassiveSkill            passives cannot be actively used (policy can enable)
-2 ForbiddenByStatus       frozen / petrified / stun (R5; S6.6 / K55 / S8.4)
-3 Preparing / PreparedSkillReady   K53 prepared-skill blocking (policy can disable)
+2 ForbiddenByStatus       frozen / petrified / stun (R5; S6.6 / 眩晕 / S8.4)
+3 Preparing / PreparedSkillReady   准备技能 prepared-skill blocking (policy can disable)
 4 UsageLimit              per-round usage count
 5 NotEnoughEnergy         energy (a burst's charge_cost = its energy cap)
 6 NotEnoughDice           dice (can_afford is a "possibly enough" upper bound)
@@ -108,7 +109,7 @@ SkillUsed { phase: Before|After, scope: Any|Kind(SkillKind)|Skill(SkillId) }
 FormTransformed  // form transformed (dispatched by form.rs)
 ```
 
-A trigger entry = "timing key + condition fn pointer + effect fn pointer + ordering tag" (D186); `dispatch_character` only orders and returns pending effects, `execute_character` actually executes; `CharacterFrames = timeline::Resolution<CharacterEffect>` (insert-style settlement). **Neither techniques nor prepared skills dispatch `SkillUsed`** (K58 / K53).
+A trigger entry = "timing key + condition fn pointer + effect fn pointer + ordering tag" (D186); `dispatch_character` only orders and returns pending effects, `execute_character` actually executes; `CharacterFrames = timeline::Resolution<CharacterEffect>` (insert-style settlement). **Neither techniques nor prepared skills dispatch `SkillUsed`** (Technique / Prepare Skill).
 
 ### 2.7 Form / growth / satiety
 
@@ -127,7 +128,7 @@ A trigger entry = "timing key + condition fn pointer + effect fn pointer + order
 ## 3. Public entry points
 
 > [!NOTE]
-> Code below is copied verbatim from the current repository (including `use`, `derive`, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
+> Code below is copied from the current repository (including `use`, `derive`, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
 
 ### 3.1 Definition carriers
 
@@ -666,7 +667,7 @@ pub struct DamageChainEnv<'a> {
     pub reductions: &'a [&'static dyn StateIdentity],
     /// 算作**伤害免疫**的状态身份集合（默认 [`statuses::IMMUNITY_STATUSES`]）。
     ///
-    /// 命中 = 本次伤害归 0（不结算）；**穿透伤害不吃免疫**（K5）。
+    /// 命中 = 本次伤害归 0（不结算）；**穿透伤害不吃免疫**（穿透伤害）。
     pub immunities: &'a [&'static dyn StateIdentity],
     /// 乘算 / 除算 / 区外加减（分工计划 §4.4.5；默认 [`DamageModifiers::NONE`]）。
     pub modifiers: DamageModifiers<'a>,
@@ -682,7 +683,7 @@ pub struct DamageChainEnv<'a> {
 **`with_type_override`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
 
 ```rust
-    /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前逐字节等价）。
+    /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前节等价）。
     ///
     /// 依据：天赋 / 状态卡面「使角色造成的物理伤害变为水元素伤害」类效果；规则书没有
     /// 「伤害类型转换」词条 —— 口径 = 覆盖后完全按新类型结算（含反应判定、穿透 / 免疫）；
@@ -728,12 +729,12 @@ pub fn settle(
 pub enum CannotUse {
     /// 被动技能不可主动使用（[`SkillUsePolicy::allow_passive`] 为 false）。
     PassiveSkill,
-    /// 该角色有技能**正在准备**：本次行动被跳过（K53）。
+    /// 该角色有技能**正在准备**：本次行动被跳过（准备技能）。
     Preparing {
         /// 正在准备的技能。
         skill: SkillId,
     },
-    /// 该角色有技能**已完成准备**：将直接使用它，不能再选别的技能（K53）。
+    /// 该角色有技能**已完成准备**：将直接使用它，不能再选别的技能（准备技能）。
     PreparedSkillReady {
         /// 已完成准备的技能。
         skill: SkillId,
@@ -757,7 +758,7 @@ pub enum CannotUse {
     /// 注意：`DicePool::can_afford` 是「**可能**就行」（折叠组按可能颜色计入上界），
     /// 所以 [`can_use`] 通过后 [`pay_skill_cost`] **仍可能**返回这个失败（折叠组需要先显式展开）。
     NotEnoughDice,
-    /// 角色被状态**禁止使用技能**（冻结 / 石化 / 眩晕；S6.6 / K55 / S8.4）。
+    /// 角色被状态**禁止使用技能**（冻结 / 石化 / 眩晕；S6.6 / 眩晕 / S8.4）。
     ///
     /// 查询实现在 [`forbidden`]；规则书原文「角色无法使用技能」。
     ForbiddenByStatus {
@@ -800,8 +801,8 @@ pub struct SkillUseContext<'a> {
 /// 判定顺序（固定）：
 /// 1. **[`CannotUse::PassiveSkill`]**：被动技能不可主动使用（策略可关）；
 /// 2. **[`CannotUse::ForbiddenByStatus`]**：角色被状态禁止使用技能（冻结 / 石化 / 眩晕；
-///    S6.6 / K55 / S8.4）；查询在 [`forbidden`]，**不受策略开关影响**；
-/// 3. **[`CannotUse::Preparing`] / [`CannotUse::PreparedSkillReady`]**：K53 准备技能阻塞
+///    S6.6 / 眩晕 / S8.4）；查询在 [`forbidden`]，**不受策略开关影响**；
+/// 3. **[`CannotUse::Preparing`] / [`CannotUse::PreparedSkillReady`]**：准备技能 准备技能阻塞
 ///    （策略可关）；判定用 `PreparedSkills::pending_action`；
 /// 4. **[`CannotUse::UsageLimit`]**：本回合次数（`SkillUses`）；
 /// 5. **[`CannotUse::NotEnoughEnergy`]**：充能（`SkillCost::energy`；元素爆发的卡面数据里它等于
@@ -862,7 +863,7 @@ pub fn pay_skill_cost(
 ///   派发也是只读的）；
 /// - **不执行技能效果体**（`SkillDef::effect` 还是占位 `fn()`，D162 TODO）；
 /// - **不执行派发结果**（D186）：`before` / `after` 只是待执行列表；
-/// - **准备技能不走这里**（K53：不派发「使用技能时 / 后」；走 `prepared::PreparedSkills`）；
+/// - **准备技能不走这里**（准备技能：不派发「使用技能时 / 后」；走 `prepared::PreparedSkills`）；
 /// - 规则书的「普通攻击 / 元素战技 后获得 1 点充能」**已作用**在返回的 `character` 上（先于调用方执行
 ///   `after`）；规则书没规定它与「使用技能后」触发的先后，本层取「获得充能先」暂定。
 pub fn use_skill(
@@ -1048,7 +1049,7 @@ pub fn technique_allowed(states: &StateList) -> bool {
 ```rust
 /// **可主动使用入口的分类**：把「技能」与「特技」并列成一个判定点。
 ///
-/// 为什么不用 SkillKind 表达特技：K58 原文「使用『特技』时不视为使用技能」，
+/// 为什么不用 SkillKind 表达特技：特技 原文「使用『特技』时不视为使用技能」，
 /// 且 D123 / D126 只把重击 / 下落攻击作为普通攻击的形态 —— 特技不是技能种类，
 /// 所以单独用一个分类枚举承载「流程语义」。
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -1088,7 +1089,7 @@ pub struct TechniqueContext<'a> {
 ```rust
 /// **使用特技**：判定通过后返回结果（不支付 / 不派发 / 不执行效果）。
 ///
-/// 依据：S8.4 / K58。调用方拿到 TechniqueUse 后：
+/// 依据：S8.4 / 特技。调用方拿到 TechniqueUse 后：
 /// 1. 按战斗行动结算（Timing::Combat）；
 /// 2. **不要**派发「使用技能时 / 后」（dispatch_technique 恒为空）；
 /// 3. 效果造成的伤害按「非角色造成」处理。
@@ -1180,7 +1181,7 @@ pub struct PreparedSkills {
 ```rust
     /// **开始准备**：追加一个准备槽，`rounds` = 还需几个行动轮（`ZERO` = 立刻完成准备）。
     ///
-    /// 纯函数：返回新容器，不改入参。只应由「出战角色」调用（K53；本层不校验，见模块文档）。
+    /// 纯函数：返回新容器，不改入参。只应由「出战角色」调用（准备技能；本层不校验，见模块文档）。
     pub fn begin(&self, skill: SkillId, rounds: Nat) -> PreparedSkills {
         let mut next = self.clone();
         next.slots.push(PreparedSkill {
@@ -1194,9 +1195,9 @@ pub struct PreparedSkills {
 **`pending_action`** — `crates/definitions/src/families/character/skill_flow/prepared.rs`
 
 ```rust
-    /// 「轮到该角色行动时」应该做什么（K53）。
+    /// 「轮到该角色行动时」应该做什么（准备技能）。
     ///
-    /// 判定顺序：**已完成准备的先直接用**（K53「如果技能已经完成准备，角色将会在此时直接使用此技能」）；
+    /// 判定顺序：**已完成准备的先直接用**（准备技能「如果技能已经完成准备，角色将会在此时直接使用此技能」）；
     /// 没有就绪的、但有准备中的 -> 跳过行动；都没有 -> `None`（正常行动）。
     pub fn pending_action(&self) -> Option<PreparedAction> {
         if let Some(skill) = self.ready_skill() {
@@ -1287,21 +1288,21 @@ pub enum CharacterTiming {
     /// 「使用 `$[S…]` 后」，抽象成「阶段 × 作用域」后**一个变体**就能表达；派发时按三档作用域
     /// 各查一次，再按结算顺序归并（`families::character::skill_flow::timing::dispatch_skill`）。
     ///
-    /// **特技（K58）与准备技能（K53）的使用不触发这个时机**：
+    /// **特技（特技）与准备技能（准备技能）的使用不触发这个时机**：
     /// 特殊词条 特技「角色使用『特技』时不视为使用技能，无法触发『使用技能后』……」；
-    /// 权威关键字 K53 准备技能「此类需要准备的技能，无法触发『使用技能后』……」。
+    /// 权威关键字 准备技能 准备技能「此类需要准备的技能，无法触发『使用技能后』……」。
     SkillUsed {
         /// 阶段（使用技能时 / 后）。
         phase: SkillPhase,
         /// 作用域（任意 / 某一类 / 某个具体技能）。
         scope: SkillScope,
     },
-    /// **转换形态**（规则书·其他规则 转换形态；权威关键字 K1013 / K1014 / K1012）。
+    /// **转换形态**（规则书·其他规则 转换形态；权威关键字 「焚尽的炽炎魔女」 / 「失能形态」 / 汲取对应元素的力量）。
     ///
     /// 依据：规则书·其他规则 转换形态「部分角色可以通过一些效果『转换形态』。转换为其他形态后，
     /// 角色的名称、元素类型、标签、技能等都有可能发生改变」；
-    /// 权威关键字 K1013「『焚尽的炽炎魔女』」（女士 永久转换；元素 冰 -> 火；只能用转换后技能）、
-    /// K1014「『失能形态』」（不能用原本技能）、K1012「汲取对应元素的力量」（按汲取元素获得技能）。
+    /// 权威关键字 「焚尽的炽炎魔女」「『焚尽的炽炎魔女』」（女士 永久转换；元素 冰 -> 火；只能用转换后技能）、
+    /// 「失能形态」「『失能形态』」（不能用原本技能）、汲取对应元素的力量「汲取对应元素的力量」（按汲取元素获得技能）。
     ///
     /// 派发入口在 `families::character::form`：`transform_with_triggers` /
     /// `restore_with_triggers`（**转换完成后**派发一次；事件带转换后的元素类型）。
@@ -1431,7 +1432,7 @@ impl Satiated {
 ### 3.7 Keyword and rules-ops interfaces referenced by this page
 
 > [!NOTE]
-> Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied verbatim).
+> Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied as-is).
 
 **`DamageArgs`** — `crates/definitions/src/keywords/op.rs`
 
@@ -1603,10 +1604,10 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
 - HP / energy never exceed their caps; caps come only from the definition or an explicit effect.
 - Character-zone slot order = entry order; switching the active character **does not reorder** slots; the active character is an independent pointer.
 - The damage chain **never changes `damage()` semantics**: HP loss / attachment / reaction check / consuming participating elements / trigger registration remain that one implementation.
-- **Piercing damage takes no bonuses at all**: immunity / bonuses / multiplication / shields / reductions are all skipped (rulebook "Piercing DMG" + K5).
-- A technique is not a skill: no `SkillUsed` dispatch (`dispatch_technique` is always empty), its damage is not dealt by the character, and it is a combat action (S8.4 / K58).
-- Frozen / petrified / stun forbid skills and techniques, queried uniformly through `can_use` / `can_use_technique` (S6.6 / K55 / S8.4).
-- Prepared skills do not go through `use_skill` (K53: neither "before" nor "after skill use" triggers).
+- **Piercing damage takes no bonuses at all**: immunity / bonuses / multiplication / shields / reductions are all skipped (rulebook "Piercing DMG" + Piercing DMG).
+- A technique is not a skill: no `SkillUsed` dispatch (`dispatch_technique` is always empty), its damage is not dealt by the character, and it is a combat action (S8.4 / Technique).
+- Frozen / petrified / stun forbid skills and techniques, queried uniformly through `can_use` / `can_use_technique` (S6.6 / Stunned / S8.4).
+- Prepared skills do not go through `use_skill` (Prepare Skill: neither "before" nor "after skill use" triggers).
 - Stats do not participate in position equality; skill usage counts are rules state (D198).
 - Pure functions, inputs untouched on failure; numbers are `Nat`; zero `f64`, zero `HashMap`.
 
@@ -1626,9 +1627,9 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
 | Defeat / avoid-defeat / healing split apart | D193 / D194 / D195 |
 | Skill timing keys and three scopes | D198; rulebook "Take Action: Use Skill" + card wording |
 | Charged / plunging "counts as" | S8.9 / S8.10; D123–D126; 留空.md #29 / #30 |
-| Technique flow | S8.4 + K58; 留空.md #85–#87 / #101 |
+| Technique flow | S8.4 + Technique; 留空.md #85–#87 / #101 |
 | Satiety and food | S8.1 + data 303300; D17; 留空.md #78–#81 |
-| Form transformation / growth | Rulebook "Other Rules: Form Transformation" + K1013/K1014; K64/K65; D238 |
+| Form transformation / growth | Rulebook "Other Rules: Form Transformation" + Crimson Witch of Embers/Deactivated; Character Level/Character Rank; D238 |
 
 ### 5.1 Documentation vs code mismatches (for review)
 

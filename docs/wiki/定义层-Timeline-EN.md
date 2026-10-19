@@ -34,7 +34,7 @@ Timing keys are defined by the blocks that need them (e.g. `CharacterZoneTiming`
 | `Resolution::{new, empty, insert, next_step, discard, snapshot}` | `timeline/suspend.rs` | Inserted settlement / interruption / resumption; `Frame` keeps the cursor |
 | `Pending::into_queued` | `timeline/dispatch.rs` | Turns a borrowed event into an owned `Queued` for frames |
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
 > Real timeline source excerpts (types + public method signatures + doc comments; bodies omitted).

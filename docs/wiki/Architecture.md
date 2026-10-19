@@ -2,7 +2,7 @@
 
 > 中文 · [[Architecture-EN|English]]
 
-*本页范围：六个 crate 的依赖方向、仓库目录、一局对局的数据流、「框架只给接口」的落地方式，以及已知文档偏差。*
+*本页范围: 六个 crate 的依赖方向, 仓库目录, 一局对局的数据流, '框架只给接口'的落地方式, 以及已知文档偏差.*
 
 ---
 
@@ -20,18 +20,18 @@ simulation（门面）──► engine / definitions / richtext（+ cards 可选
 compute（算力 bin）──► 默认无依赖；按计算需要自己加
 ```
 
-| crate（package 名） | 目录 | 依赖 | 职责 |
+| crate (package 名)  | 目录 | 依赖 | 职责 |
 |---|---|---|---|
-| `gi-genius-invokation-engine` | `new/crates/engine` | 无（仅 `dll` feature 引 `libloading`） | 机制原语：数值 / 标识 / 实体 / 区 / 随机与选择 / 精确分数 / 统计 |
-| `gi-genius-invokation-richtext` | `new/crates/richtext` | 无 | 富文本解析：原始标记文本 → 中性片段序列 |
-| `gi-genius-invokation-definitions` | `new/crates/definitions` | engine、richtext | 游戏定义层（牌族 / 类型 / 标签 / 资源 / 规则 / 状态 / 流程 / 关键字 / 调度 / 记录） |
-| `gi-genius-invokation-cards` | `new/crates/cards` | definitions、engine | 具体卡牌：每张卡的数据 + 效果逻辑 |
-| `gi-genius-invokation-simulation` | `new/crates/simulation` | 上列四项（cards 可选） | 对外唯一门面：只有 re-export，没有逻辑 |
-| `gi-genius-invokation-compute` | `new/crates/compute` | 默认无 | 算力工具链：一个计算 = 一个 bin 文件夹 |
+| `gi-genius-invokation-engine` | `new/crates/engine` | 无 (仅 `dll` feature 引 `libloading`)  | 机制原语: 数值 / 标识 / 实体 / 区 / 随机与选择 / 精确分数 / 统计 |
+| `gi-genius-invokation-richtext` | `new/crates/richtext` | 无 | 富文本解析: 原始标记文本 → 中性片段序列 |
+| `gi-genius-invokation-definitions` | `new/crates/definitions` | engine, richtext | 游戏定义层 (牌族 / 类型 / 标签 / 资源 / 规则 / 状态 / 流程 / 关键字 / 调度 / 记录)  |
+| `gi-genius-invokation-cards` | `new/crates/cards` | definitions, engine | 具体卡牌: 每张卡的数据 + 效果逻辑 |
+| `gi-genius-invokation-simulation` | `new/crates/simulation` | 上列四项 (cards 可选)  | 对外唯一门面: 只有 re-export, 没有逻辑 |
+| `gi-genius-invokation-compute` | `new/crates/compute` | 默认无 | 算力工具链: 一个计算 = 一个 bin 文件夹 |
 
 > [!IMPORTANT]
-> 依赖方向由 Cargo 强制：`definitions` 不依赖 `cards`（有守卫测试）；`richtext` 不依赖任何业务 crate；`engine` 无上层语义。
-> 外部使用者只依赖 `simulation` 门面；跨 crate 导入统一为 `gi_genius_invokation_simulation::{engine, definitions, richtext}`。
+> 依赖方向由 Cargo 强制: `definitions` 不依赖 `cards` (有守卫测试) ; `richtext` 不依赖任何业务 crate; `engine` 无上层语义.
+> 外部使用者只依赖 `simulation` 门面; 跨 crate 导入统一为 `gi_genius_invokation_simulation::{engine, definitions, richtext}`.
 
 ## 2. 目录结构
 
@@ -45,33 +45,32 @@ new/
 └─ .github/workflows/      # ci.yml、compute.yml
 ```
 
-`definitions` 内部：`base/`（L1 牌族 + id + 元素 + 视角）、`families/`（每牌族的类型枚举 + 定义载体 + 区域 + 操作）、`tags/`（L3 标签，顶层目录）、`resources/`（骰池）、`rules/`（三级统一基础操作）、`timeline/`（触发注册 + 派发 + 结算帧）、`reactions/`（元素反应）、`records/`（记录 API）、`source/`（源码嵌入）、`version/`（版本同步）、`generated/`（生成数据 + 渲染）、`state/`（`DefState` + 串联流程）、`flow/`（端到端动作）、`keywords/`（关键字函数 + 一步）。详见 [[Crate-Definitions]]。
+`definitions` 内部: `base/` (L1 牌族 + id + 元素 + 视角) , `families/` (每牌族的类型枚举 + 定义载体 + 区域 + 操作) , `tags/` (L3 标签, 顶层目录) , `resources/` (骰池) , `rules/` (三级统一基础操作) , `timeline/` (触发注册 + 派发 + 结算帧) , `reactions/` (元素反应) , `records/` (记录 API) , `source/` (源码嵌入) , `version/` (版本同步) , `generated/` (生成数据 + 渲染) , `state/` (`DefState` + 串联流程) , `flow/` (端到端动作) , `keywords/` (关键字函数 + 一步) .详见 [[Crate-Definitions]].
 
 ## 3. 一局对局的数据流
 
 | 层 | 位置 | 作用 |
 |---|---|---|
-| 状态 | `definitions/src/state/` | `DefState`：`me` / `opp` 两个具名实例 + `round` + `first_player`；各区自持状态（D42 / D182 / D183） |
-| 流程 | `definitions/src/flow/` | 吃 `&DefState` 的动作入口：使用技能 / 打牌 / 切人 / 调和 / 特技 / 回合骨架；返回新状态 + 待执行，失败 `Err` |
-| 效果组合 | `definitions/src/keywords/` | 关键字函数 + **一步 Step**（D204）：步内按书写顺序、禁止插入 |
-| 调度 | `definitions/src/timeline/` | 注册表 + 有序派发（只排序、不执行，D186）+ 结算帧（插入式，D196） |
-| 基础操作 | `definitions/src/rules/` | 三级统一基础操作纯函数（槽位 / 上限 / 开局 / 查询 / 结算顺序…） |
-| 反应 | `definitions/src/reactions/` | 反应身份 → 效果函数指针；伤害修正链在 `families/character/damage_chain/` |
-| 记录 | `definitions/src/records/` | `Recorder<T>`：属于哪一步 + 任意内容（D223 / D224） |
+| 状态 | `definitions/src/state/` | `DefState`: `me` / `opp` 两个具名实例 + `round` + `first_player`; 各区自持状态 (D42 / D182 / D183)  |
+| 流程 | `definitions/src/flow/` | 吃 `&DefState` 的动作入口: 使用技能 / 打牌 / 切人 / 调和 / 特技 / 回合骨架; 返回新状态 + 待执行, 失败 `Err` |
+| 效果组合 | `definitions/src/keywords/` | 关键字函数 + **一步 Step** (D204) : 步内按书写顺序, 禁止插入 |
+| 调度 | `definitions/src/timeline/` | 注册表 + 有序派发 (只排序, 不执行, D186) + 结算帧 (插入式, D196)  |
+| 基础操作 | `definitions/src/rules/` | 三级统一基础操作纯函数 (槽位 / 上限 / 开局 / 查询 / 结算顺序…)  |
+| 反应 | `definitions/src/reactions/` | 反应身份 → 效果函数指针; 伤害修正链在 `families/character/damage_chain/` |
+| 记录 | `definitions/src/records/` | `Recorder<T>`: 属于哪一步 + 任意内容 (D223 / D224)  |
 
-**以「使用技能」为例**（`definitions/src/flow/skill_use.rs`）：
+**以'使用技能'为例** (`definitions/src/flow/skill_use.rs`) : 
 
-1. 成对入口 `use_skill_me` / `use_skill_opp`（同一份实现，D29 / D34）；
-2. 能否使用 → 支付（骰子 / 充能）→ 派发「使用技能前」（只排序）；
-3. 执行效果体：`keywords::Step`，步内按序调用关键字函数；
-4. **步末 flush**：各区派发的待执行交给调用方执行（`flow/pending.rs`）；反应子结算在步边界插入；
-5. 派发「使用技能后」，用 `timeline::Resolution::insert` 插到当前结算位置（D196）；
-6. 分支终局判定（`state/terminal.rs`；双负 = `BothLose`，D267）。
+1. 成对入口 `use_skill_me` / `use_skill_opp` (同一份实现, D29 / D34) ; 
+2. 能否使用 → 支付 (骰子 / 充能) → 派发'使用技能前' (只排序) ; 
+3. 执行效果体: `keywords::Step`, 步内按序调用关键字函数; 
+4. **步末 flush**: 各区派发的待执行交给调用方执行 (`flow/pending.rs`) ; 反应子结算在步边界插入; 
+5. 派发'使用技能后', 用 `timeline::Resolution::insert` 插到当前结算位置 (D196) ; 
+6. 分支终局判定 (`state/terminal.rs`; 双负 = `BothLose`, D267) .
 
-**文本数据流**：`generated/data/*.json` → `build.rs`（编译期生成静态表到 `OUT_DIR`）→ `generated` 访问器 → `richtext::parse`（严格解析）→ `generated::text::render`（取值来源 → 最终字符串）。
+**文本数据流**: `generated/data/*.json` → `build.rs` (编译期生成静态表到 `OUT_DIR`) → `generated` 访问器 → `richtext::parse` (严格解析) → `generated::text::render` (取值来源 → 最终字符串) .
 
-### 3.1 接口源码摘录（逐字摘自当前仓库）
-
+### 3.1 接口源码摘录
 **根状态 `DefState`**
 
 `new/crates/definitions/src/state/def_state.rs:58-82`
@@ -262,7 +261,7 @@ pub fn fold_states(branches: Vec<(DefState, Fraction)>) -> Vec<(DefState, Fracti
 ```
 
 
-**关键字函数：造成伤害**
+**关键字函数: 造成伤害**
 
 `new/crates/definitions/src/keywords/keyword.rs:241-292`
 
@@ -321,7 +320,7 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**规则 ops：结算顺序判定**
+**规则 ops: 结算顺序判定**
 
 `new/crates/definitions/src/rules/ops/order.rs:38-59`
 
@@ -351,48 +350,48 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 ```
 
 
-## 4. 「框架只给接口」的落地
+## 4. '框架只给接口'的落地
 
 > [!NOTE]
-> 这条是最高原则（D20；`new/README.md` 的「项目理念」；`分工计划.md` §8.5），压过一切具体设计。
+> 这条是最高原则 (D20; `new/README.md` 的'项目理念'; `分工计划.md` §8.5) , 压过一切具体设计.
 
-| 功能 | 框架给的（机制） | 业务归谁 |
+| 功能 | 框架给的 (机制)  | 业务归谁 |
 |---|---|---|
-| 随机 / 选择 | `enumerate_random` / `enumerate_random_weighted` / `enumerate_select` + 精确分数 | 各块自己 `parse.rs` 的选择列表与去重函数（D25 / D26） |
-| 触发调度 | `timeline::TriggerRegistry` + `dispatch`（只排序、不执行） | 牌族 / 类型定义时机键并主动派发；卡牌登记效果函数指针（D185 / D186） |
-| 结算插入 | `timeline::Resolution` 帧 + `cursor` | 效果层决定在哪插入什么（D196） |
-| 区 / 状态 | 各区自持状态 + `with_*` 纯函数；`state` 只组合 | 各区自己（D42 / D182 / D183） |
-| 三级基础操作 | `rules/` 静态规则表 + `rules::ops` 纯函数 | 具体卡牌按需调用；不建中枢表（D176–D179） |
-| 支付 | 骰池 / 充能 / 秘传各自的 `can_afford` / `pay` | 卡牌只声明费用数据（D121 / D133 / D144） |
-| 文案 | `generated` 访问器 + `richtext` 解析 + `render` | 卡牌只写 `Localized` / 引用生成数据（D56 / D62 / D75） |
-| 记录 | `records::Recorder` 极薄容器 | 各模块定义记录内容类型并 `push`（D222–D225） |
+| 随机 / 选择 | `enumerate_random` / `enumerate_random_weighted` / `enumerate_select` + 精确分数 | 各块自己 `parse.rs` 的选择列表与去重函数 (D25 / D26)  |
+| 触发调度 | `timeline::TriggerRegistry` + `dispatch` (只排序, 不执行)  | 牌族 / 类型定义时机键并主动派发; 卡牌登记效果函数指针 (D185 / D186)  |
+| 结算插入 | `timeline::Resolution` 帧 + `cursor` | 效果层决定在哪插入什么 (D196)  |
+| 区 / 状态 | 各区自持状态 + `with_*` 纯函数; `state` 只组合 | 各区自己 (D42 / D182 / D183)  |
+| 三级基础操作 | `rules/` 静态规则表 + `rules::ops` 纯函数 | 具体卡牌按需调用; 不建中枢表 (D176–D179)  |
+| 支付 | 骰池 / 充能 / 秘传各自的 `can_afford` / `pay` | 卡牌只声明费用数据 (D121 / D133 / D144)  |
+| 文案 | `generated` 访问器 + `richtext` 解析 + `render` | 卡牌只写 `Localized` / 引用生成数据 (D56 / D62 / D75)  |
+| 记录 | `records::Recorder` 极薄容器 | 各模块定义记录内容类型并 `push` (D222–D225)  |
 
 > [!WARNING]
-> 反例（一律不许）：中枢统计器、中枢收集器、内建行为表、统一减费计算器、属性统计表、行为开关表、内建 buff 表。
+> 反例 (一律不许) : 中枢统计器, 中枢收集器, 内建行为表, 统一减费计算器, 属性统计表, 行为开关表, 内建 buff 表.
 
 ## 5. 时间与不确定性
 
 | 主题 | 口径 | 依据 |
 |---|---|---|
-| 结算顺序 | 同一时机内以 `结算顺序.md` 为唯一权威；顺序常量只在 `rules::ops::order` 一份 | D197；`结算顺序.md` |
-| 插入式结算 | 帧 + `cursor`，子结算做完回到插入点；不是 LIFO 栈 | D196 |
-| 一步原子 | 步内按书写顺序、禁止插入；插入只能发生在步之间 | D204 |
-| 不确定性 | 不确定先不物化；观测时展开成「分支 + 精确概率」，不再影响别处后折叠回 | D190 / D191 |
-| 零浮点 | 概率 / 权重 / 随机全部整数（`Fraction` = `ExactNat128` 分子分母；`Rng` 对外只给 `u128`） | D158–D160 |
+| 结算顺序 | 同一时机内以 `结算顺序.md` 为唯一权威; 顺序常量只在 `rules::ops::order` 一份 | D197; `结算顺序.md` |
+| 插入式结算 | 帧 + `cursor`, 子结算做完回到插入点; 不是 LIFO 栈 | D196 |
+| 一步原子 | 步内按书写顺序, 禁止插入; 插入只能发生在步之间 | D204 |
+| 不确定性 | 不确定先不物化; 观测时展开成'分支 + 精确概率', 不再影响别处后折叠回 | D190 / D191 |
+| 零浮点 | 概率 / 权重 / 随机全部整数 (`Fraction` = `ExactNat128` 分子分母; `Rng` 对外只给 `u128`)  | D158–D160 |
 
 ## 6. 已知文档偏差
 
 > [!WARNING]
-> 以下旧文档与当前代码 / 决策不一致。本 Wiki 按代码写；旧文档待维护者更新。
+> 以下旧文档与当前代码 / 决策不一致.本 Wiki 按代码写; 旧文档待维护者更新.
 
 | 旧文档 | 偏差 |
 |---|---|
-| `new/README.md` / `README.en.md` | 骰子「每颗 = 实体」、结算顺序「编译期解出」、类型树继承、dll / 两阶段加载、「core / engine / definitions 三个 crate」、`Rc` 结构共享 |
-| `结构.md` / `分工计划.md` | 旧目录树与旧签名：f64 概率、旧 `DefState` 字段、base 里的 `CardType` / `CardTag`、「卡牌代码不存文案」 |
-| `definitions/src/lib.rs` | 模块文档仍说 resources / timeline / loader 后续加入；实际已存在 |
-| `definitions/src/families/mod.rs` | 仍说 families「只放类型枚举」；实际还有定义载体 / 区域 / 操作 |
-| `definitions/src/records/mod.rs` | 仍说 damage_chain / 各区记录「待接入」；实际多个 `record.rs` 已用 `Recorder` |
-| `definitions/build.rs` | 手写 JSON 解析器（离线零依赖），与 D74「改用 JSON 库」冲突 |
+| `new/README.md` / `README.en.md` | 骰子'每颗 = 实体', 结算顺序'编译期解出', 类型树继承, dll / 两阶段加载, 'core / engine / definitions 三个 crate', `Rc` 结构共享 |
+| `结构.md` / `分工计划.md` | 旧目录树与旧签名: f64 概率, 旧 `DefState` 字段, base 里的 `CardType` / `CardTag`, '卡牌代码不存文案' |
+| `definitions/src/lib.rs` | 模块文档仍说 resources / timeline / loader 后续加入; 实际已存在 |
+| `definitions/src/families/mod.rs` | 仍说 families'只放类型枚举'; 实际还有定义载体 / 区域 / 操作 |
+| `definitions/src/records/mod.rs` | 仍说 damage_chain / 各区记录'待接入'; 实际多个 `record.rs` 已用 `Recorder` |
+| `definitions/build.rs` | 手写 JSON 解析器 (离线零依赖) , 与 D74'改用 JSON 库'冲突 |
 
 ## 7. 相关页面
 
@@ -404,4 +403,4 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 
 ---
 
-最后核对：2026-10-19（代码：`new/crates/definitions/src/lib.rs:pub mod`）
+最后核对: 2026-10-19 (代码: `new/crates/definitions/src/lib.rs:pub mod`) 

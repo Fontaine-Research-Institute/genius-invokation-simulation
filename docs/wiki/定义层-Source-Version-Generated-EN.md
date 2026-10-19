@@ -33,7 +33,7 @@ Three non-rule infrastructure pieces: ① each file declares its own source (ful
 | `keyword` / `keywords_all` / `action_card_type_text` / `status_type_text` | `generated/mod.rs` | Queries over generated tables |
 | `render` / `render_segments` / `TextSources` / `MissingPolicy` | `generated/text/render.rs` | Render after strict parsing; the default missing policy keeps placeholders |
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
 > Real source excerpts for source embedding, the version macro, and generated data (macro definitions included; bodies omitted).

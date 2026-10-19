@@ -38,10 +38,10 @@ Every identity therefore owns exactly one definition data item (`StateText` / `S
 
 Example references (type + file + note): `ELEMENTS: [Element; 7]` in `base/element.rs`; the state trait in `families/action_card/status/state.rs`.
 
-### Source (verbatim)
+### Source
 
 > [!NOTE]
-> The excerpts below are copied from the current repository (signatures and doc comments verbatim; bodies omitted where not needed — see the file for the full implementation).
+> The excerpts below are copied from the current repository (signatures and doc comments; bodies omitted where not needed — see the file for the full implementation).
 
 **`crates/definitions/src/base/element.rs`**
 

@@ -2,7 +2,7 @@
 
 > [[卡牌研究-爱诺|中文]] · English
 
-*Scope: the character card Aino - card text (Chinese / English originals + keyword expansion + related rulebook entries), full implementation code, test records, and notes.*
+*Scope: the character card Aino - card text (Chinese / English + keyword expansion + related rulebook entries), full implementation code, test records, and notes.*
 
 ---
 
@@ -21,33 +21,38 @@
 > [!NOTE]
 > Metadata is listed one item per row; this section contains only card-face text, never card ids or data-file paths.
 
-### 1.2 Skills (Chinese / English verbatim)
+### 1.2 Skills
 
-| Name (zh / en) | Category (zh / en) | Chinese original | English original |
-|---|---|---|---|
-| 敲打修理法 / Bish-Bash-Bosh Repair | 普通攻击 / Normal Attack | 造成2点物理伤害。 | Deals 2 Physical DMG. |
-| 妙思捕手 / Musecatcher | 元素战技 / Elemental Skill | 造成2点水元素伤害，生成1层敏捷切换。如果手牌中有卡牌具有赋能，则改为造成3点水元素伤害. | Deal 2 Hydro DMG with 1 stack of Agile Switch created. If you have a card with Empowerment in your Hand, deal 3 Hydro DMG instead. |
-| 精密水冷仪 / Precision Hydronic Cooler | 元素爆发 / Elemental Burst | 造成2点水元素伤害，召唤冷静一下鸭。 | Deals 2 Hydro DMG and summons Cool Your Jets Ducky. |
-| 模块式高效运作 / Modular Efficiency Protocol | 被动技能 / Passive Skill | 【被动】我方卡牌被赋予赋能时：如果我方场上存在冷静一下鸭，则使其可用次数+1，否则自身获得1点充能。（每回合1次） | (Passive) When Empowerment is attached to your card: If there is Cool Your Jets Ducky on your side, it gains 1 Usage, otherwise, gains 1 Energy. (Once per Round) |
+Each skill is written line by line in a fixed order, no tables; the dice cost is one line and Energy is another; omit the line when there is no Energy or for passive skills.
 
-| Skill | Cost | Element / damage |
-|---|---|---|
-| Bish-Bash-Bosh Repair | 1 Hydro Die + 2 Colorless Dice | Physical 2 |
-| Musecatcher | 3 Hydro Dice | Hydro 2 (3 when the condition is met) |
-| Precision Hydronic Cooler | 3 Hydro Dice + 2 Energy | Hydro 2 + summon |
-| Modular Efficiency Protocol | none | passive |
+Bish-Bash-Bosh Repair
+Normal Attack
+1 Hydro Elemental Die + 2 Any Elemental Dice
+> Deals 2 Physical DMG.
 
-> [!NOTE]
-> The Chinese original of Musecatcher ends with an ASCII `.`, while the current code `description` uses `。`; this known verbatim difference is recorded in the Test row below.
+Musecatcher
+Elemental Skill
+3 Hydro Elemental Dice
+> Deal 2 Hydro DMG with 1 stack of Agile Switch created. If you have a card with Empowerment in your Hand, deal 3 Hydro DMG instead.
+
+Precision Hydronic Cooler
+Elemental Burst
+3 Hydro Elemental Dice
+Energy: 2
+> Deals 2 Hydro DMG and summons Cool Your Jets Ducky.
+
+Modular Efficiency Protocol
+Passive Skill
+> (Passive) When Empowerment is attached to your card: If there is Cool Your Jets Ducky on your side, it gains 1 Usage, otherwise, gains 1 Energy. (Once per Round)
 
 ### 1.3 Keyword expansion
 
-| K code | Name | Keyword description | Where it appears |
-|---|---|---|---|
-| K3006 | Empowerment | no description text; hand-card status, boolean form (implementation: `HAND_EMPOWERMENT`) | Musecatcher condition, Modular Efficiency Protocol trigger |
-| K310 | Energy | Characters must consume Energy to use Elemental Bursts. After a character uses an Elemental Skill or Normal Attack, they gain 1 Energy. | Modular Efficiency Protocol gains 1; Precision Hydronic Cooler costs 2 |
-| K3 | Usage(s) | Each trigger consumes 1 Usage; when it runs out the card is discarded immediately. | Modular Efficiency Protocol grants Cool Your Jets Ducky +1 Usage |
-| K102 | Hydro DMG | Attaches Hydro; can trigger reactions (Vaporize / Electro-Charged / Frozen / Bloom / Lunar-Charged...). | Musecatcher / Precision Hydronic Cooler damage |
+| Keyword | Description | Where it appears |
+|---|---|---|
+| Empowerment | no description text; hand-card status, boolean form (implementation: `HAND_EMPOWERMENT`) | Musecatcher condition, Modular Efficiency Protocol trigger |
+| Energy | Characters must consume Energy to use Elemental Bursts. After a character uses an Elemental Skill or Normal Attack, they gain 1 Energy. | Modular Efficiency Protocol gains 1; Precision Hydronic Cooler costs 2 |
+| Usage(s) | Each trigger consumes 1 Usage; when it runs out the card is discarded immediately. | Modular Efficiency Protocol grants Cool Your Jets Ducky +1 Usage |
+| Hydro DMG | Attaches Hydro; can trigger reactions (Vaporize / Electro-Charged / Frozen / Bloom / Lunar-Charged...). | Musecatcher / Precision Hydronic Cooler damage |
 
 Related entities (by name):
 
@@ -74,10 +79,12 @@ Related entities (by name):
 
 ### 2.1 Full card file
 
-File: `new/crates/cards/src/cards/character/aino/mod.rs` (371 lines at verification time, verbatim).
+File: `new/crates/cards/src/cards/character/aino/mod.rs` (371 lines at verification time).
 
 > [!NOTE]
 > The card definition and data are implemented; all four skill effect bodies are still `todo!()` placeholders (`SkillEffect = fn()`, D162).
+
+*Keyword codes in comments were replaced with names; code lines unchanged.*
 
 ```rust
 //! 爱诺（角色牌 1216）——「第一张卡」样板。
@@ -94,7 +101,7 @@ File: `new/crates/cards/src/cards/character/aino/mod.rs` (371 lines at verificat
 //! - 天赋牌 `212161 天才之为构造之责任`：装备牌 / 战斗行动，费用 3 水 + 2 充能
 //!   （游戏内文本描述）；
 //! - 状态「敏捷切换」（12162 生成 1 层）；
-//! - 关键词「赋能」（K3006，12162 条件 / 12164 触发）。
+//! - 关键词「赋能」（赋能，12162 条件 / 12164 触发）。
 
 // 卡牌「资源与形状」（id / 牌族 / 类型 / 标签 / 定义载体 / 费用组件）在 definitions（D241），
 // 本 crate 只放这张卡的具体数据；导入路径因此都走 gi-genius-invokation-definitions。
@@ -189,7 +196,7 @@ fn elemental_skill_effect() {
     //       如果手牌中有卡牌具有「赋能」，则改为造成 3 点水元素伤害。
     // 缺：伤害结算入口（damage.rs 未建）。
     // 缺：状态定义与增删接口（「敏捷切换」状态定义未建）。
-    // 缺：手牌查询 + 关键词「赋能」（K3006）判定（手牌区 / 关键词查询未建）。
+    // 缺：手牌查询 + 关键词「赋能」（赋能）判定（手牌区 / 关键词查询未建）。
     todo!("缺：伤害结算入口 + 状态生成 + 手牌赋能判定")
 }
 
@@ -480,20 +487,20 @@ gi-genius-invokation-definitions = { path = "../definitions", features = ["embed
 | Base data | Open the Aino card | Max HP 10, Max Energy 2, four skills | `AINO` constants + test `aino_basic_data_matches_in_game_text` | match (verified) |
 | Tags | Open the card | Hydro / Claymore / Nod-Krai | zero-sized tuple `(Hydro, Claymore, NodKrai)` + test | match (verified) |
 | Bish-Bash-Bosh Repair text | Open the skill | Deals 2 Physical DMG. | the matching `SkillDef`'s `description` is identical | match (verified) |
-| Musecatcher text | Open the skill | the original ends with an ASCII `.` | code uses `。` | **mismatch (punctuation only), pending review** |
+| Musecatcher text | Open the skill | the description ends with an ASCII period | code uses a full-width period | **mismatch (punctuation only), pending review** |
 | Precision Hydronic Cooler text | Open the skill | Deals 2 Hydro DMG and summons Cool Your Jets Ducky. | identical | match (verified) |
 | Modular Efficiency Protocol text | Open the skill | full passive text | identical | match (verified) |
 | Skill kinds | Open the skills | Normal Attack / Elemental Skill / Elemental Burst / Passive | `SkillKind::normal_attack()` / `ElementalSkill` / `ElementalBurst` / `Passive` | match (verified) |
-| Bish-Bash-Bosh Repair cost | Open the cost | 1 Hydro + 2 Colorless | `SpecificElement(Hydro,1)` + `AnyColor(2)` | match (verified) |
-| Musecatcher cost | Open the cost | 3 Hydro | `SpecificElement(Hydro,3)` | match (verified) |
-| Precision Hydronic Cooler cost | Open the cost | 3 Hydro + 2 Energy | `from_dice_and_energy(.., 2)` | match (verified) |
-| Modular Efficiency Protocol cost | Open the cost | none | `SkillCost::FREE` | match (verified) |
+| Bish-Bash-Bosh Repair cost | Open the cost | 1 Hydro Elemental Die + 2 Any Elemental Dice | `SpecificElement(Hydro,1)` + `AnyColor(2)` | match (verified) |
+| Musecatcher cost | Open the cost | 3 Hydro Elemental Dice | `SpecificElement(Hydro,3)` | match (verified) |
+| Precision Hydronic Cooler dice cost | Open the cost | 3 Hydro Elemental Dice | `from_dice_and_energy(.., 2)` | match (verified) |
+| Precision Hydronic Cooler Energy cost | Open the cost | Energy: 2 | `from_dice_and_energy(.., 2)` | match (verified) |
 | Bish-Bash-Bosh Repair effect | Build `CharacterState::from_def(&AINO)` and let the flow execute the Normal Attack effect body | Deals 2 Physical DMG | `normal_attack_effect()` panics (`todo!`) | **not implemented - pending test** |
 | Musecatcher effect | Same, Elemental Skill; with and without an Empowered card in hand | 2 Hydro DMG + 1 Agile Switch; 3 with Empowerment | `elemental_skill_effect()` panics | **not implemented - pending test** |
 | Precision Hydronic Cooler effect | Same, Elemental Burst | 2 Hydro DMG + summon Cool Your Jets Ducky (Usage(s) 2) | `elemental_burst_effect()` panics | **not implemented - pending test** |
 | Modular Efficiency Protocol effect | Trigger when a hand card gains Empowerment (once per Round) | +1 Usage if Cool Your Jets Ducky exists, otherwise +1 Energy | `passive_effect()` panics | **not implemented - pending test** |
 | Version sync | engineering | n/a | `GAME_VERSION = 6.2` + test | verified (engineering) |
-| Source embedding | engineering | n/a | `SOURCE` verbatim / dependency parsing / source-table tests | verified (engineering) |
+| Source embedding | engineering | n/a | `SOURCE` content / dependency parsing / source-table tests | verified (engineering) |
 | Full test suite | `cd new; cargo test --offline -p gi-genius-invokation-cards` | n/a | 11 passed, 0 failed | verified (engineering) |
 
 **Reproducible steps for the effect bodies (run after wiring)**:
@@ -511,8 +518,8 @@ gi-genius-invokation-definitions = { path = "../definitions", features = ["embed
 
 | Pitfall | Detail |
 |---|---|
-| Writing the 1 Hydro die as `SameColor(1)` | `SameColor` means n same-color dice chosen at payment; the card face specifies Hydro, so use `SpecificElement(Hydro, 1)` |
-| Writing the 2 Colorless dice as `SpecificElement(Hydro, 2)` | Colorless = `AnyColor(2)`; locking it to Hydro is stricter than the rules |
+| Writing the specified Hydro die as `SameColor(1)` | `SameColor` means n same-element dice chosen at payment; the card face specifies Hydro, so use `SpecificElement(Hydro, 1)` |
+| Writing any-element dice as `SpecificElement(Hydro, 2)` | Any element = `AnyColor(2)`; locking it to Hydro is stricter than the rules |
 | Changing card content while syncing a version | D246: change only the number in `card_game_version!` |
 | Forgetting `SOURCE_FILES` for a new card | still compiles, but `source_of` / `source_files` cannot find it |
 | Missing / wrongly typed `ID` | the `const _: CardId = ID;` in `card_source!` fails to compile (D215, intentional) |
@@ -548,3 +555,4 @@ gi-genius-invokation-definitions = { path = "../definitions", features = ["embed
 ---
 
 Last verified: 2026-10-19 (code: `new/crates/cards/src/cards/character/aino/mod.rs:AINO`)
+

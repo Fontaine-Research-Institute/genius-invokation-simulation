@@ -28,7 +28,7 @@ Shared conventions: pure functions (input unchanged, clone then edit private zon
 
 ### Index
 
-Source blocks are copied verbatim from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
+The source blocks below are the implementation source from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
 
 | Flow | Notes |
 |---|---|
@@ -39,7 +39,7 @@ Source blocks are copied verbatim from the current repository (`use` / `derive` 
 | End Phase | `state/flows/end_phase.rs`: `EndPhasePending` / `EndPhaseOutcome` / `end_phase_me_first/opp_first` |
 | Round start / plunging | `state/flows/round_begin.rs`, `state/flows/plunging.rs`: `begin_round` / `battle_action_end_me/opp` |
 
-### 源码：`state/flows/opening.rs`
+### 源码: `state/flows/opening.rs`
 
 ```rust
 use crate::base::CardId;
@@ -165,7 +165,7 @@ pub fn pregame(
     // ...
 ```
 
-### 源码：`state/flows/switch.rs`
+### 源码: `state/flows/switch.rs`
 
 ```rust
 use crate::families::character::zones::combat_status::{
@@ -258,7 +258,7 @@ pub fn choose_active_after_defeat_opp(
 }
 ```
 
-### 源码：`state/flows/defeat.rs`
+### 源码: `state/flows/defeat.rs`
 
 ```rust
 use crate::families::action_card::status::StateList;
@@ -393,7 +393,7 @@ pub fn defeat_opp(
 }
 ```
 
-### 源码：`state/flows/revive.rs`
+### 源码: `state/flows/revive.rs`
 
 ```rust
 use crate::families::character::zones::field::{CharacterZonePending, CharacterZoneTriggers};
@@ -444,7 +444,7 @@ pub fn revive_opp(
 }
 ```
 
-### 源码：`state/flows/end_phase.rs`
+### 源码: `state/flows/end_phase.rs`
 
 ```rust
 use crate::families::character::character::CharacterState;
@@ -519,7 +519,7 @@ pub fn end_phase_opp_first(
 }
 ```
 
-### 源码：`state/flows/round_begin.rs`
+### 源码: `state/flows/round_begin.rs`
 
 ```rust
 use crate::state::def_state::DefState;
@@ -537,7 +537,7 @@ pub fn begin_round(state: &DefState) -> DefState {
     // ...
 ```
 
-### 源码：`state/flows/plunging.rs`
+### 源码: `state/flows/plunging.rs`
 
 ```rust
 use crate::state::def_state::DefState;

@@ -2,29 +2,29 @@
 
 > 中文 · [[定义层-Action-Card-EN|English]]
 
-*本页范围：`crates/definitions/src/families/action_card/` —— 行动牌的定义载体、手牌 / 牌库 / 支援区 / 手牌卡状态 / 当前费用五个承载，以及秘传揭令容器。*
+*本页范围: `crates/definitions/src/families/action_card/` —— 行动牌的定义载体, 手牌 / 牌库 / 支援区 / 手牌卡状态 / 当前费用五个承载, 以及秘传揭令容器.*
 
 ---
 
 ## 1. 职责
 
-行动牌族：**定义载体**（类型 / 文案 / 基础费用 / 打出条件）+ **区域状态**（手牌、牌库、支援区、手牌卡状态、当前费用）+ **查询**（按类型 / 标签）+ **秘传揭令容器**（`families/status/arcane_edict.rs`）。行动牌是**唯一有类型树**的牌族之一（另一个是状态）。
+行动牌族: **定义载体** (类型 / 文案 / 基础费用 / 打出条件) + **区域状态** (手牌, 牌库, 支援区, 手牌卡状态, 当前费用) + **查询** (按类型 / 标签) + **秘传揭令容器** (`families/status/arcane_edict.rs`) .行动牌是**唯一有类型树**的牌族之一 (另一个是状态) .
 
 ## 2. 关键概念与类型
 
-### 2.1 定义（`def.rs` / `mod.rs`）
+### 2.1 定义 (`def.rs` / `mod.rs`) 
 
 | 类型 | 文件 | 要点 |
 |---|---|---|
-| `ActionCardType` | `action_card/mod.rs` | `Support` / `Equipment` / `Event`；只是分类，无编号语义 |
-| `ActionCardDef<Tags>` | `action_card/def.rs` | `id` / `card_type` / 4 语名字描述 / `tags` / `cost: &'static [CostComponent]`（基础费用）/ `play_condition: PlayConditionFn` |
-| `PlayCondition` / `PlayConditionFn` | `action_card/def.rs` | `Ok` / `Rejected(&'static str)`；函数指针 `fn(&DefState, ViewSide) -> PlayCondition`（D217 / D186） |
+| `ActionCardType` | `action_card/mod.rs` | `Support` / `Equipment` / `Event`; 只是分类, 无编号语义 |
+| `ActionCardDef<Tags>` | `action_card/def.rs` | `id` / `card_type` / 4 语名字描述 / `tags` / `cost: &'static [CostComponent]` (基础费用) / `play_condition: PlayConditionFn` |
+| `PlayCondition` / `PlayConditionFn` | `action_card/def.rs` | `Ok` / `Rejected(&'static str)`; 函数指针 `fn(&DefState, ViewSide) -> PlayCondition` (D217 / D186)  |
 
 > [!IMPORTANT]
-> 打出条件在**比较是否付得起之前**调用（D217）：不通过就拒绝，状态一个字节不变；通过后才走支付 → 离手 → 落位 → 派发。
-> 落位（打到哪）不归本层：由 `flow::CardPlacement` 表达，本层只给 `card_type()`。
+> 打出条件在**比较是否付得起之前**调用 (D217) : 不通过就拒绝, 状态一个字节不变; 通过后才走支付 → 离手 → 落位 → 派发.
+> 落位 (打到哪) 不归本层: 由 `flow::CardPlacement` 表达, 本层只给 `card_type()`.
 
-### 2.2 支援区（`areas/support.rs`）
+### 2.2 支援区 (`areas/support.rs`) 
 
 ```text
 SupportValue    { None, Flag(bool), Count(Nat) }  // 三选一、互斥（分工计划 §4.4.15）
@@ -33,44 +33,44 @@ SupportEntry    { card, entity, value, duration }  // card = 行动牌 id（支�
 SUPPORT_CAP = 4
 ```
 
-- **上限 4**：未满 → 1 个分支概率 1；**满 4 → 用 `enumerate_select` 展开「选择弃置哪张」（4 分支，各 1/4）**；派发顺序 `Discarded`（旧）→ `Entered`（新）。
-- 结束阶段 `tick_end_phase_with_triggers`：`WholeGame` 跳过；`Round(n)` 减 1，剩 1 → 移出并派发 `Discarded`；返回的 pending 按排列顺序。
-- 时机：`SupportTiming::{Entered, Discarded}`；对外只读指针 `entries()/len()/is_full()/free_slots()/value_of()/support_duration_of()/stats()`。
+- **上限 4**: 未满 → 1 个分支概率 1; **满 4 → 用 `enumerate_select` 展开'选择弃置哪张' (4 分支, 各 1/4) **; 派发顺序 `Discarded` (旧) → `Entered` (新) .
+- 结束阶段 `tick_end_phase_with_triggers`: `WholeGame` 跳过; `Round(n)` 减 1, 剩 1 → 移出并派发 `Discarded`; 返回的 pending 按排列顺序.
+- 时机: `SupportTiming::{Entered, Discarded}`; 对外只读指针 `entries()/len()/is_full()/free_slots()/value_of()/support_duration_of()/stats()`.
 
-### 2.3 手牌（`zones/hand/`）
+### 2.3 手牌 (`zones/hand/`) 
 
 ```text
 HandState { entries: Vec<CardInstance> }   // 无序；CardInstance = { entity, card }
 HandState::MAX = 10；HandState::OPENING_SIZE = 5
 ```
 
-- **上限 10**：加入 / 生成溢出 → 不允许加入（返回失败、状态不变）；**抓牌溢出**由牌库抽取分支处理（抓到但手牌满 → 该张弃置）。
-- **起手归手牌**（D90）：`draw_opening` 先按「秘传」标签向牌库抓，再补足到 5 张（D17 / D90）。
-- 手牌**无序**、没有弃牌堆；舍弃 = 从手牌移除。
+- **上限 10**: 加入 / 生成溢出 → 不允许加入 (返回失败, 状态不变) ; **抓牌溢出**由牌库抽取分支处理 (抓到但手牌满 → 该张弃置) .
+- **起手归手牌** (D90) : `draw_opening` 先按'秘传'标签向牌库抓, 再补足到 5 张 (D17 / D90) .
+- 手牌**无序**, 没有弃牌堆; 舍弃 = 从手牌移除.
 
-### 2.4 手牌卡状态与 6 个身份（`areas/hand_state.rs` + `damage_chain/statuses.rs`）
+### 2.4 手牌卡状态与 6 个身份 (`areas/hand_state.rs` + `damage_chain/statuses.rs`) 
 
 ```text
 HandCardStates { entries: Vec<HandCardStateEntry> }   // 每张手牌一个 StateList，pos = HAND_STATE_POS = 0
 HandCardStateTiming { StateAdded, StateRemoved }
 ```
 
-6 个手牌状态（D116；K3003–K3008）：
+6 个手牌状态 (D116; 电击–无效化) : 
 
-| K 码 | 名字 | 身份实例 | 形态 | 定义位置 |
+| 关键字 | 名字 | 身份实例 | 形态 | 定义位置 |
 |---|---|---|---|---|
-| K3003 | 电击 | `ELECTRIC_SHOCK` | 布尔 | `families/character/damage_chain/statuses.rs`（历史入口） |
-| K3004 | 费用增加 | `HAND_COST_INCREASE` | 层数（待实测） | `families/action_card/areas/hand_state.rs` |
-| K3005 | 费用降低 | `COST_REDUCTION` | 层数 | `families/character/damage_chain/statuses.rs`（历史入口） |
-| K3006 | 赋能 | `HAND_EMPOWERMENT` | 布尔 | `areas/hand_state.rs` |
-| K3007 | 不可调和 | `HAND_UNTUNABLE` | 布尔 | `areas/hand_state.rs` |
-| K3008 | 无效化 | `HAND_INVALIDATION` | 布尔 | `areas/hand_state.rs` |
+| 电击 | 电击 | `ELECTRIC_SHOCK` | 布尔 | `families/character/damage_chain/statuses.rs` (历史入口)  |
+| 费用增加 | 费用增加 | `HAND_COST_INCREASE` | 层数 (待实测)  | `families/action_card/areas/hand_state.rs` |
+| 费用降低 | 费用降低 | `COST_REDUCTION` | 层数 | `families/character/damage_chain/statuses.rs` (历史入口)  |
+| 赋能 | 赋能 | `HAND_EMPOWERMENT` | 布尔 | `areas/hand_state.rs` |
+| 不可调和 | 不可调和 | `HAND_UNTUNABLE` | 布尔 | `areas/hand_state.rs` |
+| 无效化 | 无效化 | `HAND_INVALIDATION` | 布尔 | `areas/hand_state.rs` |
 
-- 枚举 `reactions::effect::HandCardStatus`（6 变体，带 `ALL` / `k_code` / `from_k_code`）；桥表 `hand_status_identity(HandCardStatus) -> &'static dyn StateIdentity` 与反向 `hand_status_of_identity` 在 `damage_chain/statuses.rs`（Z13 收口）。
-- 增 / 删复用 `StateList`（布尔幂等、层数相加），并派发 `StateAdded` / `StateRemoved`；`remove_card(entity)` 在牌离开手牌时清掉它的状态。
-- 4 个新身份（K3004/K3006/K3007/K3008）的**描述数据为 null → 留空**（D118 / 留空 #10），形态为对称 / 默认推断（待实测）。
+- 枚举 `reactions::effect::HandCardStatus` (6 变体, 带 `ALL` / `k_code` / `from_k_code`) ; 桥表 `hand_status_identity(HandCardStatus) -> &'static dyn StateIdentity` 与反向 `hand_status_of_identity` 在 `damage_chain/statuses.rs` (Z13 收口) .
+- 增 / 删复用 `StateList` (布尔幂等, 层数相加) , 并派发 `StateAdded` / `StateRemoved`; `remove_card(entity)` 在牌离开手牌时清掉它的状态.
+- 4 个新身份 (费用增加/赋能/不可调和/无效化) 的**描述数据为 null → 留空** (D118 / 留空 #10) , 形态为对称 / 默认推断 (待实测) .
 
-### 2.5 牌库（`zones/pile/`）
+### 2.5 牌库 (`zones/pile/`) 
 
 ```text
 PileState {
@@ -81,39 +81,40 @@ PileState {
 }
 ```
 
-- **位置为键**（D93 / D94）：位置 = `entries` 下标；段是连续区间；`Random` 段的 `pool` 是同源分组 id（不建池表），同 pool 的段共享 entries。
-- **标记跟着位置走**（D52 / D82）：`marks` 用公共 `StateList`（D105），插入 / 删除时维护位置。
-- **不预物化随机状态**（D188–D191）：`add_pending_mark` 只记位置列表，抽到才展开（`pending_marks` 参与折叠键）。
-- 抽取 / 折叠在 `pile/parse.rs`（本块自己的选择列表 + 去重函数，D91 / D92）：`draw` / `draw_top` / `draw_by_card` / `draw_from_random` / `draw_many` 返回 **`Vec<(DrawBranch, Fraction)>`**（分支 + 精确概率，不采样）。
-- 其他操作：`discard / discard_at / discard_random`（舍弃也维护位置标记，D86）、`put_bottom / put_bottom_many`（置底不动标记，D89）、`insert_evenly / insert_evenly_with`、`split_random_segment`、`add_mark / add_mark_with_opposite / clear_mark / pick_unmarked_targets`。
+- **位置为键** (D93 / D94) : 位置 = `entries` 下标; 段是连续区间; `Random` 段的 `pool` 是同源分组 id (不建池表) , 同 pool 的段共享 entries.
+- **标记跟着位置走** (D52 / D82) : `marks` 用公共 `StateList` (D105) , 插入 / 删除时维护位置.
+- **不预物化随机状态** (D188–D191) : `add_pending_mark` 只记位置列表, 抽到才展开 (`pending_marks` 参与折叠键) .
+- 抽取 / 折叠在 `pile/parse.rs` (本块自己的选择列表 + 去重函数, D91 / D92) : `draw` / `draw_top` / `draw_by_card` / `draw_from_random` / `draw_many` 返回 **`Vec<(DrawBranch, Fraction)>`** (分支 + 精确概率, 不采样) .
+- 其他操作: `discard / discard_at / discard_random` (舍弃也维护位置标记, D86) , `put_bottom / put_bottom_many` (置底不动标记, D89) , `insert_evenly / insert_evenly_with`, `split_random_segment`, `add_mark / add_mark_with_opposite / clear_mark / pick_unmarked_targets`.
 
-### 2.6 当前费用（`areas/cost.rs`）
+### 2.6 当前费用 (`areas/cost.rs`) 
 
 ```text
 CurrentCost { base: Vec<CostComponent>, deltas: Vec<CostDelta>, current: Vec<CostComponent> }
 CurrentCost::{new, base, deltas, current, total, with_delta, with_deltas, with_increase, with_decrease}
 ```
 
-- 当前费用 = 基础费用 + 依次重放的加费 / 减费（`deltas` 有序、可还原）。
-- 计算**复用** `resources::dice::apply_delta`（唯一一份费用算法）：加费整体加到指定元素 / 同色 / 任意（0 费加费新建同色，D170 / D172 / D178）；减费按顺序依次减到 0（D169 / D170）。
-- 纯数据字段：没有时机、不参与支付（支付在骰池 / 秘传揭令那边）。
+- 当前费用 = 基础费用 + 依次重放的加费 / 减费 (`deltas` 有序, 可还原) .
+- 计算**复用** `resources::dice::apply_delta` (唯一一份费用算法) : 加费整体加到指定元素 / 同色 / 任意 (0 费加费新建同色, D170 / D172 / D178) ; 减费按顺序依次减到 0 (D169 / D170) .
+- 纯数据字段: 没有时机, 不参与支付 (支付在骰池 / 秘传揭令那边) .
 
-### 2.7 秘传揭令（`families/status/arcane_edict.rs` + `rules/ops/arcane.rs`）
+### 2.7 秘传揭令 (`families/status/arcane_edict.rs` + `rules/ops/arcane.rs`) 
 
+*注释中的关键字代码已替换为名称, 代码行未改*
 ```text
 ArcaneEdict { available: bool, played: Nat }     // 每位牌手一份（D264）
 ArcanePlay { Allowed, AlreadyPlayed, NoEdict }
-ARCANE_EDICT                                     // 状态身份（布尔；K311 文本；无 StatusDef/无卡 id）
+ARCANE_EDICT                                     // 状态身份（布尔；秘传揭令 文本；无 StatusDef/无卡 id）
 ```
 
-- 规则书「每位牌手只能使用一张秘传」+ K311「只有揭令仍存在才能打出、打出后消耗」；`can_play` 顺序：先看已打出张数，再看揭令；`record_play` 允许时 +1 并消耗揭令。
-- 容器由**调用方持有**（留空 #68 / #98）：普通 `play_card_*` 签名不变，秘传走 `play_card_*_arcane`。
-- 数据里**没有**秘传揭令的状态卡行 → 只给共享身份，不伪造 `StatusDef`。
+- 规则书'每位牌手只能使用一张秘传'+ 秘传揭令'只有揭令仍存在才能打出, 打出后消耗'; `can_play` 顺序: 先看已打出张数, 再看揭令; `record_play` 允许时 +1 并消耗揭令.
+- 容器由**调用方持有** (留空 #68 / #98) : 普通 `play_card_*` 签名不变, 秘传走 `play_card_*_arcane`.
+- 数据里**没有**秘传揭令的状态卡行 → 只给共享身份, 不伪造 `StatusDef`.
 
 ## 3. 公开入口
 
 > [!NOTE]
-> 本节代码逐字取自当前仓库（含 use / derive / 文档注释等样板）。超长函数体截断为「签名 + 开头几行」并注明从略；未截断的即为全文。
+> 本节代码取自当前仓库 (含 use / derive / 文档注释等样板) .超长函数体截断为'签名 + 开头几行'并注明从略; 未截断的即为全文.
 
 ### 3.1 定义载体
 
@@ -250,7 +251,7 @@ pub enum SupportValue {
 /// 支援牌的**持续回合表达**（Z14：显式区分「有限回合」与「整局」）。
 ///
 /// 规则书·特殊词条「持续回合」：「每个结束阶段，都会使『持续回合』-1。『持续回合』耗尽后，
-/// 会立刻弃置这张牌。」整局状态（K60 / 无持续回合的支援牌）不参与递减，所以用
+/// 会立刻弃置这张牌。」整局状态（整局 / 无持续回合的支援牌）不参与递减，所以用
 /// SupportDuration::WholeGame **显式**表达，而不是靠 duration = None 隐含。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum SupportDuration {
@@ -492,16 +493,16 @@ pub struct HandCardStates {
 **`ExtraHandCardStatus`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
 
 ```rust
-/// 本文件补的 4 个手牌状态（K3004 / K3006 / K3007 / K3008）。
+/// 本文件补的 4 个手牌状态（费用增加 / 赋能 / 不可调和 / 无效化）。
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub enum ExtraHandCardStatus {
-    /// K3004 费用增加。
+    /// 费用增加 费用增加。
     CostIncrease,
-    /// K3006 赋能。
+    /// 赋能 赋能。
     Empowerment,
-    /// K3007 不可调和。
+    /// 不可调和 不可调和。
     Untunable,
-    /// K3008 无效化。
+    /// 无效化 无效化。
     Invalidation,
 }
 ```
@@ -543,7 +544,7 @@ macro_rules! impl_hand_status_identity {
 **`hand_status_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
 
 ```rust
-/// 手牌状态枚举 -> 状态身份（月感电 / 月绽放用；K3003–K3008 共 6 种）。
+/// 手牌状态枚举 -> 状态身份（月感电 / 月绽放用；电击–无效化 共 6 种）。
 pub fn hand_status_identity(status: HandCardStatus) -> &'static dyn StateIdentity {
     match status {
         HandCardStatus::ElectricShock => &ELECTRIC_SHOCK,
@@ -865,7 +866,7 @@ pub struct ArcaneEdict {
 **`record_play`** — `crates/definitions/src/families/status/arcane_edict.rs`
 
 ```rust
-    /// 打出秘传：允许时记录「已打出 +1」并按 K311 消耗揭令；不允许 -> None（状态不变）。
+    /// 打出秘传：允许时记录「已打出 +1」并按 秘传揭令 消耗揭令；不允许 -> None（状态不变）。
     pub fn record_play(&self) -> Option<ArcaneEdict> {
         match self.can_play() {
             ArcanePlay::Allowed => Some(ArcaneEdict {
@@ -884,7 +885,7 @@ pub struct ArcaneEdict {
 ### 3.7 本页引用的关键字 / 规则 ops
 
 > [!NOTE]
-> 以下为本文引用的关键字层 / 规则 ops 的真实源码（签名与文档注释逐字取自仓库）。
+> 以下为本文引用的关键字层 / 规则 ops 的真实源码 (签名与文档注释取自仓库) .
 
 **`apply_delta`** — `crates/definitions/src/resources/dice/mod.rs`
 
@@ -981,84 +982,84 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 
 ## 4. 不变量与禁止
 
-- **支援牌 = 行动牌本身**：打到支援区只是同一张卡换区，不产生新卡牌定义（分工计划 §4.4.3）。
-- **支援区上限 4**：满 4 时必须走 `enumerate_select` 的分支（不能悄悄覆盖 / 顺手弃第一张）。
-- **手牌无序**：不要假设 `entries` 顺序有含义；需要顺序用牌库。
-- **牌库位置 = 下标**；任何插入 / 删除都要维护 `marks` 与 `pending_marks`（D52 / D82 / D86 / D89）。
-- **抽牌不采样**：返回分支 + 精确概率（`Fraction`）；折叠发生在抽取那一刻（D52 / D83 / D97 / D98）。
-- **随机塞状态不物化**（D188 / D190 / D191）：只记位置列表，抽到再展开，展开后回收。
-- **查询默认排除三类**：不可发现 / 弃用 / 自走牌（D101）；显式给类型或标签过滤时不再额外排除。
-- **费用算法只有一份**：`CurrentCost` 复用 `resources::dice::apply_delta`，不重写。
-- **秘传每人一局一张**：`ArcaneEdict` 每位牌手一份；打出前必须先 `can_play`（D264）。
+- **支援牌 = 行动牌本身**: 打到支援区只是同一张卡换区, 不产生新卡牌定义 (分工计划 §4.4.3) .
+- **支援区上限 4**: 满 4 时必须走 `enumerate_select` 的分支 (不能悄悄覆盖 / 顺手弃第一张) .
+- **手牌无序**: 不要假设 `entries` 顺序有含义; 需要顺序用牌库.
+- **牌库位置 = 下标**; 任何插入 / 删除都要维护 `marks` 与 `pending_marks` (D52 / D82 / D86 / D89) .
+- **抽牌不采样**: 返回分支 + 精确概率 (`Fraction`) ; 折叠发生在抽取那一刻 (D52 / D83 / D97 / D98) .
+- **随机塞状态不物化** (D188 / D190 / D191) : 只记位置列表, 抽到再展开, 展开后回收.
+- **查询默认排除三类**: 不可发现 / 弃用 / 自走牌 (D101) ; 显式给类型或标签过滤时不再额外排除.
+- **费用算法只有一份**: `CurrentCost` 复用 `resources::dice::apply_delta`, 不重写.
+- **秘传每人一局一张**: `ArcaneEdict` 每位牌手一份; 打出前必须先 `can_play` (D264) .
 
 > [!IMPORTANT]
-> 区是字段（D42）：手牌 / 牌库 / 支援区的容器都由 `PlayerDefs` 持有，不建区号、不建「实体 → 区」表。
-> 所有操作纯函数：吃 `&` 返回新值，失败 = 状态不变 + `None` / `false` / 空分支。
+> 区是字段 (D42) : 手牌 / 牌库 / 支援区的容器都由 `PlayerDefs` 持有, 不建区号, 不建'实体 → 区'表.
+> 所有操作纯函数: 吃 `&` 返回新值, 失败 = 状态不变 + `None` / `false` / 空分支.
 
 > [!CAUTION]
-> 直接改 `entries` 绕过操作函数会破坏上限、位置标记与统计；一律走本页 §3 的入口。
+> 直接改 `entries` 绕过操作函数会破坏上限, 位置标记与统计; 一律走本页 §3 的入口.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 | 主题 | 依据 |
 |---|---|
-| 支援区上限 4 / 满 4 选择弃置 / 按排列顺序结算 | 规则书「游戏区域 III」；留空 #67 / #93 |
-| 手牌上限 10 / 只有手牌中的行动牌可打出与调和 | 规则书「游戏区域 VI」 |
-| 起手 5 张、秘传必在起手 | 规则书「游戏准备」+ D17 / D90 |
+| 支援区上限 4 / 满 4 选择弃置 / 按排列顺序结算 | 规则书'游戏区域 III'; 留空 #67 / #93 |
+| 手牌上限 10 / 只有手牌中的行动牌可打出与调和 | 规则书'游戏区域 VI' |
+| 起手 5 张, 秘传必在起手 | 规则书'游戏准备'+ D17 / D90 |
 | 牌库位置标记 / 抽牌折叠 / 舍弃与置底语义 | D52 / D80 / D82 / D83 / D84 / D86 / D89 / D93 / D94 / D97 / D98 |
-| 延迟展开（未观测不物化） | D188 / D189 / D190 / D191 |
-| 查询：注入 `CardMeta`、排除三类、按段分组 | D20 / D101 |
-| 当前费用 = 基础 + 加费 / 减费；加费 / 减费顺序 | D11 / D168 / D169 / D170 / D172 / D178 |
+| 延迟展开 (未观测不物化)  | D188 / D189 / D190 / D191 |
+| 查询: 注入 `CardMeta`, 排除三类, 按段分组 | D20 / D101 |
+| 当前费用 = 基础 + 加费 / 减费; 加费 / 减费顺序 | D11 / D168 / D169 / D170 / D172 / D178 |
 | 打出条件先于付费 | D217 |
-| 秘传揭令每位牌手一份 | 规则书「特殊词条 秘传」+ K311；D264；留空 #68 / #98 / #99 |
-| 手牌 6 状态身份 | D116；K3003–K3008；留空 #10 / #106 / #115 |
+| 秘传揭令每位牌手一份 | 规则书'特殊词条 秘传'+ 秘传揭令; D264; 留空 #68 / #98 / #99 |
+| 手牌 6 状态身份 | D116; 电击–无效化; 留空 #10 / #106 / #115 |
 
-### 5.1 文档与代码不一致（供复核）
+### 5.1 文档与代码不一致 (供复核) 
 
 > [!NOTE]
-> 旧文档里 `结构.md` 把支援区 / 装备 / 事件类型画在 `families/action_card/types/` 下；实际代码没有该目录（类型级行为在 `rules/` + `flow/`），承载按本页的 `zones/` 与 `areas/` 分。
+> 旧文档里 `结构.md` 把支援区 / 装备 / 事件类型画在 `families/action_card/types/` 下; 实际代码没有该目录 (类型级行为在 `rules/` + `flow/`) , 承载按本页的 `zones/` 与 `areas/` 分.
 
-1. `结构.md` 的 `types/support|equipment|event/` 与 `tags/` 子层不存在；标签在顶层 `src/tags/`（D53）。
-2. 秘传揭令没有独立 `StatusDef`（数据里没有该状态卡行），只有 `ARCANE_EDICT` 共享身份 + `ArcaneEdict` 容器，文档若写成状态牌需更正。
+1. `结构.md` 的 `types/support|equipment|event/` 与 `tags/` 子层不存在; 标签在顶层 `src/tags/` (D53) .
+2. 秘传揭令没有独立 `StatusDef` (数据里没有该状态卡行) , 只有 `ARCANE_EDICT` 共享身份 + `ArcaneEdict` 容器, 文档若写成状态牌需更正.
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 以下写法会破坏费用 / 概率 / 位置语义，且大多不会在类型层面报错。
+> 以下写法会破坏费用 / 概率 / 位置语义, 且大多不会在类型层面报错.
 
-1. **把支援牌当成新卡**：支援区条目的 `card` 就是行动牌 id；不要另建「支援牌定义」。
-2. **满 4 时自己弃第一张**：必须展开选择分支（`enumerate_select`），否则概率与检索都不对。
-3. **用手牌顺序表达规则**：手牌无序；「先抓到的先打出」不是规则。
-4. **标记跟着牌走**：牌库标记跟位置（D52 / D82），不要挂在 `PileEntry` 上。
-5. **在 definitions 里再写一遍费用算法**：加费 / 减费只用 `apply_delta`；支付只用 `DicePool::pay`。
-6. **`can_afford` 当已付款**：它是「可能就行」的上界；折叠组未展开时 `pay` 仍可能失败。
-7. **秘传先打后判**：顺序必须是手牌检查 → 秘传判定 → 打出条件（留空 #99），失败不消耗揭令。
-8. **把 `with_duration(None)` 当「没有持续回合」**：旧 API 的 None = 整局；新代码用 `SupportDuration::WholeGame` / `Round(n)`（Z14）。
+1. **把支援牌当成新卡**: 支援区条目的 `card` 就是行动牌 id; 不要另建'支援牌定义'.
+2. **满 4 时自己弃第一张**: 必须展开选择分支 (`enumerate_select`) , 否则概率与检索都不对.
+3. **用手牌顺序表达规则**: 手牌无序; '先抓到的先打出'不是规则.
+4. **标记跟着牌走**: 牌库标记跟位置 (D52 / D82) , 不要挂在 `PileEntry` 上.
+5. **在 definitions 里再写一遍费用算法**: 加费 / 减费只用 `apply_delta`; 支付只用 `DicePool::pay`.
+6. **`can_afford` 当已付款**: 它是'可能就行'的上界; 折叠组未展开时 `pay` 仍可能失败.
+7. **秘传先打后判**: 顺序必须是手牌检查 → 秘传判定 → 打出条件 (留空 #99) , 失败不消耗揭令.
+8. **把 `with_duration(None)` 当'没有持续回合'**: 旧 API 的 None = 整局; 新代码用 `SupportDuration::WholeGame` / `Round(n)` (Z14) .
 
 ## 7. 测试
 
 | 文件 | 代表测试 |
 |---|---|
-| `action_card/def.rs` | `check_play_binds_the_viewer_side`、`check_play_is_a_pure_read_only_function`、`cost_is_a_borrowed_static_slice_not_a_copy` |
-| `areas/support.rs` | `full_zone_gives_one_branch_per_discard_candidate`、`full_zone_branches_dispatch_discard_then_enter`、`end_phase_duration_ticks_and_depleted_support_is_discarded`、`whole_game_duration_skips_tick_and_round_duration_still_ticks` |
-| `areas/hand_state.rs` | `add_state_creates_entry_and_merges_by_state_list_rules`、`extra_hand_status_identities_have_names_forms_and_queries`、`remove_state_and_card` |
-| `areas/cost.rs` | `increase_on_zero_cost_creates_same_color`、`decrease_drains_specific_then_same_color_then_any`、`deltas_are_replayable_and_ordered` |
-| `zones/hand/mod.rs` | `add_fills_up_to_ten_then_rejects`、`opening_hand_draws_five_then_runs_out`、`opening_hand_prefers_arcane_cards` |
-| `zones/pile/mod.rs` | `draw_many_unmarked_folds_to_combinations`、`draw_many_marks_fold_by_combination_d98`、`pending_marks_expand_when_drawn`、`states_follow_insert_and_discard` |
-| `zones/query.rs` | `query_all_excludes_non_discoverable_three_tags`、`multi_segment_query_maps_segment_by_segment`、`filter_by_tag_matches_any_of_card_tags_by_pointer` |
-| `families/status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`、`consumed_edict_blocks_arcane_with_no_edict` |
+| `action_card/def.rs` | `check_play_binds_the_viewer_side`, `check_play_is_a_pure_read_only_function`, `cost_is_a_borrowed_static_slice_not_a_copy` |
+| `areas/support.rs` | `full_zone_gives_one_branch_per_discard_candidate`, `full_zone_branches_dispatch_discard_then_enter`, `end_phase_duration_ticks_and_depleted_support_is_discarded`, `whole_game_duration_skips_tick_and_round_duration_still_ticks` |
+| `areas/hand_state.rs` | `add_state_creates_entry_and_merges_by_state_list_rules`, `extra_hand_status_identities_have_names_forms_and_queries`, `remove_state_and_card` |
+| `areas/cost.rs` | `increase_on_zero_cost_creates_same_color`, `decrease_drains_specific_then_same_color_then_any`, `deltas_are_replayable_and_ordered` |
+| `zones/hand/mod.rs` | `add_fills_up_to_ten_then_rejects`, `opening_hand_draws_five_then_runs_out`, `opening_hand_prefers_arcane_cards` |
+| `zones/pile/mod.rs` | `draw_many_unmarked_folds_to_combinations`, `draw_many_marks_fold_by_combination_d98`, `pending_marks_expand_when_drawn`, `states_follow_insert_and_discard` |
+| `zones/query.rs` | `query_all_excludes_non_discoverable_three_tags`, `multi_segment_query_maps_segment_by_segment`, `filter_by_tag_matches_any_of_card_tags_by_pointer` |
+| `families/status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict` |
 
 ## 8. 待接入与待实测
 
-- **加费 / 减费优先顺序**（支付侧）：留空 #1（代码按 D168–D178，仍待实测）。
-- **未指定来源骰的调和内置算法**：D117 / 留空 #9。
-- **手牌 4 个状态的描述缺失**：留空 #10 / #106。
-- **秘传揭令**：容器归属与判定 / 打出条件先后：留空 #68 / #98 / #99。
-- **支援牌持续回合**：递减时机（结束阶段）与生产写入路径：留空 #67 / #93 / #105 / #116 / #117。
-- **结束阶段抓牌后的当前费用表 / `drawn_marks` 物化**：留空 #45 / #46 / #90 / #122。
-- **支援效果执行顺序与 S2.4 的偏差**：留空 #94。
-- **元素幻变**等行动牌级钩子：留空 #108（已接投掷、开局流程未接）。
-- **复苏料理**：留空 #109 / #119（与 [[定义层-Character]] 的饱腹、`flow/revive.rs` 组合）。
+- **加费 / 减费优先顺序** (支付侧) : 留空 #1 (代码按 D168–D178, 仍待实测) .
+- **未指定来源骰的调和内置算法**: D117 / 留空 #9.
+- **手牌 4 个状态的描述缺失**: 留空 #10 / #106.
+- **秘传揭令**: 容器归属与判定 / 打出条件先后: 留空 #68 / #98 / #99.
+- **支援牌持续回合**: 递减时机 (结束阶段) 与生产写入路径: 留空 #67 / #93 / #105 / #116 / #117.
+- **结束阶段抓牌后的当前费用表 / `drawn_marks` 物化**: 留空 #45 / #46 / #90 / #122.
+- **支援效果执行顺序与 S2.4 的偏差**: 留空 #94.
+- **元素幻变**等行动牌级钩子: 留空 #108 (已接投掷, 开局流程未接) .
+- **复苏料理**: 留空 #109 / #119 (与 [[定义层-Character]] 的饱腹, `flow/revive.rs` 组合) .
 
 ---
-最后核对：2026-10-19（代码：`crates/definitions/src/families/action_card/areas/support.rs::SupportZone::add_with_triggers`）
+最后核对: 2026-10-19 (代码: `crates/definitions/src/families/action_card/areas/support.rs::SupportZone::add_with_triggers`) 

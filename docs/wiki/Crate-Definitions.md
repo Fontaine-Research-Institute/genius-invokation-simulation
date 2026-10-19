@@ -1,78 +1,77 @@
-# Crate-Definitions（游戏定义层）
+# Crate-Definitions (游戏定义层) 
 
 > 中文 · [[Crate-Definitions-EN|English]]
 
-*本页范围：`definitions` crate 的职责、目录与概念、公开入口与 feature、不变量、依据、测试规模与待接入项。*
+*本页范围: `definitions` crate 的职责, 目录与概念, 公开入口与 feature, 不变量, 依据, 测试规模与待接入项.*
 
 ---
 
 ## 1. 职责
 
-承载「除具体卡牌以外的全部游戏定义」：牌族 / 类型 / 标签、被花资源（骰池）、三级统一基础操作、状态与串联流程、关键字与「一步」、触发调度、元素反应、统一记录、编译期源码嵌入、版本同步，以及 `build.rs` 生成的数据与富文本渲染。
+承载'除具体卡牌以外的全部游戏定义': 牌族 / 类型 / 标签, 被花资源 (骰池) , 三级统一基础操作, 状态与串联流程, 关键字与'一步', 触发调度, 元素反应, 统一记录, 编译期源码嵌入, 版本同步, 以及 `build.rs` 生成的数据与富文本渲染.
 
-- 目录：`new/crates/definitions/`
-- package / lib：`gi-genius-invokation-definitions` / `gi_genius_invokation_definitions`
-- 依赖：`engine`（机制原语）、`richtext`（文本解析）；默认零第三方依赖
-- 不含具体卡牌（D240 / D241）：具体卡牌在 `cards`，经 `simulation` 门面可选接入（D243）
+- 目录: `new/crates/definitions/`
+- package / lib: `gi-genius-invokation-definitions` / `gi_genius_invokation_definitions`
+- 依赖: `engine` (机制原语) , `richtext` (文本解析) ; 默认零第三方依赖
+- 不含具体卡牌 (D240 / D241) : 具体卡牌在 `cards`, 经 `simulation` 门面可选接入 (D243) 
 
 ## 2. 关键概念与类型
 
-分层（D51 / D53 / D54）：base（L1 牌族 + id + 元素 + 视角）→ families（L2 类型枚举 + 定义载体 + 区域 + 操作）→ tags（L3 标签，顶层目录）。
+分层 (D51 / D53 / D54) : base (L1 牌族 + id + 元素 + 视角) → families (L2 类型枚举 + 定义载体 + 区域 + 操作) → tags (L3 标签, 顶层目录) .
 
 | 目录 | 一句话 |
 |---|---|
-| `src/base/` | `CardFamily`（id 区域）+ `CardId` / `SkillId` / `Element` / `Perspective` |
-| `src/families/` | 每个牌族的框架：类型枚举 + 定义载体 + 区域状态 + 底层操作（行动牌：支援区 / 手牌卡状态 / 当前费用 / 牌库 / 查询；角色：伤害 / 伤害修正链 / 技能流程 / 形态与成长 / 装备栏 / 状态区；召唤物：定义 + 召唤物区；状态：类型枚举 + 定义；敌人：定义） |
-| `src/tags/` | L3 标签：顶层目录，按「牌族 / 类型」分组；一个标签一个文件、一个零大小类型（D54），共 52 个 |
-| `src/resources/` | 被花的东西：`dice/` 骰池 —— 纯计数（不是实体，D47）、三块表示（D49）、生成 / 支付 / 转化 / 查询 / 折叠展开 |
-| `src/rules/` | 三级统一基础操作：`RuleRow` 静态规则表 + `ops/` 纯函数（槽位 / 上限 / 开局 / 料理 / 伤害 / 查询 / 结算顺序；排除自走牌） |
-| `src/timeline/` | 触发 / 事件调度：泛型注册表（时机键 + 条件函数指针 + 执行函数指针，D186）+ 有序派发 + 结算帧（D196） |
-| `src/reactions/` | 14 个元素反应身份（11 基础 + 3 月反应）+ 效果函数指针表 + 效果请求（`EffectOp`） |
-| `src/records/` | 统一记录器 `Record<T>` / `Recorder<T>` / `ShowRecord`（D222–D225） |
-| `src/source/` | 编译期源码嵌入：`card_source!` / `module_source!`、`SourceFile` / `SourceOwner`、use 依赖解析（D210–D216 / D242） |
-| `src/version/` | `GameVersion` + `card_game_version!`（D244–D246） |
-| `src/generated/` | `build.rs` 生成的数据表 + 访问器 + `Localized`（D56）+ 富文本 `render`（解析由 richtext 提供） |
-| `src/state/` | `DefState`（`me` / `opp` + `round` + `first_player`）/ `PlayerDefs` + 终局判定 + `state::flows`（开局 / 切换 / 击倒 / 复苏 / 结束阶段 / 回合开始 / 下落标记） |
-| `src/flow/` | 端到端动作入口：使用技能 / 打牌 / 切换角色 / 元素调和 / 特技 / 回合骨架 / `pending` 执行器 / `recorded` 包装 / 钩子 |
-| `src/keywords/` | 关键字函数 + 一步 `Step`（D204）+ 目标选择器（含「自己」，D205 / D206）+ 反应子结算 + `trace` / `record` |
+| `src/base/` | `CardFamily` (id 区域) + `CardId` / `SkillId` / `Element` / `Perspective` |
+| `src/families/` | 每个牌族的框架: 类型枚举 + 定义载体 + 区域状态 + 底层操作 (行动牌: 支援区 / 手牌卡状态 / 当前费用 / 牌库 / 查询; 角色: 伤害 / 伤害修正链 / 技能流程 / 形态与成长 / 装备栏 / 状态区; 召唤物: 定义 + 召唤物区; 状态: 类型枚举 + 定义; 敌人: 定义)  |
+| `src/tags/` | L3 标签: 顶层目录, 按'牌族 / 类型'分组; 一个标签一个文件, 一个零大小类型 (D54) , 共 52 个 |
+| `src/resources/` | 被花的东西: `dice/` 骰池 —— 纯计数 (不是实体, D47) , 三块表示 (D49) , 生成 / 支付 / 转化 / 查询 / 折叠展开 |
+| `src/rules/` | 三级统一基础操作: `RuleRow` 静态规则表 + `ops/` 纯函数 (槽位 / 上限 / 开局 / 料理 / 伤害 / 查询 / 结算顺序; 排除自走牌)  |
+| `src/timeline/` | 触发 / 事件调度: 泛型注册表 (时机键 + 条件函数指针 + 执行函数指针, D186) + 有序派发 + 结算帧 (D196)  |
+| `src/reactions/` | 14 个元素反应身份 (11 基础 + 3 月反应) + 效果函数指针表 + 效果请求 (`EffectOp`)  |
+| `src/records/` | 统一记录器 `Record<T>` / `Recorder<T>` / `ShowRecord` (D222–D225)  |
+| `src/source/` | 编译期源码嵌入: `card_source!` / `module_source!`, `SourceFile` / `SourceOwner`, use 依赖解析 (D210–D216 / D242)  |
+| `src/version/` | `GameVersion` + `card_game_version!` (D244–D246)  |
+| `src/generated/` | `build.rs` 生成的数据表 + 访问器 + `Localized` (D56) + 富文本 `render` (解析由 richtext 提供)  |
+| `src/state/` | `DefState` (`me` / `opp` + `round` + `first_player`) / `PlayerDefs` + 终局判定 + `state::flows` (开局 / 切换 / 击倒 / 复苏 / 结束阶段 / 回合开始 / 下落标记)  |
+| `src/flow/` | 端到端动作入口: 使用技能 / 打牌 / 切换角色 / 元素调和 / 特技 / 回合骨架 / `pending` 执行器 / `recorded` 包装 / 钩子 |
+| `src/keywords/` | 关键字函数 + 一步 `Step` (D204) + 目标选择器 (含'自己', D205 / D206) + 反应子结算 + `trace` / `record` |
 
-**数据文件**：`generated/data/{terms,keywords,descriptions}.json`（入库）；`build.rs` 编译期生成静态表到 `$OUT_DIR/generated_data.rs`，运行期不读文件；标签数据是 `generated::TAGS.<字段>` 字段访问（D67）。
+**数据文件**: `generated/data/{terms,keywords,descriptions}.json` (入库) ; `build.rs` 编译期生成静态表到 `$OUT_DIR/generated_data.rs`, 运行期不读文件; 标签数据是 `generated::TAGS.<字段>` 字段访问 (D67) .
 
 ## 3. 公开入口
 
-模块全部 `pub`：`base` / `families` / `flow` / `generated` / `keywords` / `reactions` / `records` / `resources` / `rules` / `source` / `state` / `tags` / `timeline` / `version`。crate 根不做 `pub use`；对外统一经 `simulation` 门面；crate 根导出三个宏：
+模块全部 `pub`: `base` / `families` / `flow` / `generated` / `keywords` / `reactions` / `records` / `resources` / `rules` / `source` / `state` / `tags` / `timeline` / `version`.crate 根不做 `pub use`; 对外统一经 `simulation` 门面; crate 根导出三个宏: 
 
 | 入口 | 用途 |
 |---|---|
-| `card_source!(path: ["character", "aino"])` | 卡牌文件源码自声明（自动绑定模块的 `pub const ID`，D215） |
+| `card_source!(path: ["character", "aino"])` | 卡牌文件源码自声明 (自动绑定模块的 `pub const ID`, D215)  |
 | `module_source!(path: [...], name: MODULE_NAME)` | 非卡牌模块源码自声明 + 多语名字 |
-| `card_game_version!(6, 2)` | 声明「本卡已同步到的最新版本」（D244–D246） |
+| `card_game_version!(6, 2)` | 声明'本卡已同步到的最新版本' (D244–D246)  |
 
 **主要公开类型 / 入口**
 
 | 模块 | 入口示例 |
 |---|---|
-| `state` | `DefState::new / from_players`、`DefState::{me, opp, round, first_player}`、`state::flows::*`、`state::terminal::{settlement_outcome, Outcome, ROUND_LIMIT}` |
-| `flow` | `use_skill_me/opp`、`play_card_*`（含 `_with_timing` / `_food` / `_arcane`）、`switch_character_*`、`tuning_*`、`use_technique_*`、`turn::*`、`pending::{execute_pending, execute_frames}`、`recorded::*`、`fold_states` |
-| `keywords` | `Step`、`execute_step_me/opp`、`execute_steps_*`、关键字函数（`cause_damage` / `heal` / `apply_status` / `summon` / `draw_cards` / `gain_dice` …）、`TargetSelector` |
-| `timeline` | `TriggerRegistry` / `Trigger` / `dispatch` / `resolve` / `Resolution`（帧 + `insert` / `snapshot`） |
+| `state` | `DefState::new / from_players`, `DefState::{me, opp, round, first_player}`, `state::flows::*`, `state::terminal::{settlement_outcome, Outcome, ROUND_LIMIT}` |
+| `flow` | `use_skill_me/opp`, `play_card_*` (含 `_with_timing` / `_food` / `_arcane`) , `switch_character_*`, `tuning_*`, `use_technique_*`, `turn::*`, `pending::{execute_pending, execute_frames}`, `recorded::*`, `fold_states` |
+| `keywords` | `Step`, `execute_step_me/opp`, `execute_steps_*`, 关键字函数 (`cause_damage` / `heal` / `apply_status` / `summon` / `draw_cards` / `gain_dice` …) , `TargetSelector` |
+| `timeline` | `TriggerRegistry` / `Trigger` / `dispatch` / `resolve` / `Resolution` (帧 + `insert` / `snapshot`)  |
 | `records` | `Recorder<T>` / `Record<T>` / `ShowRecord` |
 | `rules` | `rows()` / `RuleRow` / `ops::*` 纯函数 |
 | `resources::dice` | `DicePool` / `DieFace` / `CostComponent` / `DiceGenSpec` / `can_afford` / `pay` / `all_dice` |
 | `source` | `SourceFile` / `SourceOwner` / `source_files()` / `source_of(path)` |
-| `version` | `GameVersion`；`version::Nat` 再导出 engine 的 `Nat` |
+| `version` | `GameVersion`; `version::Nat` 再导出 engine 的 `Nat` |
 
 **Cargo feature**
 
 | feature | 默认 | 含义 |
 |---|---|---|
-| `embed-source` | 是 | 编译期嵌入各文件源码（D213）；关闭时 `SOURCE.content` 为空、汇总表为空 |
-| `records` | 是 | 统一记录器（D223 / D224）；关闭时 `Recorder` 零大小、`push` 空操作 |
-| `stats` | 否 | 各块 `stats/` 统计（D187）；关闭时统计变空操作 |
-| `rules` | 否 | 打开 `engine/rules` 并编译 `GameRules` 适配（`state/terminal.rs`，D24） |
+| `embed-source` | 是 | 编译期嵌入各文件源码 (D213) ; 关闭时 `SOURCE.content` 为空, 汇总表为空 |
+| `records` | 是 | 统一记录器 (D223 / D224) ; 关闭时 `Recorder` 零大小, `push` 空操作 |
+| `stats` | 否 | 各块 `stats/` 统计 (D187) ; 关闭时统计变空操作 |
+| `rules` | 否 | 打开 `engine/rules` 并编译 `GameRules` 适配 (`state/terminal.rs`, D24)  |
 
-### 3.1 真实源码（逐字摘自当前仓库）
-
+### 3.1 真实源码
 **源码文件 `SourceFile`**
 
 `new/crates/definitions/src/source/mod.rs:149-162`
@@ -237,7 +236,7 @@ pub struct DefState {
 }
 ```
 
-**`DefState::me`（只读）**
+**`DefState::me` (只读) **
 
 `new/crates/definitions/src/state/def_state.rs:111-114`
 
@@ -248,7 +247,7 @@ pub struct DefState {
     }
 ```
 
-**`DefState::opp`（只读）**
+**`DefState::opp` (只读) **
 
 `new/crates/definitions/src/state/def_state.rs:116-119`
 
@@ -259,7 +258,7 @@ pub struct DefState {
     }
 ```
 
-**`DefState::round`（只读）**
+**`DefState::round` (只读) **
 
 `new/crates/definitions/src/state/def_state.rs:121-126`
 
@@ -272,7 +271,7 @@ pub struct DefState {
     }
 ```
 
-**`DefState::first_player`（只读）**
+**`DefState::first_player` (只读) **
 
 `new/crates/definitions/src/state/def_state.rs:136-141`
 
@@ -760,8 +759,10 @@ pub fn rows() -> impl Iterator<Item = &'static RuleRow> {
 
 `new/crates/definitions/src/generated/mod.rs:85-95`
 
+注释中的关键字代码已替换为名称, 代码行未改
+
 ```rust
-/// 关键字查询：按 K 码二分查找（生成表按 code 升序）。
+/// 关键字查询：按关键字名二分查找（生成表按 code 升序）。
 ///
 /// **数据来源**：generated/data/keywords.json（权威七圣召唤 keyword 数据，142 码 × 4 语名字 +
 /// 说明；129 码有 4 语说明，13 码无说明——含手牌状态 3003~3008，数据没有就保持空）。
@@ -778,8 +779,10 @@ pub fn keyword(code: KeywordCode) -> Option<&'static KeywordDef> {
 
 `new/crates/definitions/src/generated/mod.rs:97-100`
 
+注释中的关键字代码已替换为名称, 代码行未改
+
 ```rust
-/// 全部关键字（按 K 码升序）。
+/// 全部关键字（按关键字名升序）。
 pub fn keywords_all() -> &'static [KeywordDef] {
     &KEYWORDS
 }
@@ -803,7 +806,7 @@ pub struct GameVersion {
 ```
 
 
-**关键字函数：造成伤害**
+**关键字函数: 造成伤害**
 
 `new/crates/definitions/src/keywords/keyword.rs:241-292`
 
@@ -862,7 +865,7 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**关键字函数：治疗**
+**关键字函数: 治疗**
 
 `new/crates/definitions/src/keywords/keyword.rs:298-325`
 
@@ -897,7 +900,7 @@ pub fn heal(state: &DefState, env: &EffectEnv<'_>, args: &HealArgs) -> KeywordRe
 }
 ```
 
-**规则 ops：装备校验**
+**规则 ops: 装备校验**
 
 `new/crates/definitions/src/rules/ops/equip.rs:180-214`
 
@@ -939,7 +942,7 @@ pub fn check_equip(
 }
 ```
 
-**规则 ops：结算顺序判定**
+**规则 ops: 结算顺序判定**
 
 `new/crates/definitions/src/rules/ops/order.rs:38-59`
 
@@ -972,30 +975,30 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> 本 crate 不含具体卡牌；单向依赖（不得依赖 `cards` / `simulation`）。对外入口纯函数：吃 `&DefState`、返回新状态，入参一个字节不动。
+> 本 crate 不含具体卡牌; 单向依赖 (不得依赖 `cards` / `simulation`) .对外入口纯函数: 吃 `&DefState`, 返回新状态, 入参一个字节不动.
 
-- 零 `f64`（D159）：概率 / 权重一律 `Fraction`（`ExactNat128`）；业务数值一律 `Nat`。
-- 禁止裸整型与裸算术（§8.3）：`#![deny(clippy::arithmetic_side_effects)]` + 三个扫描脚本（只提示）。
-- 数据只一份：标签数据唯一在 `generated::TAGS`（D64 / D67）；源码宏与类型唯一在本 crate（D242）；`CostComponent` 唯一在 `resources::dice`（D161）。
-- 敌我不编号、区 = 变量（D29 / D34 / D42）；成对入口共用一份实现。
-- 一步原子（D204）：步内禁止插入；插入只能发生在步与步之间。
-- 插入式结算不是栈（D196）；结算顺序唯一权威是 `结算顺序.md`，常量只在 `rules::ops::order`。
-- 不确定先不物化（D190 / D191）：观测点展开成「分支 + 精确概率」，之后折叠回。
-- feature 关闭不改变语义（`records` / `stats` / `embed-source`）。
-- 不持有全局状态：注册表 / 记录器 / 骰池都是普通值字段。
+- 零 `f64` (D159) : 概率 / 权重一律 `Fraction` (`ExactNat128`) ; 业务数值一律 `Nat`.
+- 禁止裸整型与裸算术 (§8.3) : `#![deny(clippy::arithmetic_side_effects)]` + 三个扫描脚本 (只提示) .
+- 数据只一份: 标签数据唯一在 `generated::TAGS` (D64 / D67) ; 源码宏与类型唯一在本 crate (D242) ; `CostComponent` 唯一在 `resources::dice` (D161) .
+- 敌我不编号, 区 = 变量 (D29 / D34 / D42) ; 成对入口共用一份实现.
+- 一步原子 (D204) : 步内禁止插入; 插入只能发生在步与步之间.
+- 插入式结算不是栈 (D196) ; 结算顺序唯一权威是 `结算顺序.md`, 常量只在 `rules::ops::order`.
+- 不确定先不物化 (D190 / D191) : 观测点展开成'分支 + 精确概率', 之后折叠回.
+- feature 关闭不改变语义 (`records` / `stats` / `embed-source`) .
+- 不持有全局状态: 注册表 / 记录器 / 骰池都是普通值字段.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 | 领域 | 依据 |
 |---|---|
-| 牌族 / 类型 / 标签三级 | D51 / D53 / D54 / D55；`分工计划.md` §4.4.0.0 |
+| 牌族 / 类型 / 标签三级 | D51 / D53 / D54 / D55; `分工计划.md` §4.4.0.0 |
 | base / id / 敌我 / 区 | D29 / D34 / D36 / D37 / D41 / D42 |
-| 骰池（纯计数 / 三块 / 展开 / 支付） | D46–D49、D139–D148、D168–D172 |
-| 三级统一基础操作 | D176–D179；规则书·进行行动 / 游戏区域 / 特殊词条 |
-| 状态与区 | D95 / D96、D101–D119、D182 / D183 |
-| 伤害 / 反应 / 结算顺序 | 规则书·元素反应（规则 + 效果两篇）、特殊词条；`结算顺序.md`；D127–D136、D164–D167、D193–D198 |
-| 技能 / 准备技能 / 特技 | 规则书·进行行动【使用技能】与特殊词条；D7 / D15 / D19 / D123–D126 / D165 / D166 |
-| 关键字 + 一步 | D203–D209；规则书·特殊词条 |
+| 骰池 (纯计数 / 三块 / 展开 / 支付)  | D46–D49, D139–D148, D168–D172 |
+| 三级统一基础操作 | D176–D179; 规则书·进行行动 / 游戏区域 / 特殊词条 |
+| 状态与区 | D95 / D96, D101–D119, D182 / D183 |
+| 伤害 / 反应 / 结算顺序 | 规则书·元素反应 (规则 + 效果两篇) , 特殊词条; `结算顺序.md`; D127–D136, D164–D167, D193–D198 |
+| 技能 / 准备技能 / 特技 | 规则书·进行行动[使用技能]与特殊词条; D7 / D15 / D19 / D123–D126 / D165 / D166 |
+| 关键字 + 一步 | D203–D209; 规则书·特殊词条 |
 | 触发调度 / 函数指针 | D185 / D186 |
 | 记录 | D222–D225 |
 | 源码嵌入 | D210–D216 / D242 |
@@ -1004,26 +1007,26 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 | 门面与拆分 | D240–D243 |
 
 > [!NOTE]
-> 依据优先级（`RULES.md` 第三节）：规则书 > 卡面 / 权威关键字 > 参考实现（只看方法）。规则书与旧决策冲突时以规则书为准，改不动的标 `// 待接入`。
+> 依据优先级 (`RULES.md` 第三节) : 规则书 > 卡面 / 权威关键字 > 参考实现 (只看方法) .规则书与旧决策冲突时以规则书为准, 改不动的标 `// 待接入`.
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 不要在本 crate 写具体卡牌、不要写 `f64` 或裸算术、不要给标签再造总枚举 / 编号、不要在 `timeline::dispatch` 里执行效果。
+> 不要在本 crate 写具体卡牌, 不要写 `f64` 或裸算术, 不要给标签再造总枚举 / 编号, 不要在 `timeline::dispatch` 里执行效果.
 
-- 让 `definitions` 依赖 `cards` / `simulation`（反向依赖；cards 有守卫测试）。
-- 在一步内部插入子结算（违反 D204）。
-- 自己再写一份结算顺序表（唯一权威 `结算顺序.md`）。
-- 在 `records` 里定义业务字段 / 种类枚举（内容类型归各模块，D225）。
-- 关闭 `records` / `stats` 后让结算结果改变。
-- 新增模块文件用 `module_source!` 后忘记在 `source::SOURCE_FILES` 加一行（编译能过，`source_of` 找不到）。
+- 让 `definitions` 依赖 `cards` / `simulation` (反向依赖; cards 有守卫测试) .
+- 在一步内部插入子结算 (违反 D204) .
+- 自己再写一份结算顺序表 (唯一权威 `结算顺序.md`) .
+- 在 `records` 里定义业务字段 / 种类枚举 (内容类型归各模块, D225) .
+- 关闭 `records` / `stats` 后让结算结果改变.
+- 新增模块文件用 `module_source!` 后忘记在 `source::SOURCE_FILES` 加一行 (编译能过, `source_of` 找不到) .
 
 ## 7. 测试
 
-- `cargo test --offline -p gi-genius-invokation-definitions`：当前 917 条单元测试（lib target；doctest 0；默认 features）。
-- `--features rules` 额外编译 `state/terminal.rs` 的 `GameRules` 适配测试（D24）；CI 对 workspace 使用 `--features rules,dedup,opt-all`。
-- 规模分布（按测试名前缀，随开发变化）：`families::character` 304、`families::action_card` 98、`resources::dice` 45、`rules::ops` 42、`state::flows` 33、`flow::*` 约 130、`keywords::*` 约 80、`timeline::*` 约 35、`reactions::*` 约 30、`generated` 24、`state::*` 29、`records` 4、`source` 7、`version` 3、`tags` 1。
-- 代表用例：
+- `cargo test --offline -p gi-genius-invokation-definitions`: 当前 917 条单元测试 (lib target; doctest 0; 默认 features) .
+- `--features rules` 额外编译 `state/terminal.rs` 的 `GameRules` 适配测试 (D24) ; CI 对 workspace 使用 `--features rules,dedup,opt-all`.
+- 规模分布 (按测试名前缀, 随开发变化) : `families::character` 304, `families::action_card` 98, `resources::dice` 45, `rules::ops` 42, `state::flows` 33, `flow::*` 约 130, `keywords::*` 约 80, `timeline::*` 约 35, `reactions::*` 约 30, `generated` 24, `state::*` 29, `records` 4, `source` 7, `version` 3, `tags` 1.
+- 代表用例: 
 
 | 用例 | 覆盖点 |
 |---|---|
@@ -1041,21 +1044,21 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 ## 8. 待接入与待实测
 
 > [!NOTE]
-> 本 crate 规则落点最多；下表只列代表项。完整清单见 `留空.md`，以 #103 第六轮总账为准（更早条目写作时按当轮状态记，之后部分已接线，属低报）。
+> 本 crate 规则落点最多; 下表只列代表项.完整清单见 `留空.md`, 以 #103 第六轮总账为准 (更早条目写作时按当轮状态记, 之后部分已接线, 属低报) .
 
 | 编号 | 事项 |
 |---|---|
-| #15 | 三级统一基础操作待接入：结算顺序实际调度、结束阶段扣持续回合 / 可用次数、起手换牌、首发选择、击倒 / 免于击倒 / 形态转换、支援满 4、召唤满 4、元素幻变时序 |
-| #17–#32 | 伤害修正链顺序、结晶护盾上限、元素精通、伤害免疫与加伤先后、乘算取整、下落 vs 重击等 |
-| #33–#39 | 第一回合先手、结束阶段先手口径、切换角色错误优先级、元素调和来源骰限制、不可调和语义 |
-| #42–#44 | 终局判定接进 flow、`GameRules` 占位、definitions 的 `rules` feature 是否进 CI（待确认） |
-| #45–#50 | F10 抓牌后的手牌费用表 / `drawn_marks`、下落标记端到端接线 |
-| #51–#57 | 两套插入式结算类型并存（技术债）、反应效果执行时机、非伤害附着的消耗口径、trace 路径不结算反应等 |
-| #62–#66 | 覆盖报告剩余项：L12「最近角色」、自行巧局三条（另一模式不做）、Z13 / Z14 / L9 等 |
-| #67–#102 | 支援持续回合递减时机、秘传揭令归属、超限处理、饱腹解除、特技交互、复苏后出战 / 时机等 |
-| #105–#122 | 收尾轮：Z6 生产写入路径、L9 幻变钩子未接进开局、伤害类型转换已补、双负语义已落地（#121） |
-| 无编号 | `build.rs` 手写 JSON 解析器与 D74「改用 JSON 库」冲突；`src/lib.rs` / `src/families/mod.rs` 模块文档仍写旧范围（见 [[Architecture]] 末节） |
+| #15 | 三级统一基础操作待接入: 结算顺序实际调度, 结束阶段扣持续回合 / 可用次数, 起手换牌, 首发选择, 击倒 / 免于击倒 / 形态转换, 支援满 4, 召唤满 4, 元素幻变时序 |
+| #17–#32 | 伤害修正链顺序, 结晶护盾上限, 元素精通, 伤害免疫与加伤先后, 乘算取整, 下落 vs 重击等 |
+| #33–#39 | 第一回合先手, 结束阶段先手口径, 切换角色错误优先级, 元素调和来源骰限制, 不可调和语义 |
+| #42–#44 | 终局判定接进 flow, `GameRules` 占位, definitions 的 `rules` feature 是否进 CI (待确认)  |
+| #45–#50 | F10 抓牌后的手牌费用表 / `drawn_marks`, 下落标记端到端接线 |
+| #51–#57 | 两套插入式结算类型并存 (技术债) , 反应效果执行时机, 非伤害附着的消耗口径, trace 路径不结算反应等 |
+| #62–#66 | 覆盖报告剩余项: L12'最近角色', 自行巧局三条 (另一模式不做) , Z13 / Z14 / L9 等 |
+| #67–#102 | 支援持续回合递减时机, 秘传揭令归属, 超限处理, 饱腹解除, 特技交互, 复苏后出战 / 时机等 |
+| #105–#122 | 收尾轮: Z6 生产写入路径, L9 幻变钩子未接进开局, 伤害类型转换已补, 双负语义已落地 (#121)  |
+| 无编号 | `build.rs` 手写 JSON 解析器与 D74'改用 JSON 库'冲突; `src/lib.rs` / `src/families/mod.rs` 模块文档仍写旧范围 (见 [[Architecture]] 末节)  |
 
 ---
 
-最后核对：2026-10-19（代码：`new/crates/definitions/src/lib.rs:pub mod`）
+最后核对: 2026-10-19 (代码: `new/crates/definitions/src/lib.rs:pub mod`) 

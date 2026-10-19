@@ -2,13 +2,13 @@
 
 > 中文 · [[定义层-Character-EN|English]]
 
-*本页范围：`crates/definitions/src/families/character/` —— 角色牌族的定义载体、运行期状态、三个区、伤害链、技能流程、时机与形态 / 成长 / 饱腹。*
+*本页范围: `crates/definitions/src/families/character/` —— 角色牌族的定义载体, 运行期状态, 三个区, 伤害链, 技能流程, 时机与形态 / 成长 / 饱腹.*
 
 ---
 
 ## 1. 职责
 
-角色牌族：**定义载体**（`CharacterDef` / `SkillDef`）+ **运行期状态**（`CharacterState`）+ **三个区**（角色区 / 装备栏 / 出战状态区）+ **伤害链** + **技能流程** + 时机 / 形态 / 成长 / 饱腹。不做高层语义封装（D133）、不做「布尔获取充能」（D138）、不含具体卡牌（D240）。
+角色牌族: **定义载体** (`CharacterDef` / `SkillDef`) + **运行期状态** (`CharacterState`) + **三个区** (角色区 / 装备栏 / 出战状态区) + **伤害链** + **技能流程** + 时机 / 形态 / 成长 / 饱腹.不做高层语义封装 (D133) , 不做'布尔获取充能' (D138) , 不含具体卡牌 (D240) .
 
 ## 2. 关键概念与类型
 
@@ -16,35 +16,35 @@
 
 | 类型 | 文件 | 要点 |
 |---|---|---|
-| `CharacterDef<Tags>` | `definition.rs` | `id` / `name` / `tags`（泛型标签集合）/ `max_hp` / `max_energy` / `skills: &'static [&'static SkillDef]`；上限是**定义数据**，运行期当前值在 `CharacterState` |
-| `SkillDef` / `SkillCost` | `skill.rs` | `id`（= 角色 id × 10 + 序号）/ 文案 / `kind: SkillKind` / `cost: SkillCost { dice: &'static [CostComponent], energy: Nat }` / `effect: SkillEffect = fn()`（**占位签名**，D162） |
-| `SkillKind` / `SpecialNormalAttack` / `DamageType` | `types.rs` | 技能 4 类：`NormalAttack(Option<SpecialNormalAttack>)`（`None` 普攻本体 / `Some(Charged)` 重击 / `Some(Plunging)` 下落攻击）/ `ElementalSkill` / `ElementalBurst` / `Passive`；伤害类型：`Elemental(Element)` / `Physical` / `Piercing` |
+| `CharacterDef<Tags>` | `definition.rs` | `id` / `name` / `tags` (泛型标签集合) / `max_hp` / `max_energy` / `skills: &'static [&'static SkillDef]`; 上限是**定义数据**, 运行期当前值在 `CharacterState` |
+| `SkillDef` / `SkillCost` | `skill.rs` | `id` (= 角色 id × 10 + 序号) / 文案 / `kind: SkillKind` / `cost: SkillCost { dice: &'static [CostComponent], energy: Nat }` / `effect: SkillEffect = fn()` (**占位签名**, D162)  |
+| `SkillKind` / `SpecialNormalAttack` / `DamageType` | `types.rs` | 技能 4 类: `NormalAttack(Option<SpecialNormalAttack>)` (`None` 普攻本体 / `Some(Charged)` 重击 / `Some(Plunging)` 下落攻击) / `ElementalSkill` / `ElementalBurst` / `Passive`; 伤害类型: `Elemental(Element)` / `Physical` / `Piercing` |
 
 > [!NOTE]
-> 重击 / 下落攻击不是独立技能种类（D123 / D126），仍属普通攻击类（D124）；判断「对普通攻击生效」用 `is_normal_attack`。
+> 重击 / 下落攻击不是独立技能种类 (D123 / D126) , 仍属普通攻击类 (D124) ; 判断'对普通攻击生效'用 `is_normal_attack`.
 
-### 2.2 运行期状态（`character.rs`）
+### 2.2 运行期状态 (`character.rs`) 
 
-- `hp: Nat` / `max_hp: Nat`：`hp <= max_hp`（构造与写操作都钳住）。
-- `energy: Nat` / `max_energy: Nat`：元素爆发「花费所有充能」由卡面数据表达。
-- `states: StateList`：D105 所有状态共用一张列表；布尔类 `layers=None`。
-- `attachment: Attachment`：D167 元素布尔集合（可多元素共存、无计量；不是状态）。
-- **逐字源码见 §3.2**（`crates/definitions/src/families/character/character.rs`）。
+- `hp: Nat` / `max_hp: Nat`: `hp <= max_hp` (构造与写操作都钳住) .
+- `energy: Nat` / `max_energy: Nat`: 元素爆发'花费所有充能'由卡面数据表达.
+- `states: StateList`: D105 所有状态共用一张列表; 布尔类 `layers=None`.
+- `attachment: Attachment`: D167 元素布尔集合 (可多元素共存, 无计量; 不是状态) .
+- **源码见 §3.2** (`crates/definitions/src/families/character/character.rs`) .
 
-- 纯函数：`hp_add / hp_sub / hp_set`、`energy_add / energy_sub / energy_set`、`from_def`；全部 `Nat` 饱和，不改入参。
-- **不做**「获取充能（布尔）」与「生命值变动 = 被击倒」这类语义（D138 / D133）；触发式操作在 `trigger.rs`。
+- 纯函数: `hp_add / hp_sub / hp_set`, `energy_add / energy_sub / energy_set`, `from_def`; 全部 `Nat` 饱和, 不改入参.
+- **不做**'获取充能 (布尔) '与'生命值变动 = 被击倒'这类语义 (D138 / D133) ; 触发式操作在 `trigger.rs`.
 
-### 2.3 三个区（D42：区 = 字段；敌我 = 两实例）
+### 2.3 三个区 (D42: 区 = 字段; 敌我 = 两实例) 
 
 | 区 | 文件 | 关键规则 |
 |---|---|---|
-| 角色区 `CharacterZone` | `zones/field.rs` | `CHARACTER_SLOTS = 3`；`slots` 顺序 = 进场先后（切换不重排）；**出战角色是独立指针**（`active()` / `active_entity()`），不是槽位 0；时机 `Entered / Left / SwitchOut / SwitchIn / ActiveChanged` |
-| 装备栏 `EquipmentZone` | `zones/equipment.rs` | **每个场上角色一个**；槽位 `SlotKind { Weapon, Artifact, Talent, Technique }`；互斥 / 武器类型门复用 `rules::ops::equip`（D16）；同槽已有 → 强制替换并弃置旧装备；天赋同卡覆盖；时机 `Equipped / Discarded` |
-| 出战状态区 `CombatStatusZone` | `zones/combat_status.rs` | 附在出战角色上（`attached_to`）；切换时**只改 attached_to、条目不动**；同名再附着层数相加、持续回合保留原值；结束阶段 `tick_end_phase_with_triggers`；时机 `Attached / Transferred / Removed / DurationTicked / Depleted` |
+| 角色区 `CharacterZone` | `zones/field.rs` | `CHARACTER_SLOTS = 3`; `slots` 顺序 = 进场先后 (切换不重排) ; **出战角色是独立指针** (`active()` / `active_entity()`) , 不是槽位 0; 时机 `Entered / Left / SwitchOut / SwitchIn / ActiveChanged` |
+| 装备栏 `EquipmentZone` | `zones/equipment.rs` | **每个场上角色一个**; 槽位 `SlotKind { Weapon, Artifact, Talent, Technique }`; 互斥 / 武器类型门复用 `rules::ops::equip` (D16) ; 同槽已有 → 强制替换并弃置旧装备; 天赋同卡覆盖; 时机 `Equipped / Discarded` |
+| 出战状态区 `CombatStatusZone` | `zones/combat_status.rs` | 附在出战角色上 (`attached_to`) ; 切换时**只改 attached_to, 条目不动**; 同名再附着层数相加, 持续回合保留原值; 结束阶段 `tick_end_phase_with_triggers`; 时机 `Attached / Transferred / Removed / DurationTicked / Depleted` |
 
-### 2.4 伤害链（`damage_chain/`）
+### 2.4 伤害链 (`damage_chain/`) 
 
-`DamageChainEnv`（`chain.rs`）只借只读指针：
+`DamageChainEnv` (`chain.rs`) 只借只读指针: 
 
 ```text
 combat_status / character_states   // 读护盾、减伤、免疫的承载（两处都读）
@@ -53,51 +53,52 @@ modifiers: DamageModifiers         // AmountOp 四段修饰 + 取整方向
 type_override: Option<DamageType>  // 类型覆盖（物理→元素等；先于反应判定，留空 #110/#120）
 ```
 
-**结算顺序**：免疫（归 0，穿透不吃）→ 加伤 → 乘算 / 除算 → 护盾 → 减伤 → 扣血（只给 `to_hp`，不扣血）。
+**结算顺序**: 免疫 (归 0, 穿透不吃) → 加伤 → 乘算 / 除算 → 护盾 → 减伤 → 扣血 (只给 `to_hp`, 不扣血) .
 
 | 段 | 实现 | 说明 |
 |---|---|---|
-| 0 免疫 | `statuses::IMMUNITY_STATUSES` + `step_immunity` | 「免疫所有伤害」→ 短路成「基础 → 免疫 → 扣血 0」；**穿透不吃免疫**（K5） |
-| 1 加伤 | `bonus::DamageBonus` + `step_bonus` | 通用增伤 + 反应加伤 + 元素精通（`MASTERY_DAMAGE_PER_POINT` 待实测）；穿透整段跳过 |
-| 2 乘算 / 除算 | `bonus::{AmountOp, MulMode, MultiplierZone, Rounding}` + `step_scale` | 四段模型（分工计划 §4.4.5）：区内加减 → 独立乘法 + 倍数区（乘数相加）→ 所有除数相乘后一起除并取整 → 区外加减；除零 panic（D44） |
-| 3 护盾 | `rules::ops::damage::mitigate` + `step_shield` | 出战状态 203 + 角色状态 134 的点数相加；穿透不吃 |
-| 4 减伤 | 同上 + `step_reduction` | 「伤害抵消」各条相加后一次扣；穿透不吃 |
-| 5 扣血 | `step_to_hp` | 结果交给 `damage()`（附着 / 反应判定 / 触发照旧） |
+| 0 免疫 | `statuses::IMMUNITY_STATUSES` + `step_immunity` | '免疫所有伤害'→ 短路成'基础 → 免疫 → 扣血 0'; **穿透不吃免疫** (穿透伤害)  |
+| 1 加伤 | `bonus::DamageBonus` + `step_bonus` | 通用增伤 + 反应加伤 + 元素精通 (`MASTERY_DAMAGE_PER_POINT` 待实测) ; 穿透整段跳过 |
+| 2 乘算 / 除算 | `bonus::{AmountOp, MulMode, MultiplierZone, Rounding}` + `step_scale` | 四段模型 (分工计划 §4.4.5) : 区内加减 → 独立乘法 + 倍数区 (乘数相加) → 所有除数相乘后一起除并取整 → 区外加减; 除零 panic (D44)  |
+| 3 护盾 | `rules::ops::damage::mitigate` + `step_shield` | 出战状态 203 + 角色状态 134 的点数相加; 穿透不吃 |
+| 4 减伤 | 同上 + `step_reduction` | '伤害抵消'各条相加后一次扣; 穿透不吃 |
+| 5 扣血 | `step_to_hp` | 结果交给 `damage()` (附着 / 反应判定 / 触发照旧)  |
 
-- 插入式结算（D196）：`schedule()` 返回 `ScheduledChain`（`timeline::Resolution` 帧 + cursor），可 `insert` 子结算、`snapshot()` 导出 debug。
-- 结果：`ChainStage`（Base / Bypassed / Boosted / Immune / Scaled / Shielded / Reduced / ToHp）、`ChainOutcome`（`bonus_total` / `damage_after_bonus` / `after_scale` / `shield_used` / `reduction_total` / `to_hp` / `bypassed` / `immune` / `immunity_available` / `scale` / `stages`）。
-- 记录（D221 / D223 / D224 / D225）：`settle_records` / `damage_with_chain_recorded` 写 `DamageChainRecord`（Hit / TypeOverride / Increase / Mastery / ReactionBonus / BonusTotal / PiercingBypass / Immune / Scale / Shield / Reduction / ToHp / Reaction），**在计算处写真实值**，不靠 diff；关闭 `records` feature 零开销。
+- 插入式结算 (D196) : `schedule()` 返回 `ScheduledChain` (`timeline::Resolution` 帧 + cursor) , 可 `insert` 子结算, `snapshot()` 导出 debug.
+- 结果: `ChainStage` (Base / Bypassed / Boosted / Immune / Scaled / Shielded / Reduced / ToHp) , `ChainOutcome` (`bonus_total` / `damage_after_bonus` / `after_scale` / `shield_used` / `reduction_total` / `to_hp` / `bypassed` / `immune` / `immunity_available` / `scale` / `stages`) .
+- 记录 (D221 / D223 / D224 / D225) : `settle_records` / `damage_with_chain_recorded` 写 `DamageChainRecord` (Hit / TypeOverride / Increase / Mastery / ReactionBonus / BonusTotal / PiercingBypass / Immune / Scale / Shield / Reduction / ToHp / Reaction) , **在计算处写真实值**, 不靠 diff; 关闭 `records` feature 零开销.
 
-**底层伤害入口**（`damage.rs`）：`damage()` = 扣血 + 元素附着 + 反应判定 / 消耗参与元素 + 触发注册（D164 / D167）；`damage_with_triggers` 额外派发「生命值变动」；`damage_with_chain`（含 `_recorded`）先走伤修链再调 `damage()`。附着与反应注册接口在 `attachment.rs`（`Attachment` 布尔集合；`ReactionRegistry` 支持按种类 / 按元素对 / 任意回调三种注册）。
+**底层伤害入口** (`damage.rs`) : `damage()` = 扣血 + 元素附着 + 反应判定 / 消耗参与元素 + 触发注册 (D164 / D167) ; `damage_with_triggers` 额外派发'生命值变动'; `damage_with_chain` (含 `_recorded`) 先走伤修链再调 `damage()`.附着与反应注册接口在 `attachment.rs` (`Attachment` 布尔集合; `ReactionRegistry` 支持按种类 / 按元素对 / 任意回调三种注册) .
 
-### 2.5 技能流程（`skill_flow/`）
+### 2.5 技能流程 (`skill_flow/`) 
 
 | 模块 | 内容 |
 |---|---|
 | `mod.rs` | `SkillUseContext` / `SkillUsePolicy` / `can_use` / `pay_skill_cost` / `skill_energy_gain` / `use_skill` / `use_skill_with_plunging` / `SkillUse { skill, effective_kind, dice, character, uses, before, after }` |
-| `attack_form.rs` | S8.9 / S8.10 的「视为」判定：`AttackForm{Normal,Charged,Plunging}`、`AttackFormInputs{dice_total,plunging_pending}`、`is_even`、`effective_normal_attack`、`PlungingMark` |
-| `forbidden.rs` | R5 状态禁用技能查询：`SKILL_FORBIDDING_STATUSES`（冻结 / 眩晕 / 石化）、`ForbiddenUses`、`ForbiddenState`、`forbidden_by` / `skill_allowed` / `technique_allowed` |
-| `technique.rs` | L4 特技流程：`SkillUseClass` + `UseFlow`、`TechniqueContext`、`can_use_technique` / `use_technique`、`TechniqueUse`、`dispatch_technique`（**恒空**） |
-| `usage.rs` | `SkillUses`（每技能每回合上限 + 已用次数，`engine::stats::Counter`；**规则状态，不放 stats/**，D198） |
-| `prepared.rs` | 准备技能（K53）：`PreparedSkills`（begin / complete / interrupt / tick_action_round / pending_action）；阻塞主动选技能 |
-| `timing.rs` | `dispatch_skill`：按「任意 → 某一类 → 具体技能」三档作用域派发 `SkillTiming::SkillUsed`，归并后返回待执行（D186） |
+| `attack_form.rs` | S8.9 / S8.10 的'视为'判定: `AttackForm{Normal,Charged,Plunging}`, `AttackFormInputs{dice_total,plunging_pending}`, `is_even`, `effective_normal_attack`, `PlungingMark` |
+| `forbidden.rs` | R5 状态禁用技能查询: `SKILL_FORBIDDING_STATUSES` (冻结 / 眩晕 / 石化) , `ForbiddenUses`, `ForbiddenState`, `forbidden_by` / `skill_allowed` / `technique_allowed` |
+| `technique.rs` | L4 特技流程: `SkillUseClass` + `UseFlow`, `TechniqueContext`, `can_use_technique` / `use_technique`, `TechniqueUse`, `dispatch_technique` (**恒空**)  |
+| `usage.rs` | `SkillUses` (每技能每回合上限 + 已用次数, `engine::stats::Counter`; **规则状态, 不放 stats/**, D198)  |
+| `prepared.rs` | 准备技能 (准备技能) : `PreparedSkills` (begin / complete / interrupt / tick_action_round / pending_action) ; 阻塞主动选技能 |
+| `timing.rs` | `dispatch_skill`: 按'任意 → 某一类 → 具体技能'三档作用域派发 `SkillTiming::SkillUsed`, 归并后返回待执行 (D186)  |
 
-**`can_use` 判据顺序**（固定，返回第一个命中的 `CannotUse`）：
+**`can_use` 判据顺序** (固定, 返回第一个命中的 `CannotUse`) : 
 
+*注释中的关键字代码已替换为名称, 代码行未改*
 ```text
 1 PassiveSkill           被动不可主动使用（policy 可开）
-2 ForbiddenByStatus      冻结 / 石化 / 眩晕（R5；S6.6 / K55 / S8.4）
-3 Preparing / PreparedSkillReady   K53 准备技能阻塞（policy 可关）
+2 ForbiddenByStatus      冻结 / 石化 / 眩晕（R5；S6.6 / 眩晕 / S8.4）
+3 Preparing / PreparedSkillReady   准备技能 准备技能阻塞（policy 可关）
 4 UsageLimit             每回合次数
 5 NotEnoughEnergy        充能（元素爆发的 charge_cost = 充能上限）
 6 NotEnoughDice          骰子（can_afford 是「可能就行」上界）
 ```
 
-**`use_skill` 顺序**：`can_use` → 派发「使用技能时」→ 支付（骰 + 充能）→ 派发「使用技能后」→ 记使用次数 + 给充能（普攻 / 元素战技 +1）；**不执行技能效果体**（`SkillDef::effect` 仍是占位 `fn()`）。`effective_kind` 是判定后的生效形态（重击 / 下落），仅用于观测与后续派发。
+**`use_skill` 顺序**: `can_use` → 派发'使用技能时'→ 支付 (骰 + 充能) → 派发'使用技能后'→ 记使用次数 + 给充能 (普攻 / 元素战技 +1) ; **不执行技能效果体** (`SkillDef::effect` 仍是占位 `fn()`) .`effective_kind` 是判定后的生效形态 (重击 / 下落) , 仅用于观测与后续派发.
 
-### 2.6 时机与触发（`trigger.rs`）
+### 2.6 时机与触发 (`trigger.rs`) 
 
-`CharacterTiming` 是角色族**唯一一张**注册表的键（D185 / D198）：
+`CharacterTiming` 是角色族**唯一一张**注册表的键 (D185 / D198) : 
 
 ```text
 HpChanged        // 生命值变动（受伤 / 治疗 / 裸加减血都算）
@@ -108,26 +109,26 @@ SkillUsed { phase: Before|After, scope: Any|Kind(SkillKind)|Skill(SkillId) }
 FormTransformed  // 转换形态（form.rs 派发）
 ```
 
-触发项 = 「时机键 + 条件函数指针 + 效果函数指针 + 排序标识」（D186）；`dispatch_character` 只排序产出待执行，`execute_character` 才执行；`CharacterFrames = timeline::Resolution<CharacterEffect>`（插入式结算）。**特技与准备技能的使用都不派发 `SkillUsed`**（K58 / K53）。
+触发项 = '时机键 + 条件函数指针 + 效果函数指针 + 排序标识' (D186) ; `dispatch_character` 只排序产出待执行, `execute_character` 才执行; `CharacterFrames = timeline::Resolution<CharacterEffect>` (插入式结算) .**特技与准备技能的使用都不派发 `SkillUsed`** (特技 / 准备技能) .
 
 ### 2.7 形态 / 成长 / 饱腹
 
 | 模块 | 要点 |
 |---|---|
-| `form.rs` | `FormDef`（名称 / 元素 / 标签指针切片 / 技能列表）/ `Form` / `FormState`（base + current；`transform_to` / `restore` 纯函数）；`FormTriggers` + `transform_with_triggers` 派发 `FormTransformed`；**`CharacterState` 还没有形态字段**（留空 #32 / #22） |
-| `growth.rs` | `GrowthAttribute{Attack,MaxHp,MaxEnergy}` + `GrowthDirection` + `Growth` / `GrowthList`；`effective_max_hp` / `actual_max_hp(定义值)`；定义值不可变，实际值 = 定义值 + 成长；击倒时 `reset_max_hp()`（D238） |
-| `satiated.rs` | 身份 `SATIATED`（数据 303300；布尔）；`CharacterState::{satiated, with_satiated, clear_satiated, food_targetable}`；`clear_at_round_end` / `clear_on_defeat`（S8.1 第 3 条） |
-| `energy.rs` | `energy_gain(base, modifiers)`：获得量修正（D193：不做「充能变动」时机键） |
+| `form.rs` | `FormDef` (名称 / 元素 / 标签指针切片 / 技能列表) / `Form` / `FormState` (base + current; `transform_to` / `restore` 纯函数) ; `FormTriggers` + `transform_with_triggers` 派发 `FormTransformed`; **`CharacterState` 还没有形态字段** (留空 #32 / #22)  |
+| `growth.rs` | `GrowthAttribute{Attack,MaxHp,MaxEnergy}` + `GrowthDirection` + `Growth` / `GrowthList`; `effective_max_hp` / `actual_max_hp(定义值)`; 定义值不可变, 实际值 = 定义值 + 成长; 击倒时 `reset_max_hp()` (D238)  |
+| `satiated.rs` | 身份 `SATIATED` (数据 303300; 布尔) ; `CharacterState::{satiated, with_satiated, clear_satiated, food_targetable}`; `clear_at_round_end` / `clear_on_defeat` (S8.1 第 3 条)  |
+| `energy.rs` | `energy_gain(base, modifiers)`: 获得量修正 (D193: 不做'充能变动'时机键)  |
 
 ### 2.8 与状态的关系
 
-- 角色状态 = `CharacterState.states`（公共 `StateList`，位置 `CHARACTER_STATE_POS = 0`）；护盾 / 减伤 / 免疫 / 冻结 / 眩晕 / 石化 / 饱腹的身份由 `damage_chain::statuses` 提供或桥接（见 [[定义层-Summon-Enemy-Status]]）。
-- 出战状态 = `CombatStatusZone`（挂出战角色）；装备 = `EquipmentZone`（每角色一个）。
+- 角色状态 = `CharacterState.states` (公共 `StateList`, 位置 `CHARACTER_STATE_POS = 0`) ; 护盾 / 减伤 / 免疫 / 冻结 / 眩晕 / 石化 / 饱腹的身份由 `damage_chain::statuses` 提供或桥接 (见 [[定义层-Summon-Enemy-Status]]) .
+- 出战状态 = `CombatStatusZone` (挂出战角色) ; 装备 = `EquipmentZone` (每角色一个) .
 
 ## 3. 公开入口
 
 > [!NOTE]
-> 本节代码逐字取自当前仓库（含 `use` / `derive` / 文档注释等样板）。超长函数体截断为「签名 + 开头几行」，并注明从略；未截断的即为全文。
+> 本节代码取自当前仓库 (含 `use` / `derive` / 文档注释等样板) .超长函数体截断为'签名 + 开头几行', 并注明从略; 未截断的即为全文.
 
 ### 3.1 定义载体
 
@@ -666,7 +667,7 @@ pub struct DamageChainEnv<'a> {
     pub reductions: &'a [&'static dyn StateIdentity],
     /// 算作**伤害免疫**的状态身份集合（默认 [`statuses::IMMUNITY_STATUSES`]）。
     ///
-    /// 命中 = 本次伤害归 0（不结算）；**穿透伤害不吃免疫**（K5）。
+    /// 命中 = 本次伤害归 0（不结算）；**穿透伤害不吃免疫**（穿透伤害）。
     pub immunities: &'a [&'static dyn StateIdentity],
     /// 乘算 / 除算 / 区外加减（分工计划 §4.4.5；默认 [`DamageModifiers::NONE`]）。
     pub modifiers: DamageModifiers<'a>,
@@ -682,7 +683,7 @@ pub struct DamageChainEnv<'a> {
 **`with_type_override`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
 
 ```rust
-    /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前逐字节等价）。
+    /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前节等价）。
     ///
     /// 依据：天赋 / 状态卡面「使角色造成的物理伤害变为水元素伤害」类效果；规则书没有
     /// 「伤害类型转换」词条 —— 口径 = 覆盖后完全按新类型结算（含反应判定、穿透 / 免疫）；
@@ -728,12 +729,12 @@ pub fn settle(
 pub enum CannotUse {
     /// 被动技能不可主动使用（[`SkillUsePolicy::allow_passive`] 为 false）。
     PassiveSkill,
-    /// 该角色有技能**正在准备**：本次行动被跳过（K53）。
+    /// 该角色有技能**正在准备**：本次行动被跳过（准备技能）。
     Preparing {
         /// 正在准备的技能。
         skill: SkillId,
     },
-    /// 该角色有技能**已完成准备**：将直接使用它，不能再选别的技能（K53）。
+    /// 该角色有技能**已完成准备**：将直接使用它，不能再选别的技能（准备技能）。
     PreparedSkillReady {
         /// 已完成准备的技能。
         skill: SkillId,
@@ -757,7 +758,7 @@ pub enum CannotUse {
     /// 注意：`DicePool::can_afford` 是「**可能**就行」（折叠组按可能颜色计入上界），
     /// 所以 [`can_use`] 通过后 [`pay_skill_cost`] **仍可能**返回这个失败（折叠组需要先显式展开）。
     NotEnoughDice,
-    /// 角色被状态**禁止使用技能**（冻结 / 石化 / 眩晕；S6.6 / K55 / S8.4）。
+    /// 角色被状态**禁止使用技能**（冻结 / 石化 / 眩晕；S6.6 / 眩晕 / S8.4）。
     ///
     /// 查询实现在 [`forbidden`]；规则书原文「角色无法使用技能」。
     ForbiddenByStatus {
@@ -800,8 +801,8 @@ pub struct SkillUseContext<'a> {
 /// 判定顺序（固定）：
 /// 1. **[`CannotUse::PassiveSkill`]**：被动技能不可主动使用（策略可关）；
 /// 2. **[`CannotUse::ForbiddenByStatus`]**：角色被状态禁止使用技能（冻结 / 石化 / 眩晕；
-///    S6.6 / K55 / S8.4）；查询在 [`forbidden`]，**不受策略开关影响**；
-/// 3. **[`CannotUse::Preparing`] / [`CannotUse::PreparedSkillReady`]**：K53 准备技能阻塞
+///    S6.6 / 眩晕 / S8.4）；查询在 [`forbidden`]，**不受策略开关影响**；
+/// 3. **[`CannotUse::Preparing`] / [`CannotUse::PreparedSkillReady`]**：准备技能 准备技能阻塞
 ///    （策略可关）；判定用 `PreparedSkills::pending_action`；
 /// 4. **[`CannotUse::UsageLimit`]**：本回合次数（`SkillUses`）；
 /// 5. **[`CannotUse::NotEnoughEnergy`]**：充能（`SkillCost::energy`；元素爆发的卡面数据里它等于
@@ -862,7 +863,7 @@ pub fn pay_skill_cost(
 ///   派发也是只读的）；
 /// - **不执行技能效果体**（`SkillDef::effect` 还是占位 `fn()`，D162 TODO）；
 /// - **不执行派发结果**（D186）：`before` / `after` 只是待执行列表；
-/// - **准备技能不走这里**（K53：不派发「使用技能时 / 后」；走 `prepared::PreparedSkills`）；
+/// - **准备技能不走这里**（准备技能：不派发「使用技能时 / 后」；走 `prepared::PreparedSkills`）；
 /// - 规则书的「普通攻击 / 元素战技 后获得 1 点充能」**已作用**在返回的 `character` 上（先于调用方执行
 ///   `after`）；规则书没规定它与「使用技能后」触发的先后，本层取「获得充能先」暂定。
 pub fn use_skill(
@@ -1048,7 +1049,7 @@ pub fn technique_allowed(states: &StateList) -> bool {
 ```rust
 /// **可主动使用入口的分类**：把「技能」与「特技」并列成一个判定点。
 ///
-/// 为什么不用 SkillKind 表达特技：K58 原文「使用『特技』时不视为使用技能」，
+/// 为什么不用 SkillKind 表达特技：特技 原文「使用『特技』时不视为使用技能」，
 /// 且 D123 / D126 只把重击 / 下落攻击作为普通攻击的形态 —— 特技不是技能种类，
 /// 所以单独用一个分类枚举承载「流程语义」。
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
@@ -1088,7 +1089,7 @@ pub struct TechniqueContext<'a> {
 ```rust
 /// **使用特技**：判定通过后返回结果（不支付 / 不派发 / 不执行效果）。
 ///
-/// 依据：S8.4 / K58。调用方拿到 TechniqueUse 后：
+/// 依据：S8.4 / 特技。调用方拿到 TechniqueUse 后：
 /// 1. 按战斗行动结算（Timing::Combat）；
 /// 2. **不要**派发「使用技能时 / 后」（dispatch_technique 恒为空）；
 /// 3. 效果造成的伤害按「非角色造成」处理。
@@ -1180,7 +1181,7 @@ pub struct PreparedSkills {
 ```rust
     /// **开始准备**：追加一个准备槽，`rounds` = 还需几个行动轮（`ZERO` = 立刻完成准备）。
     ///
-    /// 纯函数：返回新容器，不改入参。只应由「出战角色」调用（K53；本层不校验，见模块文档）。
+    /// 纯函数：返回新容器，不改入参。只应由「出战角色」调用（准备技能；本层不校验，见模块文档）。
     pub fn begin(&self, skill: SkillId, rounds: Nat) -> PreparedSkills {
         let mut next = self.clone();
         next.slots.push(PreparedSkill {
@@ -1194,9 +1195,9 @@ pub struct PreparedSkills {
 **`pending_action`** — `crates/definitions/src/families/character/skill_flow/prepared.rs`
 
 ```rust
-    /// 「轮到该角色行动时」应该做什么（K53）。
+    /// 「轮到该角色行动时」应该做什么（准备技能）。
     ///
-    /// 判定顺序：**已完成准备的先直接用**（K53「如果技能已经完成准备，角色将会在此时直接使用此技能」）；
+    /// 判定顺序：**已完成准备的先直接用**（准备技能「如果技能已经完成准备，角色将会在此时直接使用此技能」）；
     /// 没有就绪的、但有准备中的 -> 跳过行动；都没有 -> `None`（正常行动）。
     pub fn pending_action(&self) -> Option<PreparedAction> {
         if let Some(skill) = self.ready_skill() {
@@ -1287,21 +1288,21 @@ pub enum CharacterTiming {
     /// 「使用 `$[S…]` 后」，抽象成「阶段 × 作用域」后**一个变体**就能表达；派发时按三档作用域
     /// 各查一次，再按结算顺序归并（`families::character::skill_flow::timing::dispatch_skill`）。
     ///
-    /// **特技（K58）与准备技能（K53）的使用不触发这个时机**：
+    /// **特技（特技）与准备技能（准备技能）的使用不触发这个时机**：
     /// 特殊词条 特技「角色使用『特技』时不视为使用技能，无法触发『使用技能后』……」；
-    /// 权威关键字 K53 准备技能「此类需要准备的技能，无法触发『使用技能后』……」。
+    /// 权威关键字 准备技能 准备技能「此类需要准备的技能，无法触发『使用技能后』……」。
     SkillUsed {
         /// 阶段（使用技能时 / 后）。
         phase: SkillPhase,
         /// 作用域（任意 / 某一类 / 某个具体技能）。
         scope: SkillScope,
     },
-    /// **转换形态**（规则书·其他规则 转换形态；权威关键字 K1013 / K1014 / K1012）。
+    /// **转换形态**（规则书·其他规则 转换形态；权威关键字 「焚尽的炽炎魔女」 / 「失能形态」 / 汲取对应元素的力量）。
     ///
     /// 依据：规则书·其他规则 转换形态「部分角色可以通过一些效果『转换形态』。转换为其他形态后，
     /// 角色的名称、元素类型、标签、技能等都有可能发生改变」；
-    /// 权威关键字 K1013「『焚尽的炽炎魔女』」（女士 永久转换；元素 冰 -> 火；只能用转换后技能）、
-    /// K1014「『失能形态』」（不能用原本技能）、K1012「汲取对应元素的力量」（按汲取元素获得技能）。
+    /// 权威关键字 「焚尽的炽炎魔女」「『焚尽的炽炎魔女』」（女士 永久转换；元素 冰 -> 火；只能用转换后技能）、
+    /// 「失能形态」「『失能形态』」（不能用原本技能）、汲取对应元素的力量「汲取对应元素的力量」（按汲取元素获得技能）。
     ///
     /// 派发入口在 `families::character::form`：`transform_with_triggers` /
     /// `restore_with_triggers`（**转换完成后**派发一次；事件带转换后的元素类型）。
@@ -1431,7 +1432,7 @@ impl Satiated {
 ### 3.7 本页引用的关键字 / 规则 ops
 
 > [!NOTE]
-> 以下为本文引用的关键字层 / 规则 ops 的真实源码（签名与文档注释逐字取自仓库）。
+> 以下为本文引用的关键字层 / 规则 ops 的真实源码 (签名与文档注释取自仓库) .
 
 **`DamageArgs`** — `crates/definitions/src/keywords/op.rs`
 
@@ -1600,81 +1601,81 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
 
 ## 4. 不变量与禁止
 
-- 生命 / 充能永远不超过上限；上限只由定义或明确效果给。
-- 角色区槽位顺序 = 进场先后；切换出战**不重排**槽位；出战是独立指针。
-- 伤害链**不改 `damage()` 语义**：扣血 / 附着 / 反应判定 / 消耗参与元素 / 触发注册仍是原来那份代码。
-- **穿透伤害什么加成都不吃**：免疫 / 加伤 / 乘算 / 护盾 / 减伤全部跳过（规则书·特殊词条 穿透伤害 + K5）。
-- 特技不是技能：不派发 `SkillUsed`（`dispatch_technique` 恒空）、伤害不算角色造成、是战斗行动（S8.4 / K58）。
-- 冻结 / 石化 / 眩晕禁用技能与特技：`can_use` / `can_use_technique` 统一查询（S6.6 / K55 / S8.4）。
-- 准备技能不走 `use_skill`（K53 不触发「使用技能时 / 后」）。
-- 统计（stats）不参与局面等价；技能次数是规则状态（D198）。
-- 纯函数、失败不改入参；数值全 `Nat`；零 `f64`、零 `HashMap`。
+- 生命 / 充能永远不超过上限; 上限只由定义或明确效果给.
+- 角色区槽位顺序 = 进场先后; 切换出战**不重排**槽位; 出战是独立指针.
+- 伤害链**不改 `damage()` 语义**: 扣血 / 附着 / 反应判定 / 消耗参与元素 / 触发注册仍是原来那份代码.
+- **穿透伤害什么加成都不吃**: 免疫 / 加伤 / 乘算 / 护盾 / 减伤全部跳过 (规则书·特殊词条 穿透伤害 + 穿透伤害) .
+- 特技不是技能: 不派发 `SkillUsed` (`dispatch_technique` 恒空) , 伤害不算角色造成, 是战斗行动 (S8.4 / 特技) .
+- 冻结 / 石化 / 眩晕禁用技能与特技: `can_use` / `can_use_technique` 统一查询 (S6.6 / 眩晕 / S8.4) .
+- 准备技能不走 `use_skill` (准备技能 不触发'使用技能时 / 后') .
+- 统计 (stats) 不参与局面等价; 技能次数是规则状态 (D198) .
+- 纯函数, 失败不改入参; 数值全 `Nat`; 零 `f64`, 零 `HashMap`.
 
 > [!IMPORTANT]
-> 免疫最前短路、类型覆盖先于反应判定（留空 #25 / #110 / #120）；顺序未定的项不要自行拍板，登记到 留空.md。
+> 免疫最前短路, 类型覆盖先于反应判定 (留空 #25 / #110 / #120) ; 顺序未定的项不要自行拍板, 登记到 留空.md.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 | 主题 | 依据 |
 |---|---|
-| 角色区 3 槽 / 出战角色 / 切换角色（付 1 骰） | 规则书「游戏区域 I(3)(4)(5)」+「战斗行动【切换角色】」；支付在 flow 层 |
-| 装备栏：每角色 1 武器 / 1 圣遗物 / 1 特技 / 任意天赋 | 规则书「游戏区域 II(1)」；D16 |
-| 出战状态随切换转移、结束阶段 -1 | 规则书「游戏区域 II(3)」+「特殊词条 持续回合」 |
+| 角色区 3 槽 / 出战角色 / 切换角色 (付 1 骰)  | 规则书'游戏区域 I(3)(4)(5)'+'战斗行动[切换角色]'; 支付在 flow 层 |
+| 装备栏: 每角色 1 武器 / 1 圣遗物 / 1 特技 / 任意天赋 | 规则书'游戏区域 II(1)'; D16 |
+| 出战状态随切换转移, 结束阶段 -1 | 规则书'游戏区域 II(3)'+'特殊词条 持续回合' |
 | 伤害会附着并触发反应 | D164 / D167 |
-| 伤害链顺序 | 规则书·特殊词条 + `结算顺序.md` §三 + 分工计划 §4.4.5；留空 #17 / #25–#28 |
+| 伤害链顺序 | 规则书·特殊词条 + `结算顺序.md` §三 + 分工计划 §4.4.5; 留空 #17 / #25–#28 |
 | 击倒 / 免于击倒 / 治疗拆开 | D193 / D194 / D195 |
-| 技能时机键与三档作用域 | D198；规则书「进行行动 使用技能」+ 卡面措辞 |
-| 重击 / 下落攻击的「视为」 | S8.9 / S8.10；D123–D126；留空 #29 / #30 |
-| 特技流程 | S8.4 + K58；留空 #85–#87 / #101 |
-| 饱腹与料理 | S8.1 + 数据 303300；D17；留空 #78–#81 |
-| 形态转换 / 成长 | 规则书·其他规则 转换形态 + K1013/K1014；K64/K65；D238 |
+| 技能时机键与三档作用域 | D198; 规则书'进行行动 使用技能'+ 卡面措辞 |
+| 重击 / 下落攻击的'视为' | S8.9 / S8.10; D123–D126; 留空 #29 / #30 |
+| 特技流程 | S8.4 + 特技; 留空 #85–#87 / #101 |
+| 饱腹与料理 | S8.1 + 数据 303300; D17; 留空 #78–#81 |
+| 形态转换 / 成长 | 规则书·其他规则 转换形态 + '焚尽的炽炎魔女'/'失能形态'; 角色等级/角色等阶; D238 |
 
-### 5.1 文档与代码不一致（供复核）
+### 5.1 文档与代码不一致 (供复核) 
 
 > [!NOTE]
-> 以下为本轮复核发现，均以当前代码为准；需在旧文档或决策日志中更正。
+> 以下为本轮复核发现, 均以当前代码为准; 需在旧文档或决策日志中更正.
 
-1. `结构.md` §4.3 把技能流程画成 `families/character/skills/{prepared,transform,defeat,attack_kind}.rs`；实际是 `families/character/skill_flow/` + `form.rs` + `trigger.rs` + `damage_chain/`。
-2. `结构.md` 的 `character/zones/{status.rs, skill.rs, equipment.rs}` 与实际不符：实际为 `zones/{field.rs, equipment.rs, combat_status.rs}`；角色状态走公共 `StateList`。
-3. `决策日志.md` **D165** 说 `families/character/prepared.rs` 取消，但代码保留 `skill_flow/prepared.rs`（`can_use` 会阻塞准备中的技能），需 Lead 确认以哪条为准。
-4. `留空.md` 第 32 条称 `flow/skill_use.rs` 尚未调用 `use_skill_with_plunging`，实际 flow 已有 `use_skill_me_with_plunging`，该条已过期。
+1. `结构.md` §4.3 把技能流程画成 `families/character/skills/{prepared,transform,defeat,attack_kind}.rs`; 实际是 `families/character/skill_flow/` + `form.rs` + `trigger.rs` + `damage_chain/`.
+2. `结构.md` 的 `character/zones/{status.rs, skill.rs, equipment.rs}` 与实际不符: 实际为 `zones/{field.rs, equipment.rs, combat_status.rs}`; 角色状态走公共 `StateList`.
+3. `决策日志.md` **D165** 说 `families/character/prepared.rs` 取消, 但代码保留 `skill_flow/prepared.rs` (`can_use` 会阻塞准备中的技能) , 需 Lead 确认以哪条为准.
+4. `留空.md` 第 32 条称 `flow/skill_use.rs` 尚未调用 `use_skill_with_plunging`, 实际 flow 已有 `use_skill_me_with_plunging`, 该条已过期.
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 下面几条会直接改变结算语义或绕过统一入口。
+> 下面几条会直接改变结算语义或绕过统一入口.
 
-1. **把「重击 / 下落」当独立技能种类**：它们只是 `NormalAttack(Some(...))`（D123 / D126）；判断「对普通攻击生效」用 `is_normal_attack`。
-2. **自己判冻结 / 眩晕**：用 `skill_flow::forbidden`；不要另建状态名表。
-3. **把 `can_use` 当完整行动校验**：它不看出战角色、行动权 / 阶段、目标合法性、费用修正链。
-4. **特技走 `use_skill`**：特技不是技能，走 `skill_flow::technique`（端到端是 `flow::use_technique_me/opp`）。
-5. **给 `DamageChainEnv` 传第二份状态列表 / 自造护盾承载**：链只读 `CombatStatusZone` + `CharacterState.states`（D183）。
-6. **忘了 `type_override`**：在「物理伤害变为水元素伤害」场景必须用 `with_type_override`，否则反应按原类型判定。
-7. **把饱腹做成层数 / 手写状态文本**：饱腹是布尔共享身份（数据 303300）；替换定义需与状态块协调（留空 #79）。
-8. **击倒时只把 hp 设 0**：还要走 `trigger::defeat_with_triggers` / 上层清理；实际上限按 D238 重置。
+1. **把'重击 / 下落'当独立技能种类**: 它们只是 `NormalAttack(Some(...))` (D123 / D126) ; 判断'对普通攻击生效'用 `is_normal_attack`.
+2. **自己判冻结 / 眩晕**: 用 `skill_flow::forbidden`; 不要另建状态名表.
+3. **把 `can_use` 当完整行动校验**: 它不看出战角色, 行动权 / 阶段, 目标合法性, 费用修正链.
+4. **特技走 `use_skill`**: 特技不是技能, 走 `skill_flow::technique` (端到端是 `flow::use_technique_me/opp`) .
+5. **给 `DamageChainEnv` 传第二份状态列表 / 自造护盾承载**: 链只读 `CombatStatusZone` + `CharacterState.states` (D183) .
+6. **忘了 `type_override`**: 在'物理伤害变为水元素伤害'场景必须用 `with_type_override`, 否则反应按原类型判定.
+7. **把饱腹做成层数 / 手写状态文本**: 饱腹是布尔共享身份 (数据 303300) ; 替换定义需与状态块协调 (留空 #79) .
+8. **击倒时只把 hp 设 0**: 还要走 `trigger::defeat_with_triggers` / 上层清理; 实际上限按 D238 重置.
 
 ## 7. 测试
 
 | 文件 | 代表测试 |
 |---|---|
-| `character.rs` | `new_clamps_current_values_to_their_maxima`、`hp_sub_saturates_at_zero`、`numeric_operations_are_pure` |
-| `types.rs` | `four_skill_kinds_are_covered`、`special_forms_still_count_as_normal_attack`、`physical_and_piercing_are_not_elemental` |
-| `definition.rs` / `skill.rs` | `definition_carries_skill_list_in_order`、`skill_def_carries_identity_kind_cost_and_effect` |
-| `zones/field.rs` / `zones/equipment.rs` / `zones/combat_status.rs` | `switch_dispatches_out_then_in_then_active_changed`、`occupied_slot_replaces_and_discards_old_equipment`、`transfer_moves_attachment_and_keeps_entries` |
-| `damage_chain/chain.rs` / `bonus.rs` / `record.rs` | `immunity_short_circuits_the_chain_and_deals_zero`、`multipliers_apply_between_bonus_and_shield`、`type_override_rewrites_the_type_before_the_chain` |
-| `damage.rs` | `damage_with_chain_shield_reduces_the_damage_that_lands`、`damage_with_chain_is_pure_on_the_character_state` |
-| `skill_flow/*` | `forbidden_status_blocks_skill_use_and_changes_nothing`、`even_dice_total_turns_normal_attack_into_charged`、`technique_dispatches_no_skill_used_trigger` |
-| `form.rs` / `growth.rs` / `satiated.rs` | `transform_switches_name_element_tags_and_skills`、`reset_max_hp_returns_actual_cap_to_definition`、`food_effect_grants_satiated_once_and_blocks_food_targeting` |
+| `character.rs` | `new_clamps_current_values_to_their_maxima`, `hp_sub_saturates_at_zero`, `numeric_operations_are_pure` |
+| `types.rs` | `four_skill_kinds_are_covered`, `special_forms_still_count_as_normal_attack`, `physical_and_piercing_are_not_elemental` |
+| `definition.rs` / `skill.rs` | `definition_carries_skill_list_in_order`, `skill_def_carries_identity_kind_cost_and_effect` |
+| `zones/field.rs` / `zones/equipment.rs` / `zones/combat_status.rs` | `switch_dispatches_out_then_in_then_active_changed`, `occupied_slot_replaces_and_discards_old_equipment`, `transfer_moves_attachment_and_keeps_entries` |
+| `damage_chain/chain.rs` / `bonus.rs` / `record.rs` | `immunity_short_circuits_the_chain_and_deals_zero`, `multipliers_apply_between_bonus_and_shield`, `type_override_rewrites_the_type_before_the_chain` |
+| `damage.rs` | `damage_with_chain_shield_reduces_the_damage_that_lands`, `damage_with_chain_is_pure_on_the_character_state` |
+| `skill_flow/*` | `forbidden_status_blocks_skill_use_and_changes_nothing`, `even_dice_total_turns_normal_attack_into_charged`, `technique_dispatches_no_skill_used_trigger` |
+| `form.rs` / `growth.rs` / `satiated.rs` | `transform_switches_name_element_tags_and_skills`, `reset_max_hp_returns_actual_cap_to_definition`, `food_effect_grants_satiated_once_and_blocks_food_targeting` |
 
 ## 8. 待接入与待实测
 
-- **伤害乘算 / 免疫**：免疫与加伤先后、免疫时是否附着 / 反应、倍数区叠加、取整方向、`DamageBonus` 与乘算先后 —— 留空 #25–#28；具体护罩身份归状态块 #31；卡面「翻倍」由卡牌层声明 #32。
-- **重击 / 下落**：下落 vs 重击优先级 #29；下落标记保留规则 #30；标记持有与 flow 清理 #59–#61 / #77；「宣布结束」是否清标记 #95。
-- **特技**：费用规则书未写 #85；是否占每回合次数 / 不触发「角色引发元素反应后」的派发过滤 #86；端到端已在 `flow/technique.rs`，细节 #101。
-- **状态禁用技能**：判据顺序（只影响错误码优先级）#83；冻结等解除调度在 state/flows #84；行为变化提醒（`CannotUse::ForbiddenByStatus`）由 flow 自动获得 #88。
-- **饱腹**：解除发生在结束阶段哪一步 #78；正式 `StatusDef` 与共享身份二选一 #79；描述与规则书措辞差异 #80；调度归 cards + flow #81。
-- **形态 / 类型转换**：`CharacterState` 无形态字段、事件装不下形态身份 #22；`DamageChainEnv::type_override` 已接（#120），「哪些卡用哪种转换」归 cards。
-- **敌人牌**：`EnemyDef` 缺充能上限、无运行期区（留空 #15）。
+- **伤害乘算 / 免疫**: 免疫与加伤先后, 免疫时是否附着 / 反应, 倍数区叠加, 取整方向, `DamageBonus` 与乘算先后 —— 留空 #25–#28; 具体护罩身份归状态块 #31; 卡面'翻倍'由卡牌层声明 #32.
+- **重击 / 下落**: 下落 vs 重击优先级 #29; 下落标记保留规则 #30; 标记持有与 flow 清理 #59–#61 / #77; '宣布结束'是否清标记 #95.
+- **特技**: 费用规则书未写 #85; 是否占每回合次数 / 不触发'角色引发元素反应后'的派发过滤 #86; 端到端已在 `flow/technique.rs`, 细节 #101.
+- **状态禁用技能**: 判据顺序 (只影响错误码优先级) #83; 冻结等解除调度在 state/flows #84; 行为变化提醒 (`CannotUse::ForbiddenByStatus`) 由 flow 自动获得 #88.
+- **饱腹**: 解除发生在结束阶段哪一步 #78; 正式 `StatusDef` 与共享身份二选一 #79; 描述与规则书措辞差异 #80; 调度归 cards + flow #81.
+- **形态 / 类型转换**: `CharacterState` 无形态字段, 事件装不下形态身份 #22; `DamageChainEnv::type_override` 已接 (#120) , '哪些卡用哪种转换'归 cards.
+- **敌人牌**: `EnemyDef` 缺充能上限, 无运行期区 (留空 #15) .
 
 ---
-最后核对：2026-10-19（代码：`crates/definitions/src/families/character/skill_flow/mod.rs::can_use`）
+最后核对: 2026-10-19 (代码: `crates/definitions/src/families/character/skill_flow/mod.rs::can_use`) 

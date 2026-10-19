@@ -2,24 +2,24 @@
 
 > 中文 · [[定义层-Records-EN|English]]
 
-*本页范围：统一记录 API——`Record<T>` / `Recorder<T>` / `ShowRecord` 契约、各模块内容类型，以及 feature 关闭时的零开销行为。*
+*本页范围: 统一记录 API——`Record<T>` / `Recorder<T>` / `ShowRecord` 契约, 各模块内容类型, 以及 feature 关闭时的零开销行为.*
 
 ---
 
 ## 1. 职责
 
-统一的记录 API：极薄的泛型容器「属于哪一步 + 任意内容」，内容类型与显示由各模块自己定义；feature `records` 关闭时零大小、`push` 空操作，不影响结算。
+统一的记录 API: 极薄的泛型容器'属于哪一步 + 任意内容', 内容类型与显示由各模块自己定义; feature `records` 关闭时零大小, `push` 空操作, 不影响结算.
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| `Record<T>` | `crates/definitions/src/records/mod.rs` | 一条记录：`step: Nat` + `content: T` |
-| `Recorder<T>` | 同上 | 唯一写入 `push`；只读 `entries`；`clear` / `len` / `is_empty` / `step_entries` |
-| `ShowRecord` | 同上 | 内容类型实现 `show(&self, out: &mut String)`；记录器不预设种类 / 字段 |
-| feature `records` | `crates/definitions/Cargo.toml` | 默认开启；关闭时 `Recorder` 零大小、`push` 丢弃内容、`entries` 恒空 |
+| `Record<T>` | `crates/definitions/src/records/mod.rs` | 一条记录: `step: Nat` + `content: T` |
+| `Recorder<T>` | 同上 | 唯一写入 `push`; 只读 `entries`; `clear` / `len` / `is_empty` / `step_entries` |
+| `ShowRecord` | 同上 | 内容类型实现 `show(&self, out: &mut String)`; 记录器不预设种类 / 字段 |
+| feature `records` | `crates/definitions/Cargo.toml` | 默认开启; 关闭时 `Recorder` 零大小, `push` 丢弃内容, `entries` 恒空 |
 
-各模块内容类型（一模块一个 `record.rs`，D225）：
+各模块内容类型 (一模块一个 `record.rs`, D225) : 
 
 | 模块 | 文件 | 内容类型 |
 |---|---|---|
@@ -41,10 +41,10 @@
 | `trait ShowRecord` | 同上 | 内容类型自己实现显示 |
 | `type XRecorder = Recorder<XRecord>` 与 `*_recorded` 入口 | 各模块 `record.rs` | 各模块专用记录器 / 带记录的入口 |
 
-### 源码（逐字）
+### 源码 
 
 > [!NOTE]
-> 下面贴出 `records/mod.rs` 的核心定义（`Record` / `ShowRecord` / 两种 `Recorder` 及其 impl，含 `cfg` 与 `derive` 行）。
+> 下面贴出 `records/mod.rs` 的核心定义 (`Record` / `ShowRecord` / 两种 `Recorder` 及其 impl, 含 `cfg` 与 `derive` 行) .
 
 **`crates/definitions/src/records/mod.rs`**
 
@@ -189,51 +189,51 @@ impl<T: ShowRecord> Recorder<T> {
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> 步号由写入方给：记录器不推断当前步；同一动作的多条内容可以同 step。
-> 记录只写观测、不改结算；关闭 feature 时不允许留下「只有开记录才发生」的行为。
+> 步号由写入方给: 记录器不推断当前步; 同一动作的多条内容可以同 step.
+> 记录只写观测, 不改结算; 关闭 feature 时不允许留下'只有开记录才发生'的行为.
 
-- 内容类型归模块自己：不要在 `records` 里加统一记录种类大枚举或统一字段。
-- 显示归内容类型：不要在记录器里写格式化 / 中文文案；`ShowRecord::show` 是唯一入口。
-- 只读：`entries()` 返回只读切片；写入只能 `push`；清空只能 `clear`。
-- 关闭 feature 时不得构造内容：模块内记录点用 `#[cfg(feature = "records")]` 包住 `push`。
-- 记录器不参与局面等价：各状态 / 区不把 `Recorder` 放进 `PartialEq`。
+- 内容类型归模块自己: 不要在 `records` 里加统一记录种类大枚举或统一字段.
+- 显示归内容类型: 不要在记录器里写格式化 / 中文文案; `ShowRecord::show` 是唯一入口.
+- 只读: `entries()` 返回只读切片; 写入只能 `push`; 清空只能 `clear`.
+- 关闭 feature 时不得构造内容: 模块内记录点用 `#[cfg(feature = "records")]` 包住 `push`.
+- 记录器不参与局面等价: 各状态 / 区不把 `Recorder` 放进 `PartialEq`.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 > [!NOTE]
-> 记录器本身不解释规则；它只服务「插入式结算可回放 / 可对照」这一观测需求。
+> 记录器本身不解释规则; 它只服务'插入式结算可回放 / 可对照'这一观测需求.
 
 | 编号 | 结论 |
 |---|---|
 | D221 | 插入式结算回放的记录需求 |
-| D223 / D224 | 记录 API 极薄：属于哪一步 + 任意内容，内容类型与显示自定 |
-| D225 | 内容类型单独一个文件（各模块 `record.rs`） |
-| D190 / D191 | 随机效果的观测展开可记录，但不写回状态 |
-| D187 | 统计（计数）与记录（哪一步发生了什么）是两条线 |
+| D223 / D224 | 记录 API 极薄: 属于哪一步 + 任意内容, 内容类型与显示自定 |
+| D225 | 内容类型单独一个文件 (各模块 `record.rs`)  |
+| D190 / D191 | 随机效果的观测展开可记录, 但不写回状态 |
+| D187 | 统计 (计数) 与记录 (哪一步发生了什么) 是两条线 |
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 把记录当结算输入会形成循环依赖；把记录器放进局面等价会因记录差异破坏状态比较。
+> 把记录当结算输入会形成循环依赖; 把记录器放进局面等价会因记录差异破坏状态比较.
 
-1. 在 `records/mod.rs` 加 `enum RecordKind`：违反「内容类型由模块自己定」。
-2. 在内容类型之外写中文格式化：`ShowRecord` 才是显示入口。
-3. 用记录结果反推 / 改写结算：记录只写观测。
-4. 关闭 feature 时在 `push` 参数里构造大对象：构造应放进 `#[cfg(feature = "records")]` 内。
-5. 把记录器放进状态 `PartialEq/Eq`：破坏局面等价。
+1. 在 `records/mod.rs` 加 `enum RecordKind`: 违反'内容类型由模块自己定'.
+2. 在内容类型之外写中文格式化: `ShowRecord` 才是显示入口.
+3. 用记录结果反推 / 改写结算: 记录只写观测.
+4. 关闭 feature 时在 `push` 参数里构造大对象: 构造应放进 `#[cfg(feature = "records")]` 内.
+5. 把记录器放进状态 `PartialEq/Eq`: 破坏局面等价.
 
 ## 7. 测试
 
 | 文件 | 测试 |
 |---|---|
-| `records/mod.rs` | `records_keep_push_order_and_step_numbers`、`display_is_defined_by_content_types`、`entries_are_read_only_and_clear_empties_the_container`、`empty_recorder_renders_nothing_and_records_belong_to_explicit_steps` |
-| 各模块 `record.rs` | 伤害链 / 关键字 / 角色区 / 召唤物区 / 支援区 / 牌库 / 手牌 / 流程的记录测试（feature 门控） |
+| `records/mod.rs` | `records_keep_push_order_and_step_numbers`, `display_is_defined_by_content_types`, `entries_are_read_only_and_clear_empties_the_container`, `empty_recorder_renders_nothing_and_records_belong_to_explicit_steps` |
+| 各模块 `record.rs` | 伤害链 / 关键字 / 角色区 / 召唤物区 / 支援区 / 牌库 / 手牌 / 流程的记录测试 (feature 门控)  |
 
 ## 8. 待接入与待实测
 
-- `留空.md#56`：trace / record 路径不结算反应（轨迹类型没有反应条目），与 `execute_step_me` 不一致。
-- 记录器本身无规则语义，没有专属 `留空` 条目；各模块「记录哪些动作」的覆盖范围随区块接线扩展。
+- `留空.md#56`: trace / record 路径不结算反应 (轨迹类型没有反应条目) , 与 `execute_step_me` 不一致.
+- 记录器本身无规则语义, 没有专属 `留空` 条目; 各模块'记录哪些动作'的覆盖范围随区块接线扩展.
 
 ---
 
-最后核对：2026-10-19（代码：crates/definitions/src/records/mod.rs:Recorder）
+最后核对: 2026-10-19 (代码: crates/definitions/src/records/mod.rs:Recorder) 

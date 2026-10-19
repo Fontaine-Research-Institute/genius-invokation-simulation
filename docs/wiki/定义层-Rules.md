@@ -1,42 +1,42 @@
-# 定义层-Rules
+﻿# 定义层-Rules
 
 > 中文 · [[定义层-Rules-EN|English]]
 
-*本页范围：L1 牌族 / L2 类型 / L3 标签统一规则表（`RuleRow` + `BaseRule`）与 `rules/ops/` 纯函数的组织方式。*
+*本页范围: L1 牌族 / L2 类型 / L3 标签统一规则表 (`RuleRow` + `BaseRule`) 与 `rules/ops/` 纯函数的组织方式.*
 
 ---
 
 ## 1. 职责
 
-把三级（牌族 / 类型 / 标签）的**基础操作**统一成一张静态规则表；每行只声明机制、阶段、筛选角色与依据，具体操作是 `rules/ops/` 下的纯函数。本层不持有状态、不新建容器（D20）。
+把三级 (牌族 / 类型 / 标签) 的**基础操作**统一成一张静态规则表; 每行只声明机制, 阶段, 筛选角色与依据, 具体操作是 `rules/ops/` 下的纯函数.本层不持有状态, 不新建容器 (D20) .
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| `Layer` / `RuleKind` / `Stage` / `QueryRole` / `RuleOp` | `crates/definitions/src/rules/mod.rs` | 层级；机制 vs 仅分类；生效阶段；被谁当筛选条件；用到哪组基础操作 |
-| `RuleRow` | 同上 | 三级同一形状：`layer/kind/ops/stages/query_roles/evidence/basis` + 可选数据（槽位 / 数字 / 开局钩子 / 伤害角色 / 查询策略等） |
-| `BaseRule` | 同上 | 统一访问器，唯一实现 = `RuleRow`；消费者只依赖 trait |
-| `Evidence` / `NumRule` / `OpeningSpec` / `DamageRole` / `RuleName` | 同上 | 卡 id + 一句话卡文；规则数字（Nat）；开局钩子；护盾 / 减伤角色；行名从 generated 或唯一映射取 |
-| 三级表 | `families.rs` / `types.rs` / `tags_action.rs` / `tags_character.rs` / `tags_summon_enemy.rs` | 各自 `pub static ROWS: &[RuleRow]`；`rows()` 按牌族 -> 类型 -> 标签拼接 |
-| 基础操作 | `crates/definitions/src/rules/ops/*.rs` | 14 个纯函数模块：`equip` / `support` / `damage` / `lifetime` / `opening` / `order` / `query` / `resonance` / `adventure` / `simulanka` / `arkhe` / `stage` / `food` / `arcane` |
+| `Layer` / `RuleKind` / `Stage` / `QueryRole` / `RuleOp` | `crates/definitions/src/rules/mod.rs` | 层级; 机制 vs 仅分类; 生效阶段; 被谁当筛选条件; 用到哪组基础操作 |
+| `RuleRow` | 同上 | 三级同一形状: `layer/kind/ops/stages/query_roles/evidence/basis` + 可选数据 (槽位 / 数字 / 开局钩子 / 伤害角色 / 查询策略等)  |
+| `BaseRule` | 同上 | 统一访问器, 唯一实现 = `RuleRow`; 消费者只依赖 trait |
+| `Evidence` / `NumRule` / `OpeningSpec` / `DamageRole` / `RuleName` | 同上 | 卡 id + 一句话卡文; 规则数字 (Nat) ; 开局钩子; 护盾 / 减伤角色; 行名从 generated 或唯一映射取 |
+| 三级表 | `families.rs` / `types.rs` / `tags_action.rs` / `tags_character.rs` / `tags_summon_enemy.rs` | 各自 `pub static ROWS: &[RuleRow]`; `rows()` 按牌族 -> 类型 -> 标签拼接 |
+| 基础操作 | `crates/definitions/src/rules/ops/*.rs` | 14 个纯函数模块: `equip` / `support` / `damage` / `lifetime` / `opening` / `order` / `query` / `resonance` / `adventure` / `simulanka` / `arkhe` / `stage` / `food` / `arcane` |
 
 ## 3. 公开入口
 
 | 入口 | 文件 | 说明 |
 |---|---|---|
-| `rows()` / `all_rows()` | `rules/mod.rs` | 遍历全表（牌族 -> 类型 -> 标签） |
+| `rows()` / `all_rows()` | `rules/mod.rs` | 遍历全表 (牌族 -> 类型 -> 标签)  |
 | `row_of_tag` / `row_of_family` / `row_of_action_card_type` / `row_of_status_type` | 同上 | 按标签 / 牌族 / 行动牌类型 / 状态类型查行 |
 | `family_name(family)` | 同上 | 牌族显示名的唯一映射 |
 | `trait BaseRule` | 同上 | `layer/name/kind/ops/stages/query_roles/evidence/basis/tag/slots/nums/opening/support_cap/damage/query_policy` |
 | `rules::ops::*` | `rules/ops/` | 与 `RuleOp` 一一对应的纯函数模块 |
 
-### 源码（逐字）
+### 源码 
 
 > [!NOTE]
-> 以下为规则表与 ops 的真实源码摘录（签名 + 文档注释逐字；ops 函数体从略，完整实现见各文件）。
+> 以下为规则表与 ops 的真实源码摘录 (签名 + 文档注释; ops 函数体从略, 完整实现见各文件) .
 
-**`crates/definitions/src/rules/mod.rs（Layer / RuleKind / Stage / QueryRole / RuleOp）`**
+**`crates/definitions/src/rules/mod.rs(Layer / RuleKind / Stage / QueryRole / RuleOp)`**
 
 ```rust
 
@@ -99,7 +99,7 @@ pub enum QueryRole {
     EnemyClass,
     /// 召唤物分类（效果按此筛选）。
     SummonClass,
-    /// 始基力极性（荒 / 芒，荒芒湮灭效应）。
+    /// 始基力:荒性形态 / 始基力:芒性形态（荒芒湮灭效应）。
     Arkhe,
 }
 
@@ -129,7 +129,7 @@ pub enum RuleOp {
     Adventure,
     /// 希穆兰卡集合 / 随机生成范围（ops::simulanka）。
     Simulanka,
-    /// 始基力荒 / 芒对立（ops::arkhe）。
+    /// 始基力:荒性形态 / 始基力:芒性形态对立（ops::arkhe）。
     Arkhe,
     /// 可用次数 / 持续回合（ops::lifetime；规则书·特殊词条）。
     Lifetime,
@@ -138,7 +138,7 @@ pub enum RuleOp {
 }
 ```
 
-**`crates/definitions/src/rules/mod.rs（RuleRow 与 BaseRule）`**
+**`crates/definitions/src/rules/mod.rs(RuleRow 与 BaseRule)`**
 
 ```rust
 /// **统一规则行**：三级共用同一形状。
@@ -448,52 +448,52 @@ pub fn support_exit() -> SupportExit
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> 本层不持有状态、不新建容器：区域状态归各区块，ops 只做「判定 + 结果」（D20）。
-> 每行必须有 `evidence` 或 `basis`；机制行必须声明 `ops`，仅分类行不得声明操作。
+> 本层不持有状态, 不新建容器: 区域状态归各区块, ops 只做'判定 + 结果' (D20) .
+> 每行必须有 `evidence` 或 `basis`; 机制行必须声明 `ops`, 仅分类行不得声明操作.
 
-- 标签行覆盖除「自走牌」外的全部标签；自走牌不建行、不实现。
-- 数字一律 `Nat`；本层不做概率运算，随机只给范围 / 集合，抽样走引擎。
-- 行名不另存：标签 / 类型取自 generated 文本指针；牌族名只走 `family_name`。
-- 新机制先查既有 `RuleOp` / 纯函数模块，不要绕开表散落特例。
+- 标签行覆盖除'自走牌'外的全部标签; 自走牌不建行, 不实现.
+- 数字一律 `Nat`; 本层不做概率运算, 随机只给范围 / 集合, 抽样走引擎.
+- 行名不另存: 标签 / 类型取自 generated 文本指针; 牌族名只走 `family_name`.
+- 新机制先查既有 `RuleOp` / 纯函数模块, 不要绕开表散落特例.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 > [!NOTE]
-> 依据优先级：规则书 > 权威关键字 > 卡面文本；不读参考实现（D122）。
-> 规则书与旧决策冲突时以规则书为准（如持续回合已改为结束阶段）。
+> 依据优先级: 规则书 > 权威关键字 > 卡面文本; 不读参考实现 (D122) .
+> 规则书与旧决策冲突时以规则书为准 (如持续回合已改为结束阶段) .
 
 | 编号 | 结论 |
 |---|---|
-| D20 | 框架只给接口；判定 / 结果用纯函数，不持有状态 |
+| D20 | 框架只给接口; 判定 / 结果用纯函数, 不持有状态 |
 | D122 | `rules/ops/` 的组织方式与依据来源 |
-| D108 | 本层不解释具体状态语义，只声明机制 |
-| D240 | 具体卡牌效果不在本层（在 cards crate） |
+| D108 | 本层不解释具体状态语义, 只声明机制 |
+| D240 | 具体卡牌效果不在本层 (在 cards crate)  |
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 绕过规则表写特例会同时破坏「可遍历 / 可测试」两个性质，测试会钉死表覆盖度。
+> 绕过规则表写特例会同时破坏'可遍历 / 可测试'两个性质, 测试会钉死表覆盖度.
 
-1. 在 ops 里新建区域 / 缓存状态：违反 D20。
-2. 直接 match `RuleRow` 字段写特例：应使用 `BaseRule` 访问器。
-3. 给「仅分类」标签声明 `ops`：测试失败；分类标签只有 `query_roles`。
-4. 新增标签忘了在 `tags_*/ROWS` 加行：`tag_rows_cover_every_tag_except_automaton` 会抓出。
-5. 拿 `evidence` 的卡 id 做运算：它只用于审计 / 展示。
+1. 在 ops 里新建区域 / 缓存状态: 违反 D20.
+2. 直接 match `RuleRow` 字段写特例: 应使用 `BaseRule` 访问器.
+3. 给'仅分类'标签声明 `ops`: 测试失败; 分类标签只有 `query_roles`.
+4. 新增标签忘了在 `tags_*/ROWS` 加行: `tag_rows_cover_every_tag_except_automaton` 会抓出.
+5. 拿 `evidence` 的卡 id 做运算: 它只用于审计 / 展示.
 
 ## 7. 测试
 
 | 文件 | 测试 |
 |---|---|
-| `rules/mod.rs` | `table_covers_all_three_layers`、`tag_rows_cover_every_tag_except_automaton`、`every_row_has_evidence_or_basis`、`classification_rows_have_no_operations`、`mechanism_rows_declare_operations`、`every_rule_op_is_declared_by_some_row`、`lookups_work_for_families_and_types`、`numeric_rules_are_positive`、`query_policy_rows_match_query_module`、`opening_hooks_are_attached_to_expected_rows` |
-| `rules/ops/*.rs` | 如 `equip.rs::matching_weapon_attaches_to_empty_slot`、`support.rs::support_zone_cap_is_four`、`lifetime.rs::duration_ticks_at_end_phase_only`、`order.rs::five_sources_are_in_rulebook_order`、`damage.rs::shield_absorbs_then_reduction_subtracts` |
+| `rules/mod.rs` | `table_covers_all_three_layers`, `tag_rows_cover_every_tag_except_automaton`, `every_row_has_evidence_or_basis`, `classification_rows_have_no_operations`, `mechanism_rows_declare_operations`, `every_rule_op_is_declared_by_some_row`, `lookups_work_for_families_and_types`, `numeric_rules_are_positive`, `query_policy_rows_match_query_module`, `opening_hooks_are_attached_to_expected_rows` |
+| `rules/ops/*.rs` | 如 `equip.rs::matching_weapon_attaches_to_empty_slot`, `support.rs::support_zone_cap_is_four`, `lifetime.rs::duration_ticks_at_end_phase_only`, `order.rs::five_sources_are_in_rulebook_order`, `damage.rs::shield_absorbs_then_reduction_subtracts` |
 
 ## 8. 待接入与待实测
 
-- `留空.md#15`：三级统一层仍有需状态块的接线项（结算顺序调度、结束阶段扣持续回合 / 可用次数、起手换牌、首发选择、击倒 / 免于击倒 / 转换形态、支援满 4 分支、召唤物满 4、元素幻变时序）。
-- `留空.md#63`：自行巧局（蓄力 / 额外行动 / 等级突破）不并入常规流程，本阶段不做。
-- `留空.md#66`：F7 时机调用点 / F10 结束阶段顺序两处待复核。
-- `留空.md#70` / `#71`：Z15 超限处理方式、召唤物「层数 vs 可用次数」口径待实测。
+- `留空.md#15`: 三级统一层仍有需状态块的接线项 (结算顺序调度, 结束阶段扣持续回合 / 可用次数, 起手换牌, 首发选择, 击倒 / 免于击倒 / 转换形态, 支援满 4 分支, 召唤物满 4, 元素幻变时序) .
+- `留空.md#63`: 自行巧局 (蓄力 / 额外行动 / 等级突破) 不并入常规流程, 本阶段不做.
+- `留空.md#66`: F7 时机调用点 / F10 结束阶段顺序两处待复核.
+- `留空.md#70` / `#71`: Z15 超限处理方式, 召唤物'层数 vs 可用次数'口径待实测.
 
 ---
 
-最后核对：2026-10-19（代码：crates/definitions/src/rules/mod.rs:RuleRow）
+最后核对: 2026-10-19 (代码: crates/definitions/src/rules/mod.rs:RuleRow) 

@@ -2,38 +2,38 @@
 
 > 中文 · [[定义层-Tags-EN|English]]
 
-*本页范围：标签体系——一标签一文件一零大小类型、`TagText`、`Localized` / `Resolved`，以及生成的唯一标签数据 `TAGS`。*
+*本页范围: 标签体系——一标签一文件一零大小类型, `TagText`, `Localized` / `Resolved`, 以及生成的唯一标签数据 `TAGS`.*
 
 ---
 
 ## 1. 职责
 
-标签是独立顶层目录 `tags/` 下的「一标签一文件一零大小类型」（D53 / D54）；文本数据只有一份，编译期生成到 `generated::TAGS`，运行期身份 = 字段地址（D67）。没有标签枚举、数字 / 字符串编号或查表。
+标签是独立顶层目录 `tags/` 下的'一标签一文件一零大小类型' (D53 / D54) ; 文本数据只有一份, 编译期生成到 `generated::TAGS`, 运行期身份 = 字段地址 (D67) .没有标签枚举, 数字 / 字符串编号或查表.
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| 标签类型 | `crates/definitions/src/tags/<family>/<type>/<tag>.rs` | 每个标签一个 `pub struct Xxx;`（ZST），并提供 `data() -> &'static TagText` 返回 `&TAGS.<field>` |
-| 目录分组 | `tags/action_card/{support,equipment,event}`、`tags/action_card/common`、`tags/character/{element,nation,arkhe}`、`tags/summon`、`tags/enemy`、`tags/status` | 按牌族 / 类型分组；跨牌族共用标签只导入唯一定义处（D55） |
-| `TagText` | `crates/definitions/build.rs` 生成到 `OUT_DIR/generated_data.rs` | `{ name: Localized, description: Localized }`；description 本轮无数据、恒为空 |
-| `TAGS` / `Tags` | 同上 | 一个标签一个字段；字段名 = `terms.json` 的 `rust` 标识转 snake_case；字段访问无查表 |
-| `Localized` / `Resolved` / `Lang` | `crates/definitions/src/generated/localized.rs` | 4 语文本；`get(lang)` 返回 `Exact / Fallback / Missing`，缺语言显式报告回退 |
+| 标签类型 | `crates/definitions/src/tags/<family>/<type>/<tag>.rs` | 每个标签一个 `pub struct Xxx;` (ZST) , 并提供 `data() -> &'static TagText` 返回 `&TAGS.<field>` |
+| 目录分组 | `tags/action_card/{support,equipment,event}`, `tags/action_card/common`, `tags/character/{element,nation,arkhe}`, `tags/summon`, `tags/enemy`, `tags/status` | 按牌族 / 类型分组; 跨牌族共用标签只导入唯一定义处 (D55)  |
+| `TagText` | `crates/definitions/build.rs` 生成到 `OUT_DIR/generated_data.rs` | `{ name: Localized, description: Localized }`; description 本轮无数据, 恒为空 |
+| `TAGS` / `Tags` | 同上 | 一个标签一个字段; 字段名 = `terms.json` 的 `rust` 标识转 snake_case; 字段访问无查表 |
+| `Localized` / `Resolved` / `Lang` | `crates/definitions/src/generated/localized.rs` | 4 语文本; `get(lang)` 返回 `Exact / Fallback / Missing`, 缺语言显式报告回退 |
 
 ## 3. 公开入口
 
 | 入口 | 文件 | 说明 |
 |---|---|---|
-| `pub struct Xxx;` | 各标签文件 | 具体标签类型（ZST），导入到最终层级使用 |
-| `data() -> &'static TagText` | 各标签文件 | 返回 `&TAGS.<field>`，不写文案字面量 |
+| `pub struct Xxx;` | 各标签文件 | 具体标签类型 (ZST) , 导入到最终层级使用 |
+| `data() -> &'static TagText` | 各标签文件 | 返回 `&TAGS.<field>`, 不写文案字面量 |
 | `Localized::{EMPTY, from_parts, from_all, slot, has, get}` | `generated/localized.rs` | 构造 / 取语言槽 / 带三态回退的取值 |
 | `Resolved::{text, is_exact, is_fallback, is_missing, fallback_from}` | 同上 | 缺语言的三态访问器 |
 | `generated::TAGS.<field>` | 生成代码 | 标签文本唯一数据源 |
 
-### 源码（逐字）
+### 源码 
 
 > [!NOTE]
-> 标签类型与唯一数据：`TagText` 由 `build.rs` 在编译期生成（下面同时贴出生成代码与一个真实标签文件）。
+> 标签类型与唯一数据: `TagText` 由 `build.rs` 在编译期生成 (下面同时贴出生成代码与一个真实标签文件) .
 
 **`crates/definitions/src/tags/action_card/support/location.rs`**
 
@@ -56,7 +56,7 @@ pub fn data() -> &'static crate::generated::TagText {
 // 运行期身份（D67）：data() 返回的字段地址（&TAGS.<字段>）；按指针比较/筛选，不用数字编号、不用 TypeId。
 ```
 
-**`crates/definitions/build.rs（TagText / TAGS 生成节选）`**
+**`crates/definitions/build.rs(TagText / TAGS 生成节选)`**
 
 ```rust
     // D67：标签数据**唯一一份**，一个标签一个字段；运行期身份 = 字段地址（&TAGS.field）。
@@ -100,8 +100,10 @@ pub enum Lang {
 
 **`crates/definitions/src/generated/localized.rs`**
 
+*注释中的关键字代码已替换为名称, 代码行未改*
+
 ```rust
-/// 底层是若干条 UTF-8 静态字符串；**保留富文本标记的原文**（<color>、$[K53] 等），
+/// 底层是若干条 UTF-8 静态字符串；**保留富文本标记的原文**（<color>、关键字占位符 等），
 /// 渲染在 generated::text 里做。字段直接按语言命名，取值走 get()（会报告回退）。
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct Localized {
@@ -259,53 +261,53 @@ impl Resolved {
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> 一个标签一个文件、一个零大小类型；没有「总标签枚举」，也没有数字 / 字符串编号（D54）。
-> 标签文本只有一份（`TAGS`）：标签文件里不写文案字面量；运行期身份 = 字段地址（D67）。
+> 一个标签一个文件, 一个零大小类型; 没有'总标签枚举', 也没有数字 / 字符串编号 (D54) .
+> 标签文本只有一份 (`TAGS`) : 标签文件里不写文案字面量; 运行期身份 = 字段地址 (D67) .
 
-- 只能导入最终层级的具体标签，例如 `use crate::tags::action_card::support::location::Location;`。
-- 跨牌族共用标签只导入定义处那一份（D55），不许复制第二份类型 / 数据。
-- 缺语言必须走 `Resolved` 显式回退，不要自己用 `slot()` 静默拿别语言顶上。
-- 标签集合形态（元组 / Vec / 位图）本轮未定，不要擅自引入全局位图。
+- 只能导入最终层级的具体标签, 例如 `use crate::tags::action_card::support::location::Location;`.
+- 跨牌族共用标签只导入定义处那一份 (D55) , 不许复制第二份类型 / 数据.
+- 缺语言必须走 `Resolved` 显式回退, 不要自己用 `slot()` 静默拿别语言顶上.
+- 标签集合形态 (元组 / Vec / 位图) 本轮未定, 不要擅自引入全局位图.
 
-## 5. 依据（规则书与 D 编号）
+## 5. 依据 (规则书与 D 编号) 
 
 > [!NOTE]
-> 数据来源：`generated/data/terms.json` -> `build.rs` 生成；运行期不读文件。
-> 标签全集来自游戏内文本描述，当前 52 个；规则表实现其中 51 个（排除自走牌，见 [[定义层-Rules]]）。
+> 数据来源: `generated/data/terms.json` -> `build.rs` 生成; 运行期不读文件.
+> 标签全集来自游戏内文本描述, 当前 52 个; 规则表实现其中 51 个 (排除自走牌, 见 [[定义层-Rules]]) .
 
 | 编号 | 结论 |
 |---|---|
-| D53 / D54 | 标签是零大小类型、一标签一文件，不是枚举 / 数字 / 字符串 |
-| D55 | 每个标签唯一定义、全建（52 个）；跨牌族共用只导入定义处 |
-| D67 | 运行期身份 = `&TAGS.<field>` 的地址，字段访问不查表 |
-| D56 / D68 | 语言用枚举，缺语言显式回退（`Resolved`），字段命名固定 |
-| D62 | 富文本保留标记，渲染在 `generated::text` |
+| D53 / D54 | 标签是零大小类型, 一标签一文件, 不是枚举 / 数字 / 字符串 |
+| D55 | 每个标签唯一定义, 全建 (52 个) ; 跨牌族共用只导入定义处 |
+| D67 | 运行期身份 = `&TAGS.<field>` 的地址, 字段访问不查表 |
+| D56 / D68 | 语言用枚举, 缺语言显式回退 (`Resolved`) , 字段命名固定 |
+| D62 | 富文本保留标记, 渲染在 `generated::text` |
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 以下写法会让标签数据出现第二份或让缺语言变成静默错误；相关测试会直接失败。
+> 以下写法会让标签数据出现第二份或让缺语言变成静默错误; 相关测试会直接失败.
 
-1. 新加标签只在 `tags/` 建类型，忘了在 `terms.json` 加条目：`TAGS` 没有字段，`data()` 编译失败。
-2. 在标签文件里写名字字符串：违反「数据唯一一份」。
-3. 用 `tag as usize` / `TypeId` 当身份：身份是数据地址。
-4. 请求语言缺失时直接取 `slot()` 当有效文本：必须看 `Resolved`。
-5. 把 `tags/status/` 当已有标签全集：数据里状态没有标签，本轮为空。
+1. 新加标签只在 `tags/` 建类型, 忘了在 `terms.json` 加条目: `TAGS` 没有字段, `data()` 编译失败.
+2. 在标签文件里写名字字符串: 违反'数据唯一一份'.
+3. 用 `tag as usize` / `TypeId` 当身份: 身份是数据地址.
+4. 请求语言缺失时直接取 `slot()` 当有效文本: 必须看 `Resolved`.
+5. 把 `tags/status/` 当已有标签全集: 数据里状态没有标签, 本轮为空.
 
 ## 7. 测试
 
 | 文件 | 测试 |
 |---|---|
-| `tags/mod.rs` | `every_tag_is_a_distinct_zero_sized_type`（52 个、类型名互异） |
-| `generated/mod.rs` | `tag_data_is_one_field_per_tag_and_pointers_are_distinct`、`tag_files_have_no_string_literals_and_all_expose_data`、`tags_struct_fields_match_tag_files_one_to_one`、`no_index_access_to_tag_data_in_sources` |
-| `generated/localized.rs` | `lang_all_order_is_fixed`、`resolved_exact_when_language_present`、`resolved_fallback_reports_source_language`、`resolved_missing_is_not_silent`、`only_missing_slots_are_none` |
+| `tags/mod.rs` | `every_tag_is_a_distinct_zero_sized_type` (52 个, 类型名互异)  |
+| `generated/mod.rs` | `tag_data_is_one_field_per_tag_and_pointers_are_distinct`, `tag_files_have_no_string_literals_and_all_expose_data`, `tags_struct_fields_match_tag_files_one_to_one`, `no_index_access_to_tag_data_in_sources` |
+| `generated/localized.rs` | `lang_all_order_is_fixed`, `resolved_exact_when_language_present`, `resolved_fallback_reports_source_language`, `resolved_missing_is_not_silent`, `only_missing_slots_are_none` |
 
 ## 8. 待接入与待实测
 
-- `留空.md#11`：卡面 / 标签文案只填中文（其他语言为 `None`，取用时走 `Fallback`）；是否补齐 4 语未定。
-- `留空.md#10`：手牌状态的描述在关键字数据里缺失（不编）。
-- 标签集合形态未定（元组 / Vec / 位图），设计待定，无对应固定编号。
+- `留空.md#11`: 卡面 / 标签文案只填中文 (其他语言为 `None`, 取用时走 `Fallback`) ; 是否补齐 4 语未定.
+- `留空.md#10`: 手牌状态的描述在关键字数据里缺失 (不编) .
+- 标签集合形态未定 (元组 / Vec / 位图) , 设计待定, 无对应固定编号.
 
 ---
 
-最后核对：2026-10-19（代码：crates/definitions/src/tags/action_card/support/location.rs:Location）
+最后核对: 2026-10-19 (代码: crates/definitions/src/tags/action_card/support/location.rs:Location) 

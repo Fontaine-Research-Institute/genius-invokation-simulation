@@ -44,7 +44,7 @@ Organize the **five card families (L1 `CardFamily`)** into "type definitions + z
 ## 3. Public entry points
 
 > [!NOTE]
-> Code below is copied verbatim from the current repository (including use, derive, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
+> Code below is copied from the current repository (including use, derive, doc comments and other boilerplate). Over-long function bodies are truncated to the signature + first body lines with an explicit note; everything else is the full item.
 
 ### 3.1 Card family and type enums
 

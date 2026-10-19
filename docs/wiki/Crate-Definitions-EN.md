@@ -71,8 +71,7 @@ All modules are `pub`: `base` / `families` / `flow` / `generated` / `keywords` /
 | `stats` | no | per-block `stats/` counters (D187); when off they become no-ops |
 | `rules` | no | enables `engine/rules` and compiles the `GameRules` adapter (`state/terminal.rs`, D24) |
 
-### 3.1 Real Source Excerpts (verbatim from the current repository)
-
+### 3.1 Real Source Excerpts
 **Source file `SourceFile`**
 
 `new/crates/definitions/src/source/mod.rs:149-162`
@@ -760,8 +759,10 @@ pub fn rows() -> impl Iterator<Item = &'static RuleRow> {
 
 `new/crates/definitions/src/generated/mod.rs:85-95`
 
+Keyword codes in comments were replaced with names; code lines are unchanged.
+
 ```rust
-/// 关键字查询：按 K 码二分查找（生成表按 code 升序）。
+/// 关键字查询：按关键字名二分查找（生成表按 code 升序）。
 ///
 /// **数据来源**：generated/data/keywords.json（权威七圣召唤 keyword 数据，142 码 × 4 语名字 +
 /// 说明；129 码有 4 语说明，13 码无说明——含手牌状态 3003~3008，数据没有就保持空）。
@@ -778,8 +779,10 @@ pub fn keyword(code: KeywordCode) -> Option<&'static KeywordDef> {
 
 `new/crates/definitions/src/generated/mod.rs:97-100`
 
+Keyword codes in comments were replaced with names; code lines are unchanged.
+
 ```rust
-/// 全部关键字（按 K 码升序）。
+/// 全部关键字（按关键字名升序）。
 pub fn keywords_all() -> &'static [KeywordDef] {
     &KEYWORDS
 }
