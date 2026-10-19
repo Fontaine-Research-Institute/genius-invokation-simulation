@@ -59,7 +59,7 @@ Elemental Skill
 **Let the People Rejoice**
 Elemental Burst
 4 Hydro Dice
-Energy: 2
+2 Energy
 
 > Deals 2 Hydro DMG, creates 1 Universal Revelry.
 
@@ -96,7 +96,7 @@ Elemental Skill
 **Let the People Rejoice**
 Elemental Burst
 4 Hydro Dice
-Energy: 2
+2 Energy
 
 > Deals 2 Hydro DMG, creates 1 Universal Revelry.
 

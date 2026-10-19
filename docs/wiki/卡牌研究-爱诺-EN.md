@@ -38,7 +38,7 @@ Elemental Skill
 Precision Hydronic Cooler
 Elemental Burst
 3 Hydro Elemental Dice
-Energy: 2
+2 Energy
 > Deals 2 Hydro DMG and summons Cool Your Jets Ducky.
 
 Modular Efficiency Protocol
@@ -494,7 +494,7 @@ gi-genius-invokation-definitions = { path = "../definitions", features = ["embed
 | Bish-Bash-Bosh Repair cost | Open the cost | 1 Hydro Elemental Die + 2 Any Elemental Dice | `SpecificElement(Hydro,1)` + `AnyColor(2)` | match (verified) |
 | Musecatcher cost | Open the cost | 3 Hydro Elemental Dice | `SpecificElement(Hydro,3)` | match (verified) |
 | Precision Hydronic Cooler dice cost | Open the cost | 3 Hydro Elemental Dice | `from_dice_and_energy(.., 2)` | match (verified) |
-| Precision Hydronic Cooler Energy cost | Open the cost | Energy: 2 | `from_dice_and_energy(.., 2)` | match (verified) |
+| Precision Hydronic Cooler Energy cost | Open the cost | 2 Energy | `from_dice_and_energy(.., 2)` | match (verified) |
 | Bish-Bash-Bosh Repair effect | Build `CharacterState::from_def(&AINO)` and let the flow execute the Normal Attack effect body | Deals 2 Physical DMG | `normal_attack_effect()` panics (`todo!`) | **not implemented - pending test** |
 | Musecatcher effect | Same, Elemental Skill; with and without an Empowered card in hand | 2 Hydro DMG + 1 Agile Switch; 3 with Empowerment | `elemental_skill_effect()` panics | **not implemented - pending test** |
 | Precision Hydronic Cooler effect | Same, Elemental Burst | 2 Hydro DMG + summon Cool Your Jets Ducky (Usage(s) 2) | `elemental_burst_effect()` panics | **not implemented - pending test** |

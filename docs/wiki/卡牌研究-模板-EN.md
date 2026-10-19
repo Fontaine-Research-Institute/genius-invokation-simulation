@@ -45,7 +45,7 @@ Skills and modes are written line by line in a fixed order (no tables); dice cos
 <skill name>
 <skill type: Normal Attack / Elemental Skill / Elemental Burst / Passive Skill / Talent>
 <dice cost: x Hydro Elemental Dice + n Any Elemental Dice / n Same Elemental Dice>
-<Energy: x, omit this line when none>
+<x Energy, omit this line when none>
 > <card-face text copied exactly, original punctuation kept>
 
 <mode name>
