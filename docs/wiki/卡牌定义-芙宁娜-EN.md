@@ -1,155 +1,159 @@
-# 卡牌研究: 芙宁娜 (天赋 → 效果 → 普攻 → 双负) 
+# Card Research: Furina (Talent → Effect → Normal Attack → Double Lose)
 
-> 中文 · [[卡牌研究-芙宁娜-EN|English]]
+> [[卡牌定义-芙宁娜|中文]] · English
 
-*本页范围: 芙宁娜 (始基力：荒性形态 / 始基力：芒性形态) 与天赋"诸君听我颂, 共举爱之杯!", 状态"万众瞩目"的**卡面描述 + 实现代码 + 实测**.芙宁娜整卡**尚未实现**; §2 的"计划中的实现"是设计稿.*
+*Scope: Furina (Arkhe: Ousia form / Arkhe: Pneuma form), the talent "Hear Me — Let Us Raise the Chalice of Love!" and the status Center of Attention — **card text + implementation code + playtest record**. Furina as a whole is **not implemented**; the "planned implementation" in §2 is a design draft.*
 
 ---
 
-## 1. 卡面描述
+## 1. Card text
 
-### 1.1 "诸君听我颂, 共举爱之杯!"
+### 1.1 "Hear Me — Let Us Raise the Chalice of Love!"
 
-天赋
-3 个水元素骰
+Talent
+3 Hydro Dice
 
-> 战斗行动：我方出战角色为芙宁娜时，装备此牌。
-> 芙宁娜装备此牌后，立刻使用一次孤心沙龙。
-> 装备有此牌的芙宁娜使用孤心沙龙时，会对自身附属万众瞩目。（角色普通攻击时根据形态触发不同效果）
-> （牌组中包含芙宁娜，才能加入牌组）
+> Combat Action: When your active character is Furina, equip this card.
+> After Furina equips this card, immediately use Salon Solitaire once.
+> When Furina, who has this card equipped, uses Salon Solitaire, she will apply Center of Attention to herself. (Normal Attack will trigger different effects depending on state)
+> (You must have Furina in your deck to add this card to your deck.)
 
 
-实现: 注册"装备此牌的角色使用孤心沙龙后"的函数, 函数效果是一步(赋予状态).
+Implementation: register a function for "after the equipped character uses Salon Solitaire"; the function body is one step (attach status).
 
-### 1.2 "万众瞩目"
+### 1.2 "Center of Attention"
 
-角色状态
+Character Status
 
-> 角色进行普通攻击时：使角色造成的物理伤害变为水元素伤害。如果角色处于「荒」形态，则治疗我方所有后台角色1点；如果角色处于「芒」形态，则此伤害+2，但是对一位受伤最少的我方角色造成1点穿透伤害。
-> 可用次数：1
+> When the character uses a Normal Attack: Physical DMG dealt by the character is converted to Hydro DMG.If the character is in the Ousia state, heal all of your characters on standby for 1 HP. If the character is in the Pneuma state, +2 DMG for this instance, but deal 1 Piercing DMG to your character who has taken the least DMG.
+> Usage(s): 1
 
-### 1.3 芙宁娜的两张形态牌
+### 1.3 Furina's two form cards
 
-#### 始基力：荒性形态
+#### Arkhe: Ousia form
 
-| 项 | 内容 |
+| Item | Content |
 |---|---|
-| 生命上限 | 12 |
-| 充能上限 | 2 |
-| 标签 | 水元素 / 单手剑 / 枫丹 / 始基力：荒性 |
-| 形态转换 | 可转换为始基力：芒性形态 |
+| HP cap | 12 |
+| Energy cap | 2 |
+| Tags | Hydro / Sword / Fontaine / Arkhe: Ousia |
+| Transformation | can transform into the Arkhe: Pneuma form |
 
-**独舞之邀**
-普通攻击
-1 个水元素骰 + 2 个任意元素骰
+**Soloist's Solicitation**
+Normal Attack
+1 Hydro Die + 2 Unaligned Dice
 
-> 造成2点物理伤害。
-> 每回合1次：如果手牌中没有圣俗杂座，则生成手牌圣俗杂座。
-
-
-**孤心沙龙**
-元素战技
-3 个水元素骰
-
-> 芙宁娜当前处于「始基力：荒性」形态：召唤沙龙成员。
-> （芙宁娜处于「始基力：芒性」形态时，会改为召唤众水的歌者）
+> Deals 2 Physical DMG.
+> Once per Round: If you do not have Seats Sacred and Secular in your Hand, create 1 Seats Sacred and Secular card in your Hand.
 
 
-**万众狂欢**
-元素爆发
-4 个水元素骰
-2点充能
-> 造成2点水元素伤害，生成普世欢腾。
+**Salon Solitaire**
+Elemental Skill
+3 Hydro Dice
+
+> Furina is currently in the Arkhe: Ousia state. Summons Salon Members.
+> (When Furina is in the Arkhe: Pneuma state, she will summon Singer of Many Waters instead)
 
 
-**始基力：圣俗杂座**
-被动技能
-> 【被动】战斗开始时，生成手牌圣俗杂座。
+**Let the People Rejoice**
+Elemental Burst
+4 Hydro Dice
+2 Energy
 
-#### 始基力：芒性形态
+> Deals 2 Hydro DMG, creates 1 Universal Revelry.
 
-| 项 | 内容 |
+
+**Arkhe: Seats Sacred and Secular**
+Passive Skill
+> (Passive) When battle begins, create 1 Seats Sacred and Secular card in your Hand.
+
+#### Arkhe: Pneuma form
+
+| Item | Content |
 |---|---|
-| 生命上限 | 12 |
-| 充能上限 | 2 |
-| 标签 | 水元素 / 单手剑 / 枫丹 / 始基力：芒性 |
-| 形态转换 | 可转换为始基力：荒性形态 |
+| HP cap | 12 |
+| Energy cap | 2 |
+| Tags | Hydro / Sword / Fontaine / Arkhe: Pneuma |
+| Transformation | can transform into the Arkhe: Ousia form |
 
-**独舞之邀**
-普通攻击
-1 个水元素骰 + 2 个任意元素骰
+**Soloist's Solicitation**
+Normal Attack
+1 Hydro Die + 2 Unaligned Dice
 
-> 造成2点物理伤害。
-> 每回合1次：生成手牌圣俗杂座。
-
-
-**孤心沙龙**
-元素战技
-3 个水元素骰
-
-> 芙宁娜当前处于「始基力：芒性」形态：召唤众水的歌者。
-> （芙宁娜处于「始基力：荒性」形态时，会改为召唤沙龙成员）
+> Deals 2 Physical DMG.
+> Once per Round: Create 1 Seats Sacred and Secular card in your Hand.
 
 
-**万众狂欢**
-元素爆发
-4 个水元素骰
-2点充能
-> 造成2点水元素伤害，生成普世欢腾。
+**Salon Solitaire**
+Elemental Skill
+3 Hydro Dice
+
+> Furina is currently in the Arkhe: Pneuma state. Summons Singer of Many Waters.
+> (When Furina is in the Arkhe: Ousia state, she will summon Salon Members instead)
 
 
-**始基力：圣俗杂座**
-被动技能
-> 【被动】战斗开始时，生成手牌圣俗杂座。
+**Let the People Rejoice**
+Elemental Burst
+4 Hydro Dice
+2 Energy
 
-### 1.4 相关事件 / 召唤物 / 出战状态
+> Deals 2 Hydro DMG, creates 1 Universal Revelry.
 
-| 对象 | 描述 |
+
+**Arkhe: Seats Sacred and Secular**
+Passive Skill
+> (Passive) When battle begins, create 1 Seats Sacred and Secular card in your Hand.
+
+### 1.4 Related event / summons / combat status
+
+| Object | Text |
 |---|---|
-| 事件"圣俗杂座" | 在"始基力：荒性"和"始基力：芒性"之中, 切换芙宁娜的形态.如果我方场上存在沙龙成员或众水的歌者, 也切换其形态. |
-| 召唤物"沙龙成员" | 结束阶段: 造成 1 点水元素伤害.如果我方存在生命值至少为 6 的角色, 则对一位受伤最少的我方角色造成 1 点穿透伤害, 然后再造成 1 点水元素伤害.可用次数: 2 (可叠加, 最多叠加到 4 次) |
-| 召唤物"众水的歌者" | 结束阶段: 治疗所有我方角色 1 点.如果我方存在生命值不多于 5 的角色, 则再治疗一位受伤最多的角色 1 点.可用次数: 2 (可叠加, 最多叠加到 4 次) |
-| 出战状态"普世欢腾" | 我方出战角色受到伤害或治疗后: 叠加 1 点狂欢值.持续回合: 2 |
+| Event "Seats Sacred and Secular" | When in Arkhe: Ousia or Arkhe: Pneuma states, switch Furina's state. If you have Salon Members or Singer of Many Waters on the field, change their state as well. |
+| Summon "Salon Members" | End Phase: Deal 1 Hydro DMG. If your side has characters with at least 6 HP, deal 1 Piercing DMG to your character who has taken the least DMG, and deal another 1 Hydro DMG. Usage(s): 2 (Can stack. Max 4 stacks) |
+| Summon "Singer of Many Waters" | End Phase: Heal all your characters for 1 HP. If your side has characters with no more than 5 HP, heal the most injured character for an additional 1 HP. Usage(s): 2 (Can stack. Max 4 stacks) |
+| Combat status "Universal Revelry" | After your active character takes DMG or is healed: Add 1 stack of Revelry. Duration (Rounds): 2 |
 
-### 1.5 关键字说明
+### 1.5 Keyword notes
 
-| 关键字 | 说明 |
+| Keyword | Description |
 |---|---|
-| 战斗行动 | 我方执行了一次战斗行动后, 会轮到对方行动.打出具有此规则的手牌是战斗行动, 而非快速行动. |
-| 可用次数 | 此牌效果触发后, 会消耗 1 次可用次数; 可用次数耗尽后, 立刻弃置此牌. |
-| 持续回合 | 每回合结束阶段, 持续回合 -1; 持续回合耗尽后, 立刻弃置此牌. |
-| 穿透伤害 | 穿透伤害不吃护盾 / 减伤 / 免疫. |
-| 物理伤害 | 物理伤害不会附着元素, 也不会发生元素反应. |
-| 水元素伤害 | 附着水元素, 可发生元素反应 (蒸发 / 感电 / 冻结 / 绽放等) . |
-| 狂欢值 | 我方造成的伤害 +1 (包括角色引发的扩散伤害) .可用次数 1 (可叠加, 没有上限) . |
-| 万众瞩目 | 角色进行普通攻击时: 使角色造成的物理伤害变为水元素伤害……可用次数: 1. (全文见 §1.2) |
-| 沙龙成员 | 结束阶段: 造成 1 点水元素伤害……可用次数: 2 (可叠加, 最多叠加到 4 次) . |
-| 众水的歌者 | 结束阶段: 治疗所有我方角色 1 点……可用次数: 2 (可叠加, 最多叠加到 4 次) . |
+| Combat Action | After you perform a combat action, the opponent acts next. Playing a card with this rule is a combat action, not a fast action. |
+| Usage(s) | After this card's effect triggers, consume 1 usage; when usage is depleted, discard this card immediately. |
+| Duration (Rounds) | Each End Phase, duration -1; when depleted, discard this card immediately. |
+| Piercing DMG | Piercing DMG ignores shields / damage reduction / immunity. |
+| Physical DMG | Physical DMG does not attach elements and does not trigger elemental reactions. |
+| Hydro DMG | Attaches Hydro and may trigger reactions (Vaporize / Electro-Charged / Frozen / Bloom, etc.). |
+| Revelry | Your DMG +1 (including Swirl DMG caused by characters). Usage 1 (stackable, no limit). |
+| Center of Attention | When the character uses a Normal Attack: convert Physical DMG to Hydro DMG … Usage(s): 1. (Full text in §1.2) |
+| Salon Members | End Phase: deal 1 Hydro DMG … Usage(s): 2 (can stack, max 4). |
+| Singer of Many Waters | End Phase: heal all your characters for 1 HP … Usage(s): 2 (can stack, max 4). |
 
-### 1.6 相关规则书条目摘录
+### 1.6 Related rulebook entries
 
-| 条目 | 内容摘要 |
+| Entry | Excerpt |
 |---|---|
-| S1.4 胜利条件 | 击倒对方牌手的所有"角色牌", 即可获得胜利. |
-| S7.3 击倒 | 当角色的生命值被降为 0, 则在技能或效果结算完成后, 角色就会被击倒. |
-| S7.4 免于被击倒 | 此时, 角色不视为被击倒过. |
-| 特殊词条 穿透伤害 | 穿透伤害不吃护盾 / 减伤 / 免疫. |
-| 特殊词条 可用次数 | 触发后消耗 1 次; 耗尽后立刻弃置. |
-| 特殊词条 持续回合 | 每个结束阶段 -1; 耗尽后弃置. |
-| 元素反应·规则 | 元素伤害先附着, 再判定反应, 再结算反应效果. |
+| S1.4 Victory | Defeat all of the opponent's character cards to win. |
+| S7.3 Defeat | When a character's HP is reduced to 0, the character is defeated after the skill or effect finishes settling. |
+| S7.4 Avoid Defeat | At that point, the character is not considered defeated. |
+| Special entry Piercing DMG | Piercing DMG ignores shields / damage reduction / immunity. |
+| Special entry Usage(s) | Consume 1 per trigger; discard immediately when depleted. |
+| Special entry Duration (Rounds) | -1 each End Phase; discard when depleted. |
+| Elemental Reactions · Rules | Elemental DMG attaches first, then the reaction is checked, then the reaction effect settles. |
 
-## 2. 实现代码
+## 2. Implementation code
 
 > [!WARNING]
-> **芙宁娜整卡未实现**: `crates/cards/` 目前只有爱诺样板 (`cards/character/aino`), 且其效果体还是 `todo!`. 2.1 是**当前仓库真实源码** (本链需要的原语); 2.2 是**计划中的完整实现代码 (设计稿, 不可编译, 未实现)**; 2.3 列落地缺口.
+> **Furina as a whole is not implemented**: `crates/cards/` currently contains only the Aino sample (`cards/character/aino`), whose effect bodies are still `todo!`. §2.1 is **real source from the current repository** (the primitives this chain needs); §2.2 is the **planned complete implementation (design draft, does not compile, not implemented)**; §2.3 lists what is missing.
 
-### 2.1 已具备的原语 (真实源码) 
+### 2.1 Available primitives (real source)
 
-#### 2.1.1 伤害类型转换 (物理 → 水) 
+> Source blocks are copied from the repository; comment lines that cited keyword numbers had the numbers removed (user rule: no K codes).
+
+#### 2.1.1 Damage type conversion (Physical → Hydro)
 
 **`DamageChainEnv`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
 
-*注释中的关键字代码已替换为名称, 代码行未改*
+*Keyword codes in comments were replaced with names; code lines unchanged*
 ```rust
 /// 修正链从「区」读数据的**只读依赖**（D183：只借不拥有、不拷贝、不重造承载）。
 ///
@@ -179,7 +183,7 @@ pub struct DamageChainEnv<'a> {
 }
 ```
 
-**`with_type_override` / `effective_type`** — 同文件
+**`with_type_override` / `effective_type`** — same file
 
 ```rust
     /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前逐字节等价）。
@@ -200,7 +204,7 @@ pub struct DamageChainEnv<'a> {
     }
 ```
 
-#### 2.1.2 伤害加算 (+2) 
+#### 2.1.2 Damage bonus (+2)
 
 **`MulMode` / `Rounding` / `AmountOp` / `DamageModifiers`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
 
@@ -274,11 +278,11 @@ pub struct DamageModifiers<'a> {
 }
 ```
 
-#### 2.1.3 受伤最少的目标
+#### 2.1.3 The least-injured target
 
-**`TargetSelector`** — `crates/definitions/src/keywords/target.rs` (整枚举, 含 `LostHpRank`) 
+**`TargetSelector`** — `crates/definitions/src/keywords/target.rs` (whole enum, including `LostHpRank`; enum-level docs omitted, full source in file)
 
-*注释中的关键字代码已替换为名称, 代码行未改*
+*Keyword codes in comments were replaced with names; code lines unchanged*
 ```rust
 pub enum TargetSelector {
     /// **自己**（效果主体自身；D205 / D206）。实体号从执行上下文取，不手写。
@@ -399,7 +403,7 @@ pub enum TargetSelector {
 }
 ```
 
-**`LostHpOrder`** — 同文件
+**`LostHpOrder`** — same file
 
 ```rust
 /// **受伤量排序方向**（[TargetSelector::LostHpRank] 用；D237）。
@@ -412,7 +416,7 @@ pub enum LostHpOrder {
 }
 ```
 
-#### 2.1.4 状态身份与层数 (可用次数) 
+#### 2.1.4 Status identity and layers (usage)
 
 **`StateIdentity`** — `crates/definitions/src/families/action_card/status/state.rs`
 
@@ -455,7 +459,7 @@ pub trait StateIdentity: 'static + std::fmt::Debug {
 }
 ```
 
-**`StateText` / `StateForm` / `StateList` / `StateEntry` / `layers`** — 同文件
+**`StateText` / `StateForm` / `StateList` / `StateEntry` / `layers`** — same file
 
 ```rust
 /// 状态的静态定义数据（D110）：**与 TagText 同构** —— 4 语名字 + 4 语描述。
@@ -516,7 +520,7 @@ pub struct StateEntry {
     }
 ```
 
-#### 2.1.5 一步组合
+#### 2.1.5 Step composition
 
 **`Step` / `execute_step_me`** — `crates/definitions/src/keywords/step.rs`
 
@@ -539,7 +543,7 @@ pub fn execute_step_me(state: &DefState, step: &Step, env: &EffectEnv<'_>) -> St
 }
 ```
 
-#### 2.1.6 伤害参数
+#### 2.1.6 Damage arguments
 
 **`DamageArgs` / `with_modifiers`** — `crates/definitions/src/keywords/op.rs`
 
@@ -575,7 +579,7 @@ pub struct DamageArgs {
     }
 ```
 
-#### 2.1.7 终局判定 (双负) 
+#### 2.1.7 Terminal verdict (double lose)
 
 **`Outcome`** — `crates/definitions/src/state/terminal.rs`
 
@@ -602,7 +606,7 @@ pub enum Outcome {
 }
 ```
 
-#### 2.1.8 召唤物合并 (形态同步的承载) 
+#### 2.1.8 Summon merging (the carrier of form sync)
 
 **`summon_with_triggers`** — `crates/definitions/src/families/summon/zones/mod.rs`
 
@@ -623,13 +627,14 @@ pub enum Outcome {
     // ...（其余实现从略；见 crates/definitions/src/families/summon/zones/mod.rs）
 ```
 
-### 2.2 计划中的实现 (完整代码, 未实现) 
+### 2.2 Planned implementation (complete code, not implemented)
 
 > [!WARNING]
-> 以下 11 段全部**未实现, 不可编译**; 类型 / 函数名尽量用仓库真实定义, 注释里的章节号沿用旧稿.它们是"如果现在写会怎么写"的完整设计稿.
-> 代码里的 id 常量 (`FURINA_OUSIA_CARD_ID` 等) 按卡牌数据表填写; 本页不写具体数字 (用户口径) .
+> All 11 blocks below are **not implemented and do not compile**; type and function names follow real definitions where possible, and section numbers inside comments refer to the old draft. They are the complete design draft of "how we would write it now".
 
-#### 2.2.1 角色与标签定义
+> Id constants in the code (`FURINA_OUSIA_CARD_ID` etc.) are filled from the card data table; this page writes no concrete numbers (user rule).
+
+#### 2.2.1 Character and tag definitions
 
 ```rust
 // 设计稿：crates/cards/src/cards/character/furina/mod.rs（未创建）
@@ -681,7 +686,7 @@ pub static FURINA_PNEUMA: CharacterDef<TagsPneuma> = CharacterDef {
 };
 ```
 
-#### 2.2.2 四个技能 (效果体占位) 
+#### 2.2.2 The four skills (effect bodies are placeholders)
 
 ```rust
 // 设计稿：技能定义（SkillEffect 目前是 fn，D162；效果体只能 todo!）
@@ -750,7 +755,7 @@ pub static SKILL_PASSIVE: SkillDef = SkillDef {
 };
 ```
 
-#### 2.2.3 形态定义
+#### 2.2.3 Form definitions
 
 ```rust
 // 设计稿：form.rs 的 FormDef 需要 &'static [&'static TagText] 指针切片（D67）。
@@ -789,7 +794,7 @@ pub fn toggle_form(current: FormState) -> FormState {
 }
 ```
 
-#### 2.2.4 事件"圣俗杂座": 切形态 + 切召唤物
+#### 2.2.4 Event "Seats Sacred and Secular": switch form + summon form
 
 ```rust
 // 设计稿：事件牌效果体。Step/KeywordOp 是真实类型；但「切形态」「替换召唤物卡 id」
@@ -821,7 +826,7 @@ pub fn seats_sacred_and_secular_step -> Step {
 }
 ```
 
-#### 2.2.5 天赋: 打出条件 + 立刻使用孤心沙龙
+#### 2.2.5 Talent card: play condition + immediate Salon Solitaire
 
 ```rust
 // 设计稿：天赋（装备 / 战斗行动 / 天赋）。
@@ -861,7 +866,7 @@ pub static TALENT: ActionCardDef<(Talent, CombatAction)> = ActionCardDef::new(
 );
 ```
 
-#### 2.2.5.1 注册"使用孤心沙龙后"回调 (一步(赋予状态))
+#### 2.2.5.1 Register the "after Salon Solitaire" hook (one step (attach the status))
 
 ```rust
 // 设计稿（未实现）：装备注册「装备此牌的角色使用孤心沙龙后」的回调。
@@ -884,7 +889,7 @@ pub static TALENT_HOOK: EquipmentHook = EquipmentHook {
 };
 ```
 
-#### 2.2.6 万众瞩目状态身份
+#### 2.2.6 Center of Attention status identity
 
 ```rust
 // 设计稿：状态身份（与 satiated.rs / damage_chain/statuses.rs 同款写法）。
@@ -914,7 +919,7 @@ impl StateIdentity for CenterOfAttention {
 pub static CENTER_OF_ATTENTION: CenterOfAttention = CenterOfAttention(&CENTER_OF_ATTENTION_TEXT);
 ```
 
-#### 2.2.7 普攻触发万众瞩目 (+2 / 治疗后台 / 穿透最少受伤) 
+#### 2.2.7 Normal Attack triggers Center of Attention (+2 / heal standby / piercing to the least injured)
 
 ```rust
 // 设计稿：普通攻击触发（「角色进行普通攻击时」）。
@@ -989,7 +994,7 @@ pub fn normal_attack_with_center_of_attention(
 }
 ```
 
-#### 2.2.8 孤心沙龙按形态召唤
+#### 2.2.8 Salon Solitaire summons by form
 
 ```rust
 // 设计稿：战技效果（召唤物卡 id 按形态分派）。
@@ -1017,7 +1022,7 @@ pub fn salon_step(form: ArkheForm) -> Vec<KeywordOp> {
 }
 ```
 
-#### 2.2.9 召唤物定义
+#### 2.2.9 Summon definitions
 
 ```rust
 // 设计稿：召唤物定义（SummonDef；结束阶段执行动作仍待接入）。
@@ -1045,7 +1050,7 @@ pub static SINGER_OF_MANY_WATERS: SummonDef<> = SummonDef::new(
 );
 ```
 
-#### 2.2.10 未来 SkillContext (#125 的建议签名) 
+#### 2.2.10 Future SkillContext (the signature proposed by #125)
 
 ```rust
 // 设计稿：这是 §4 建议的 SkillEffect 新签名（当前 SkillDef::effect 是 fn，D162）。
@@ -1067,7 +1072,7 @@ pub fn use_skill_with_context(context: &SkillContext<'_>) {
 }
 ```
 
-#### 2.2.11 测试示例
+#### 2.2.11 Test examples
 
 ```rust
 // 设计稿：卡牌测试将放在 crates/cards/src/cards/character/furina/mod.rs 的 tests 里，
@@ -1105,91 +1110,91 @@ fn pneuma_branch_deals_two_bonus_and_one_piercing {
 }
 ```
 
-### 2.3 要落地还缺什么 (能力清单) 
+### 2.3 What is still missing before landing (capability list)
 
-| 缺口 | 影响 | 留空编号 |
+| Gap | Impact | 留空 id |
 |---|---|---|
-| 技能效果体无上下文 (`SkillEffect = fn()`, D162)  | 四个技能的效果体写不出来 | #125 |
-| 实体 → 卡 id 映射缺失 (`CharacterSlot` 无卡 id)  | 天赋条件"出战角色是芙宁娜"写不出 | #126 |
-| `FormState` 未与角色实体绑定 | 形态分支取不到"当前形态" | #127 |
-| 状态无"消耗 1 层"原语 | 万众瞩目触发后无法 -1 / 归零移除 | #128 |
-| 召唤物同名合并取最大 + 缺"替换召唤物卡 id" | 2+2=4 叠加与形态同步做不到 | #129 |
-| 装备触发拿不到 `DefState` | "装备后立刻使用一次技能"接不上 | #130 |
-| 旧稿误写"第二个孤心沙龙" | 已纠正: 孤心沙龙只有一个技能, 天赋只负责"使用该技能时挂状态"; 无技能 id 问题 | #131 (旧稿误写, 已纠正)  |
-| tag key 与 tagstext 语义相反 | 荒 / 芒判定必须按 tagstext | #132 |
+| No skill-effect context (`SkillEffect = fn()`, D162) | The four skill effect bodies cannot be written | #125 |
+| Entity → card-id mapping missing (`CharacterSlot` has no card id) | The talent condition "active character is Furina" cannot be written | #126 |
+| `FormState` is not bound to the character entity | Form branches cannot read "current form" | #127 |
+| No "consume 1 layer" primitive for statuses | Center of Attention cannot decrement / be removed at 0 | #128 |
+| Summon same-name merge takes the maximum + no "replace summon card id" | 2+2=4 stacking and form sync cannot be done | #129 |
+| Equipment triggers cannot reach `DefState` | "Immediately use a skill after equipping" cannot be wired | #130 |
+| Old draft wrongly wrote "a second Salon Solitaire" | Corrected: Salon Solitaire has exactly one skill; the talent only "applies a status when the skill is used"; no skill-id issue | #131 (old draft, corrected) |
+| Tag key vs tagstext inverted | Ousia / Pneuma must be judged by tagstext | #132 |
 
-## 3. 实测
+## 3. Playtest
 
-### 3.1 可复现局面 (双负) 
+### 3.1 Reproducible position (double lose)
 
-局面: 我方芙宁娜为**始基力：芒性形态 **, 装备天赋"诸君听我颂, 共举爱之杯!", 已因孤心沙龙附属"万众瞩目" (可用次数 1) ; 我方场上仅剩这 1 个角色且**当前生命 1**; 敌方仅剩 1 个角色.轮到芙宁娜普通攻击.
+Position: your Furina is in the **Arkhe: Pneuma form**, has the talent "Hear Me — Let Us Raise the Chalice of Love!" equipped and Center of Attention attached (usage 1) from Salon Solitaire; your side has only this one character left and its **current HP is 1**; the opponent has only one character left. It is Furina's turn to Normal Attack.
 
-复现步骤: 
+Reproduction steps:
 
-1. 打出天赋"诸君听我颂, 共举爱之杯!" 装备芙宁娜 (战斗行动, 3 个水元素骰) → 触发"立刻使用孤心沙龙".
-2. 孤心沙龙结算: 召唤众水的歌者 (始基力：芒性形态) , 并对芙宁娜附属万众瞩目 (1 次可用次数) .
-3. 我方把芙宁娜以外角色全部送掉, 只留 1 血芙宁娜; 敌方也只留 1 个角色.
-4. 芙宁娜普通攻击 (2 点物理 → 万众瞩目转水, 始基力：芒性形态 +2 = 4 点水伤) .
-5. 同一结算内: 万众瞩目追加"对受伤最少我方角色 1 点穿透"→ 命中 1 血芙宁娜.
-6. 观察: 敌方最后角色被 4 点水伤击倒; 我方芙宁娜被 1 点穿透击倒 —— 同一步内双方角色区都空.
+1. Play the talent "Hear Me — Let Us Raise the Chalice of Love!" on Furina (combat action, 3 Hydro Dice) → triggers "immediately use Salon Solitaire once".
+2. Salon Solitaire resolves: summon Singer of Many Waters (Pneuma), and apply Center of Attention to Furina (1 usage).
+3. Remove all your other characters so only the 1-HP Furina remains; the opponent also keeps only one character.
+4. Furina performs a Normal Attack (2 Physical → converted to Hydro by Center of Attention, Pneuma +2 = 4 Hydro DMG).
+5. Within the same settlement, Center of Attention appends "1 Piercing DMG to your character who has taken the least DMG" → hits the 1-HP Furina.
+6. Observe: the opponent's last character is defeated by 4 Hydro DMG; your Furina is defeated by 1 Piercing DMG — both character zones become empty within the same step.
 
-预期 (按规则 + 代码) : 本步执行完 → 步边界判 `Outcome::BothLose` (双方都输, D267 / D268) ; 不是平局, 也不是先结算者获胜.
+Expected (by rules + code): after the step completes, the step boundary yields `Outcome::BothLose` (both players lose, D267 / D268); not a draw, and not "whoever settles first wins".
 
-### 3.2 实测记录表
+### 3.2 Playtest record
 
-| 项目 | 局面 / 操作 | 游戏内结果 | 我们的实现结果 | 结论 |
+| Item | Position / operation | In-game result | Our implementation | Conclusion |
 |---|---|---|---|---|
-| 双负 (本页核心)  | 始基力：芒性形态 + 天赋"诸君听我颂, 共举爱之杯!" + 普攻; 敌我各剩 1 角色, 我方 1 血 | **待实测** | 已通过: `state/terminal.rs :: tests::same_step_enemy_damage_plus_self_damage_ends_in_both_lose` | 双方都输 (`BothLose`) ; 待游戏内复核 |
-| 物理转水 | 万众瞩目在场时普攻 (物理 2)  | **待实测** | 已通过: `damage.rs :: tests::type_override_turns_physical_into_hydro_and_vaporizes` | 类型按覆盖值结算, 数值不变 |
-| 始基力：芒性形态 +2 | 始基力：芒性形态普攻 | **待实测** | 未实现 (卡牌层缺失)  | 待实现后测 |
-| 始基力：芒性形态 1 点穿透 | 始基力：芒性形态普攻追加段 | **待实测** | 未实现 (卡牌层缺失)  | 待实现后测 |
-| 穿透不吃护盾 / 免疫 | 我方有护盾 / 免疫时被 1 点穿透 | **待实测** | 已具备 (伤害链按穿透跳过护盾 / 减伤 / 免疫)  | 穿透必落地 |
-| 可用次数消耗时机 | 普攻触发后万众瞩目是否消失 | **待实测** | 未实现 (#128 无"消耗 1 层"原语)  | 触发时消耗, 不是回合结束 |
-| 形态与召唤物形态同步 | 打出事件"圣俗杂座" | **待实测** | 未实现 (#129)  | 角色与场上召唤物一起切 |
+| Double lose (core of this page) | Arkhe: Pneuma form + talent "Hear Me — Let Us Raise the Chalice of Love!" + Normal Attack; one character left each side, ours at 1 HP | **pending test** | Passed: `state/terminal.rs :: tests::same_step_enemy_damage_plus_self_damage_ends_in_both_lose` | Both players lose (`BothLose`); pending in-game confirmation |
+| Physical → Hydro | Normal Attack with Center of Attention (2 Physical) | **pending test** | Passed: `damage.rs :: tests::type_override_turns_physical_into_hydro_and_vaporizes` | Settles by the override type, value unchanged |
+| Pneuma +2 | Normal Attack in Arkhe: Pneuma form | **pending test** | Not implemented (card layer missing) | Test after implementation |
+| Pneuma 1 Piercing DMG | The appended instance in Arkhe: Pneuma form | **pending test** | Not implemented (card layer missing) | Test after implementation |
+| Piercing ignores shields / immunity | 1 Piercing DMG against a shield / immunity | **pending test** | Available (chain skips shields / reductions / immunity for piercing) | Piercing always lands |
+| Usage consumption timing | Whether Center of Attention disappears after the trigger | **pending test** | Not implemented (#128, no "consume 1 layer" primitive) | Consumed on trigger, not at round end |
+| Form and summon form sync | Play event "Seats Sacred and Secular" | **pending test** | Not implemented (#129) | Character and on-field summons switch together |
 
-## 4. 备注
+## 4. Notes
 
-### 4.1 坑
+### 4.1 Pitfalls
 
 > [!WARNING]
-> 以下四条会直接改变双负结论或形态分支.
+> These four directly change the double-lose conclusion or the form branches.
 
-1. **形态与召唤物形态要一起切**: 事件 "圣俗杂座" 要求"场上存在沙龙成员或众水的歌者, 也切换其形态"; 只切角色形态会让结束阶段效果用错数值.
-2. **可用次数消耗时机**: 万众瞩目在"普通攻击时"触发后消耗 1 次, **不是**回合结束 / 行动阶段开始 (D12 点名的参考实现老 bug) .
-3. **穿透不吃护盾 / 减伤 / 免疫**: 始基力：芒性形态分支的 1 点穿透若被护盾吸收, "我方最后角色被击倒"不成立, 双负结论失效 (规则书·特殊词条 穿透伤害) .
-4. **tag key 与 tagstext 语义相反**: `furina.json` (中文"荒性") 带 `GCG_TAG_ARKHE_PNEUMA`, 英文 tagstext 是 `Arkhe: Ousia`; 必须按 tagstext 映射 (#132) .
+1. **Switch the form and the summon form together**: event Seats Sacred and Secular requires "if you have Salon Members or Singer of Many Waters on the field, change their state as well"; switching only the character form makes the End Phase effect use wrong numbers.
+2. **Usage consumption timing**: Center of Attention consumes 1 usage when a Normal Attack triggers it, **not** at round end / action-phase start (the reference implementation's old bug named by D12).
+3. **Piercing ignores shields / reductions / immunity**: if the Arkhe: Pneuma form branch's 1 Piercing DMG were absorbed by a shield, "your last character is defeated" would not hold and the double-lose conclusion collapses (rulebook special entry: Piercing DMG).
+4. **Tag key vs tagstext inverted**: `furina.json` (Chinese "荒性") carries `GCG_TAG_ARKHE_PNEUMA` while the English tagstext is `Arkhe: Ousia`; map by tagstext (#132).
 
-### 4.2 相关 D 编号
+### 4.2 Related D-numbers
 
-| D 编号 | 内容 | 与本页的关系 |
+| D no. | Content | Relation to this page |
 |---|---|---|
-| D204 | 一步是原子结算单位, 步内不提前终止 | 双负只在步边界判 |
-| D267 / D268 | 同一步内双方全灭 = 双方都输 | 本页核心结论 |
-| D12 | 可用次数按触发次数递减 | 万众瞩目消耗时机 |
-| D164 / D167 | 伤害附带元素附着, 反应判定在伤害入口统一 | 物理转水后的反应判定 |
-| D185 / D186 | 时机键由牌族定义; 效果登记函数指针 | 触发与派发模型 |
-| D193 / D194 | 避免击倒与击倒分开 | 步边界判据用角色区 |
+| D204 | A step is the atomic settlement unit; no early termination inside a step | The double lose is judged only at the step boundary |
+| D267 / D268 | Both sides wiped within one step = both lose | The core conclusion of this page |
+| D12 | Usage decrements per trigger | Center of Attention consumption timing |
+| D164 / D167 | Damage attaches elements and the reaction check is unified at the damage entry | Reaction check after Physical → Hydro |
+| D185 / D186 | Timing keys are defined by the family; effects register function pointers | Trigger / dispatch model |
+| D193 / D194 | Avoid-defeat is separate from defeat | The step-boundary criterion uses zones |
 
-### 4.3 留空.md §二十四 (芙宁娜实现所需框架缺口) 
+### 4.3 留空.md §二十四 (framework gaps for the Furina implementation)
 
-| 编号 | 缺口 |
+| No. | Gap |
 |---|---|
-| #125 | `SkillEffect` 无上下文 (`fn()`, D162)  |
-| #126 | 实体 → 卡 id 映射缺失 |
-| #127 | `FormState` 未与角色实体绑定 |
-| #128 | 状态"消耗 1 层"原语缺失 |
-| #129 | 召唤物同名合并做不到卡面语义 + 缺替换卡 id |
-| #130 | 装备触发拿不到 `DefState` |
-| #131 | 旧稿误写"第二个孤心沙龙": 已纠正 (孤心沙龙只有一个技能, 天赋触发上状态)  |
-| #132 | tag key 与 tagstext 语义相反 |
+| #125 | `SkillEffect` has no context (`fn()`, D162) |
+| #126 | Entity → card-id mapping missing |
+| #127 | `FormState` is not bound to the character entity |
+| #128 | No "consume 1 layer" primitive for statuses |
+| #129 | Summon same-name merge does not match card text + no replace-card-id primitive |
+| #130 | Equipment triggers cannot reach `DefState` |
+| #131 | Old draft wrongly wrote "a second Salon Solitaire": corrected (one skill; the talent triggers a status) |
+| #132 | Tag key vs tagstext inverted |
 
-### 4.4 关联页面
+### 4.4 Related pages
 
-| 页面 | 关系 |
+| Page | Relation |
 |---|---|
-| [[定义层-Character]] / [[定义层-Character-EN|EN]] | 角色族, 伤害链, skill_flow 的真实源码 |
-| [[定义层-Summon-Enemy-Status]] / [[定义层-Summon-Enemy-Status-EN|EN]] | 状态身份 / 召唤物区 |
-| [[定义层-Action-Card]] / [[定义层-Action-Card-EN|EN]] | 天赋作为装备牌的打出与落位 |
+| [[定义层-Character-EN]] / [[定义层-Character|中文]] | Character family, damage chain, real source of skill_flow |
+| [[定义层-Summon-Enemy-Status-EN]] / [[定义层-Summon-Enemy-Status|中文]] | Status identities / summon zone |
+| [[定义层-Action-Card-EN]] / [[定义层-Action-Card|中文]] | Playing and placing the talent as equipment |
 
 ---
-最后核对: 2026-10-19 (代码: `crates/definitions/src/state/terminal.rs`, `crates/definitions/src/families/character/damage_chain/chain.rs`, `crates/definitions/src/keywords/target.rs`) 
+Last verified: 2026-10-19 (code: `crates/definitions/src/state/terminal.rs`, `crates/definitions/src/families/character/damage_chain/chain.rs`, `crates/definitions/src/keywords/target.rs`)

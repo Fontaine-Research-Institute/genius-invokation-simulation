@@ -142,10 +142,10 @@ python tools/run-compute.py --list
 
 | Page | Content |
 |---|---|
-| [[卡牌研究]] | Column overview, template, index of studied cards |
-| [[卡牌研究-爱诺]] | Aino: full code plus line-by-line rationale |
-| [[卡牌研究-芙宁娜]] | Furina: talent, Center of Attention, form switching (design study, not implemented) |
-| [[卡牌研究-模板]] | Template for new card research pages |
+| [[卡牌定义]] | Column overview, template, index of studied cards |
+| [[卡牌定义-爱诺]] | Aino: full code plus line-by-line rationale |
+| [[卡牌定义-芙宁娜]] | Furina: talent, Center of Attention, form switching (design study, not implemented) |
+| [[卡牌定义-模板]] | Template for new card research pages |
 
 ---
 ---

@@ -1,6 +1,6 @@
 # Card Research
 
-> [[卡牌研究|中文]] · English
+> [[卡牌定义|中文]] · English
 
 *Scope: what this column is (card text + implementation code + test records), writing requirements, the page template, studied entries, basis, and maintenance conventions.*
 
@@ -56,15 +56,15 @@ Evidence order: rulebook > card text / authoritative keywords > reference implem
 
 ## 3. Page Template
 
-Copy [[卡牌研究-模板-EN]] for a new card; add a row to section 4 of this page.
+Copy [[卡牌定义-模板-EN]] for a new card; add a row to section 4 of this page.
 
 ## 4. Studied Entries
 
 | Name | Type | Status | Page |
 |---|---|---|---|
-| Aino | character card | implemented (four effect bodies are still `todo!()` placeholders) | [[卡牌研究-爱诺-EN]] |
-| Lost Legacies in the Sand | event card, Arcane Legend | card not implemented (pile / hand / Arcane bookkeeping primitives exist) | [[卡牌研究-沙中遗事-EN]] |
-| Furina | character card (multi-card) | being rewritten to this structure by defs-char | [[卡牌研究-芙宁娜]] |
+| Aino | character card | implemented (four effect bodies are still `todo!()` placeholders) | [[卡牌定义-爱诺-EN]] |
+| Lost Legacies in the Sand | event card, Arcane Legend | card not implemented (pile / hand / Arcane bookkeeping primitives exist) | [[卡牌定义-沙中遗事-EN]] |
+| Furina | character card (multi-card) | being rewritten to this structure by defs-char | [[卡牌定义-芙宁娜]] |
 
 ## 5. Basis and Related Pages
 
@@ -83,7 +83,7 @@ Copy [[卡牌研究-模板-EN]] for a new card; add a row to section 4 of this p
 ## 6. Maintenance Conventions
 
 - **Re-paste code when it changes**: section-2 source is copied from the repository exactly; re-paste and update the footer.
-- **New cards**: template + one row in section 4; Chinese page `卡牌研究-<name>.md`, English page `卡牌研究-<name>-EN.md`.
+- **New cards**: template + one row in section 4; Chinese page `卡牌定义-<name>.md`, English page `卡牌定义-<name>-EN.md`.
 - **Test results** only use: match / mismatch / pending test; a mismatch states the exact difference (punctuation, number, etc.).
 - **Order conclusions**: one sentence + reproducible steps in section 3, D numbers in 4.2; no long interaction chains.
 - `_Sidebar.md` / `_Footer.md` are maintained centrally.

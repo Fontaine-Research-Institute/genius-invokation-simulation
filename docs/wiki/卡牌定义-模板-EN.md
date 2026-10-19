@@ -1,11 +1,11 @@
 # Card Research - <Name>
 
-> [[卡牌研究-模板|中文]] · English
+> [[卡牌定义-模板|中文]] · English
 
 *Scope: <Name> - card text (Chinese / English + keyword expansion + related rulebook entries), implementation code (real source / planned code + missing work), test records, and notes.*
 
 > [!NOTE]
-> How to use: copy this page, rename it to `卡牌研究-<Name>-EN.md`, fill in the 4 sections, and add a row to section 4 of [[卡牌研究-EN]].
+> How to use: copy this page, rename it to `卡牌定义-<Name>-EN.md`, fill in the 4 sections, and add a row to section 4 of [[卡牌定义-EN]].
 
 > [!IMPORTANT]
 > Hard writing rules:
@@ -129,7 +129,7 @@ Description: <what this capability is>.
 
 | Page | Content |
 |---|---|
-| [[卡牌研究-EN]] | column index and writing requirements |
+| [[卡牌定义-EN]] | column index and writing requirements |
 
 ---
 

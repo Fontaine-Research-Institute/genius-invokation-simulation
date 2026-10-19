@@ -1,6 +1,6 @@
 # Card Research: Aino
 
-> [[卡牌研究-爱诺|中文]] · English
+> [[卡牌定义-爱诺|中文]] · English
 
 *Scope: the character card Aino - card text (Chinese / English + keyword expansion + related rulebook entries), full implementation code, test records, and notes.*
 
@@ -545,8 +545,8 @@ gi-genius-invokation-definitions = { path = "../definitions", features = ["embed
 
 | Page | Content |
 |---|---|
-| [[卡牌研究-EN]] | column index and the 4-section writing requirements |
-| [[卡牌研究-沙中遗事-EN]] | another studied card (order / Arcane) |
+| [[卡牌定义-EN]] | column index and the 4-section writing requirements |
+| [[卡牌定义-沙中遗事-EN]] | another studied card (order / Arcane) |
 | [[Crate-Cards-EN]] | `cards` crate and card organization |
 | [[定义层-Character-EN]] | character family (definition carriers / skills / numbers) |
 | [[定义层-Resources-EN]] | dice and cost |
