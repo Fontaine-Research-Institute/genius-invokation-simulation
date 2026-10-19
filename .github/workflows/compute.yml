@@ -55,7 +55,7 @@ jobs:
       names: ${{ steps.scan.outputs.names }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Scan compute configs
         id: scan
@@ -91,7 +91,7 @@ jobs:
         compute: ${{ fromJSON(needs.discover.outputs.names) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Rust toolchain (stable)
         uses: dtolnay/rust-toolchain@stable
