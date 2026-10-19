@@ -21,7 +21,7 @@
 | 片段 | `src/parse.rs`: `Segment` | `Text` / `ColorStart` / `ColorEnd` / `Keyword { code, variant }` / `Card` / `Character` / `Skill` / `Damage` / `Variable` / `TokenValue` / `Icon` |
 | 伤害占位 | `src/parse.rs`: `DamageKey` | `Element` / `Damage` / `Numbered(u32)`; `marker()` 还原原始标记 |
 | 解析错误 | `src/parse.rs`: `ParseError` | `position` (字节下标) + `found` + `expected`; `line_col()` / `snippet()` / `Display` / `Error` |
-| any 白名单 | `src/parse.rs`: `AnyMatch` / `ALLOWED_ANY_MATCHES` | 唯一允许'中间任意'的匹配点 = 颜色值 (`ColorDigits`, D65)  |
+| any 白名单 | `src/parse.rs`: `AnyMatch` / `ALLOWED_ANY_MATCHES` | 唯一允许"中间任意"的匹配点 = 颜色值 (`ColorDigits`, D65)  |
 | 固定允许集 | `src/parse.rs` | `KEYWORD_VARIANTS = ["s1"]`, `SPRITE_PRESETS` (43 个) , `TOKEN_VALUES` (1 个) ——逐个枚举, 固定匹配, 未登记即失败 (D65 / D66)  |
 | 解析入口 | `src/parse.rs`: `parse()` | 整段文本 → `Result<Vec<Segment>, ParseError>` |
 | crate 导出 | `src/lib.rs` | 再导出 `Segment` / `parse` / `ParseError` / `AnyMatch` / `DamageKey` / 三个白名单常量; `#![forbid(unsafe_code)]` |
@@ -201,7 +201,7 @@ pub enum Segment {
 
 | 主题 | 依据 |
 |---|---|
-| 文本拆'解析 / 渲染'两段; 全量文本解析测试 | D62 |
+| 文本拆"解析 / 渲染"两段; 全量文本解析测试 | D62 |
 | 解析必须严格: 未匹配 = 失败 | D63 |
 | 头尾固定; 中间 any 只允许已证明不影响结果的类别 | D65 / D66 |
 | 富文本解析器独立成 crate, 与 engine 同级; 不依赖业务 crate | D75 / D76 |
@@ -213,7 +213,7 @@ pub enum Segment {
 > [!WARNING]
 > 不要把解析器当渲染器: 它不取名字, 不选语言, 不删颜色 / 图标; 遇到未知标记也不能当普通文本吞掉 (D63) .
 
-- 给图标 / token / 关键字变体加'any 匹配': 未证明就不许 (D66) .
+- 给图标 / token / 关键字变体加"any 匹配": 未证明就不许 (D66) .
 - 以为 `{SPRITE_PRESET#…}` 在解析阶段就被删掉: 它是 `Segment::Icon`, 删除发生在渲染层.
 - 以为 `Variable` / `TokenValue` 有静态值可填: 它们原样保留.
 - 在 definitions 里再写一份解析器: 只 `pub use` 本 crate.
@@ -243,8 +243,8 @@ pub enum Segment {
 
 | 编号 | 事项 |
 |---|---|
-| #3 | 关键字名字有低置信反推样本 (约 182 个'语言 × 关键字'票数 < 3) , 靠换权威数据覆盖 JSON; 与解析器无关 |
-| 无编号 | 渲染侧'结构认识但名字表没有'按 `MissingPolicy` 处理 (`definitions/src/generated/text/render.rs`) ; 不属本 crate |
+| #3 | 关键字名字有低置信反推样本 (约 182 个"语言 × 关键字"票数 < 3) , 靠换权威数据覆盖 JSON; 与解析器无关 |
+| 无编号 | 渲染侧"结构认识但名字表没有"按 `MissingPolicy` 处理 (`definitions/src/generated/text/render.rs`) ; 不属本 crate |
 | 无编号 | 数据出现新图标 / token / 关键字变体: 先取证再登记常量 (D65 / D66)  |
 
 ---

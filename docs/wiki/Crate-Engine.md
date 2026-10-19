@@ -8,7 +8,7 @@
 
 ## 1. 职责
 
-机制原语 crate: 只提供数值, 标识, 实体, 区容器, 随机与选择, 精确分数, 统计这些'没有任何游戏语义'的底层零件.默认零依赖; 上层 (`definitions` / `cards` / `simulation`) 依赖它, 它不依赖任何业务 crate.
+机制原语 crate: 只提供数值, 标识, 实体, 区容器, 随机与选择, 精确分数, 统计这些"没有任何游戏语义"的底层零件.默认零依赖; 上层 (`definitions` / `cards` / `simulation`) 依赖它, 它不依赖任何业务 crate.
 
 - 目录: `new/crates/engine/`
 - package / lib: `gi-genius-invokation-engine` / `gi_genius_invokation_engine`
@@ -21,10 +21,10 @@
 | 精确数值族 | `src/nat.rs`: `ExactNat8/16/32/64/128`, 默认 `ExactNat = ExactNat128` | 加 / 减 / 乘上溢 / 下溢都 panic (D153) ; 概率 / 分数用它 (D152 / D156)  |
 | 算术宏 | `src/nat.rs`: `nadd!` / `nsub!` / `nmul!` / `ndiv!` | 两族共用一套名字, 语义由类型决定 (D155)  |
 | 实体标识 | `src/id.rs`: `EntityId = Nat` | 单调不复用流水号; 引擎不记实体在哪个区 (D42)  |
-| 列表下标 | `src/id.rs`: `ActionId = u32` | 只是'列表第几项', 不参与数值运算 |
+| 列表下标 | `src/id.rs`: `ActionId = u32` | 只是"列表第几项", 不参与数值运算 |
 | 实体表 | `src/entity.rs`: `EntityTable` | 只发号: `alloc` / `len` / `is_empty` |
 | 区容器 | `src/area.rs`: `Area` (多实体) , `SingleArea` (单实体 = 变量)  | 没有身份, 编号, 登记; 是状态字段的类型 (D42)  |
-| 选择原语 | `src/select.rs`: `SelectionSource<S>` + `enumerate_select` | 只收'列表 + 数量', 没有 `who` (D25) ; 列表形状归各块 `parse.rs` (D26)  |
+| 选择原语 | `src/select.rs`: `SelectionSource<S>` + `enumerate_select` | 只收"列表 + 数量", 没有 `who` (D25) ; 列表形状归各块 `parse.rs` (D26)  |
 | 随机原语 | `src/random.rs`: `DedupFn` / `enumerate_random` / `enumerate_random_weighted` | 纯枚举, 不消费 PRNG; 分支概率是 `Fraction` (D149 / D158)  |
 | 精确分数 | `src/prob.rs`: `Fraction` / `total` / `normalize` / `pick_index` | 分子 / 分母 `ExactNat128`; 自动约分; 分母 0 panic |
 | 随机源 | `src/rng.rs`: `Rng` | SplitMix64; 对外只有 `next_u128` / `next_below_u128` (拒绝采样, D160)  |

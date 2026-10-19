@@ -2,19 +2,19 @@
 
 > 中文 · [[定义层-Source-Version-Generated-EN|English]]
 
-*本页范围: 源码嵌入 (每文件自声明源码 + 依赖) , 版本声明宏, '不删旧版本'口径, 以及生成数据与富文本渲染.*
+*本页范围: 源码嵌入 (每文件自声明源码 + 依赖) , 版本声明宏, "不删旧版本"口径, 以及生成数据与富文本渲染.*
 
 ---
 
 ## 1. 职责
 
-三件非规则基础设施: ① 每文件自声明源码 (编译期嵌入全文 + 依赖 + 归属, 可裁剪) ; ② 游戏版本声明宏 (只写'本卡 / 本模块已同步到的版本') ; ③ 生成数据与富文本渲染 (`generated/`, 运行期不读文件) .
+三件非规则基础设施: ① 每文件自声明源码 (编译期嵌入全文 + 依赖 + 归属, 可裁剪) ; ② 游戏版本声明宏 (只写"本卡 / 本模块已同步到的版本") ; ③ 生成数据与富文本渲染 (`generated/`, 运行期不读文件) .
 
 ## 2. 关键概念与类型
 
 | 概念 | 文件 | 说明 |
 |---|---|---|
-| `card_source!` / `module_source!` | `crates/definitions/src/source/mod.rs` | 文件头声明'本文件 ↔ 归属'; 卡牌宏绑定本模块 `pub const ID: CardId`, 不写 id |
+| `card_source!` / `module_source!` | `crates/definitions/src/source/mod.rs` | 文件头声明"本文件 ↔ 归属"; 卡牌宏绑定本模块 `pub const ID: CardId`, 不写 id |
 | `SourceFile` | 同上 | `owner` / `path` / `segments` / `content` (`include_str!` 源码文本) / `dependencies`; `dependencies()` 零分配视图 |
 | `SOURCE_FILES` / `source_files` / `source_of` / `source_files_under` | 同上 | 汇总入口; `SOURCE_FILES` 是手写清单, 漏加不报错但查不到 |
 | `GameVersion` / `card_game_version!` | `crates/definitions/src/version/mod.rs`, `version/macros.rs` | `major.minor`; 宏生成 `GAME_VERSION`, 语义 = 已同步到的最新游戏版本 |
@@ -335,7 +335,7 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 
 > [!IMPORTANT]
 > `SOURCE_FILES` 是手写清单: 漏加不会编译失败, 但汇总入口找不到; 直接读文件自己的 `SOURCE` 常量不受影响 (D242) .
-> 版本宏只表示'本卡 / 本模块已同步到的版本', 没有全仓最新版本常量 (D245) .
+> 版本宏只表示"本卡 / 本模块已同步到的版本", 没有全仓最新版本常量 (D245) .
 
 - `SourceFile.content` 是宏调用文件源码文本 (不展开宏, 不解析) ; 卡牌宏自动绑定 `ID`, 不写 id.
 - feature `embed-source` 默认开启; 关闭时 `SOURCE_FILES` 为空, 各文件 `content` 为空串, 依赖表为空, 访问器照常可调用.
@@ -351,7 +351,7 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 |---|---|
 | D213 / D214 / D215 / D216 | 每文件自声明源码, 编译期解析依赖, 卡牌宏不写 id, 两种宏 |
 | D242 | 通用机制留 definitions, 卡牌源码表在 cards crate; `SOURCE_FILES` 手写清单 |
-| D244 / D245 / D246 | 版本宏与'只写同步版本'; D247 阶段收口 |
+| D244 / D245 / D246 | 版本宏与"只写同步版本"; D247 阶段收口 |
 | D248 / D249 / D250 / D251 | 卡牌多版本区间 (仅设计, 未实现) ; 按卡独立选择, 默认最新, 已实现旧版本不删除 |
 | D62 / D75 / D76 | 富文本两段式: 解析在 richtext crate, 渲染在 definitions |
 | D67 | 标签数据唯一一份, 字段访问 |
@@ -360,11 +360,11 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 ## 6. 常见误用
 
 > [!WARNING]
-> 把版本宏当'最新版本判断'或期望旧版本区间已实现, 都会得到错误结论.
+> 把版本宏当"最新版本判断"或期望旧版本区间已实现, 都会得到错误结论.
 
 1. 用了 `module_source!` 但忘了在 `SOURCE_FILES` 加行: 汇总查询不到 (测试只保证已登记清单的路径顺序) .
 2. 在卡牌宏里手写 id: 宏自动绑定本模块 `ID`; 缺 `ID` 或类型不对会编译报错.
-3. 把版本宏当最新版本判断: 它只表示'已同步到'; 没有 `is_synced_to` / 最新常量 (D245 已删) .
+3. 把版本宏当最新版本判断: 它只表示"已同步到"; 没有 `is_synced_to` / 最新常量 (D245 已删) .
 4. 期望旧版本区间已实现: D248 只是设计; 当前没有多版本定义 / 加载器.
 5. 绕过 `generated::TAGS` 写文案: 数据必须唯一一份.
 6. 把解析器兜底当渲染缺失策略: 解析未匹配 = `ParseError`; `MissingPolicy` 只管名字表缺失.

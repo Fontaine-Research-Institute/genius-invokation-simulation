@@ -48,9 +48,9 @@
 | 11 | **No keyword ids**: keyword ids are ids too; use the keyword name (Energy / Physical DMG / Usage(s) / Arcane Legend / Undiscoverable, etc.) or a one-line description |
 | 12 | **Do not merge forms**: 始基力：荒性形态 and 始基力：芒性形态 get separate tables and full names |
 | 13 | **No cost for passive skills**: there is no cost field; do not write a cost line at all, just omit it |
-| 14 | **No tables for skills**: each skill is three lines: skill name / skill type (Normal Attack / Elemental Skill / Elemental Burst / Passive Skill / Talent, no prefix) / '>' the card-face text copied exactly; passive skills list no cost, cost numbers go on their own line |
+| 14 | **No tables for skills**: each skill is three lines: skill name / skill type (Normal Attack / Elemental Skill / Elemental Burst / Passive Skill / Talent, no prefix) / ">" the card-face text copied exactly; passive skills list no cost, cost numbers go on their own line |
 | 15 | **Code-block comments**: replace keyword ids in comments with names and add a one-line note above the block; code lines stay as in the repository |
-| 16 | **Full cost wording**: no shorthand; write 'x Hydro Elemental Dice + n Any Elemental Dice / n Same Elemental Dice'; dice cost and Energy on separate lines; omit Energy when none; omit both lines for passive skills |
+| 16 | **Full cost wording**: no shorthand; write "x Hydro Elemental Dice + n Any Elemental Dice / n Same Elemental Dice"; dice cost and Energy on separate lines; write Energy as "x Energy"; omit Energy when none; omit both lines for passive skills |
 
 Evidence order: rulebook > card text / authoritative keywords > reference implementation (technique only; `RULES.md` section 3, items 2 and 3).
 

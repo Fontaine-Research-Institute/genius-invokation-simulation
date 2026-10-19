@@ -19,10 +19,10 @@
 > 8. Half-width punctuation only (the full-width colon inside the form names 始基力：荒性形态 / 始基力：芒性形态 is the only exception).
 > 9. Copy the card-face text and keep the original punctuation; quoted blocks are the only place that keeps full-width punctuation (our own prose stays half-width).
 > 10. Paste the matching real source immediately after each capability description; do not pile code at the page end and do not just link.
-> 11. Paste code in full; when unsure write 'pending test', never invent.
-> 12. No tables for skills: each skill is three lines: skill name / skill type (Normal Attack / Elemental Skill / Elemental Burst / Passive Skill / Talent, no prefix) / '>' the card-face text copied exactly; passive skills list no cost, cost numbers go on their own line; modes use the same three-line form.
+> 11. Paste code in full; when unsure write "pending test", never invent.
+> 12. No tables for skills: each skill is three lines: skill name / skill type (Normal Attack / Elemental Skill / Elemental Burst / Passive Skill / Talent, no prefix) / ">" the card-face text copied exactly; passive skills list no cost, cost numbers go on their own line; modes use the same three-line form.
 > 13. Replace keyword ids in code-block comments with names and add a one-line note above the block; code lines stay as in the repository.
-> 14. Full cost wording: no shorthand; write 'x Hydro Elemental Dice + n Any Elemental Dice / n Same Elemental Dice'; dice cost and Energy on separate lines; omit Energy when none; omit both lines for passive skills.
+> 14. Full cost wording: no shorthand; write "x Hydro Elemental Dice + n Any Elemental Dice / n Same Elemental Dice"; dice cost and Energy on separate lines; write Energy as "x Energy"; omit Energy when none; omit both lines for passive skills.
 
 ---
 

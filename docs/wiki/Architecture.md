@@ -2,7 +2,7 @@
 
 > 中文 · [[Architecture-EN|English]]
 
-*本页范围: 六个 crate 的依赖方向, 仓库目录, 一局对局的数据流, '框架只给接口'的落地方式, 以及已知文档偏差.*
+*本页范围: 六个 crate 的依赖方向, 仓库目录, 一局对局的数据流, "框架只给接口"的落地方式, 以及已知文档偏差.*
 
 ---
 
@@ -59,13 +59,13 @@ new/
 | 反应 | `definitions/src/reactions/` | 反应身份 → 效果函数指针; 伤害修正链在 `families/character/damage_chain/` |
 | 记录 | `definitions/src/records/` | `Recorder<T>`: 属于哪一步 + 任意内容 (D223 / D224)  |
 
-**以'使用技能'为例** (`definitions/src/flow/skill_use.rs`) : 
+**以"使用技能"为例** (`definitions/src/flow/skill_use.rs`) : 
 
 1. 成对入口 `use_skill_me` / `use_skill_opp` (同一份实现, D29 / D34) ; 
-2. 能否使用 → 支付 (骰子 / 充能) → 派发'使用技能前' (只排序) ; 
+2. 能否使用 → 支付 (骰子 / 充能) → 派发"使用技能前" (只排序) ; 
 3. 执行效果体: `keywords::Step`, 步内按序调用关键字函数; 
 4. **步末 flush**: 各区派发的待执行交给调用方执行 (`flow/pending.rs`) ; 反应子结算在步边界插入; 
-5. 派发'使用技能后', 用 `timeline::Resolution::insert` 插到当前结算位置 (D196) ; 
+5. 派发"使用技能后", 用 `timeline::Resolution::insert` 插到当前结算位置 (D196) ; 
 6. 分支终局判定 (`state/terminal.rs`; 双负 = `BothLose`, D267) .
 
 **文本数据流**: `generated/data/*.json` → `build.rs` (编译期生成静态表到 `OUT_DIR`) → `generated` 访问器 → `richtext::parse` (严格解析) → `generated::text::render` (取值来源 → 最终字符串) .
@@ -350,10 +350,10 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 ```
 
 
-## 4. '框架只给接口'的落地
+## 4. "框架只给接口"的落地
 
 > [!NOTE]
-> 这条是最高原则 (D20; `new/README.md` 的'项目理念'; `分工计划.md` §8.5) , 压过一切具体设计.
+> 这条是最高原则 (D20; `new/README.md` 的"项目理念"; `分工计划.md` §8.5) , 压过一切具体设计.
 
 | 功能 | 框架给的 (机制)  | 业务归谁 |
 |---|---|---|
@@ -376,7 +376,7 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 | 结算顺序 | 同一时机内以 `结算顺序.md` 为唯一权威; 顺序常量只在 `rules::ops::order` 一份 | D197; `结算顺序.md` |
 | 插入式结算 | 帧 + `cursor`, 子结算做完回到插入点; 不是 LIFO 栈 | D196 |
 | 一步原子 | 步内按书写顺序, 禁止插入; 插入只能发生在步之间 | D204 |
-| 不确定性 | 不确定先不物化; 观测时展开成'分支 + 精确概率', 不再影响别处后折叠回 | D190 / D191 |
+| 不确定性 | 不确定先不物化; 观测时展开成"分支 + 精确概率", 不再影响别处后折叠回 | D190 / D191 |
 | 零浮点 | 概率 / 权重 / 随机全部整数 (`Fraction` = `ExactNat128` 分子分母; `Rng` 对外只给 `u128`)  | D158–D160 |
 
 ## 6. 已知文档偏差
@@ -386,11 +386,11 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 
 | 旧文档 | 偏差 |
 |---|---|
-| `new/README.md` / `README.en.md` | 骰子'每颗 = 实体', 结算顺序'编译期解出', 类型树继承, dll / 两阶段加载, 'core / engine / definitions 三个 crate', `Rc` 结构共享 |
-| `结构.md` / `分工计划.md` | 旧目录树与旧签名: f64 概率, 旧 `DefState` 字段, base 里的 `CardType` / `CardTag`, '卡牌代码不存文案' |
+| `new/README.md` / `README.en.md` | 骰子"每颗 = 实体", 结算顺序"编译期解出", 类型树继承, dll / 两阶段加载, "core / engine / definitions 三个 crate", `Rc` 结构共享 |
+| `结构.md` / `分工计划.md` | 旧目录树与旧签名: f64 概率, 旧 `DefState` 字段, base 里的 `CardType` / `CardTag`, "卡牌代码不存文案" |
 | `definitions/src/lib.rs` | 模块文档仍说 resources / timeline / loader 后续加入; 实际已存在 |
 | `definitions/src/families/mod.rs` | 仍说 families'只放类型枚举'; 实际还有定义载体 / 区域 / 操作 |
-| `definitions/src/records/mod.rs` | 仍说 damage_chain / 各区记录'待接入'; 实际多个 `record.rs` 已用 `Recorder` |
+| `definitions/src/records/mod.rs` | 仍说 damage_chain / 各区记录"待接入"; 实际多个 `record.rs` 已用 `Recorder` |
 | `definitions/build.rs` | 手写 JSON 解析器 (离线零依赖) , 与 D74'改用 JSON 库'冲突 |
 
 ## 7. 相关页面

@@ -2,13 +2,13 @@
 
 > 中文 · [[定义层-Base-EN|English]]
 
-*本页范围: 定义层最底层的无行为, 无状态基础数据: 元素, 牌族, 编号, 视角方, 以及状态'身份 = 数据地址'的口径.*
+*本页范围: 定义层最底层的无行为, 无状态基础数据: 元素, 牌族, 编号, 视角方, 以及状态"身份 = 数据地址"的口径.*
 
 ---
 
 ## 1. 职责
 
-提供**不含行为与状态**的基础数据: `Element`, `CardFamily` (= id 区域) , `CardId` / `SkillId`, `Perspective`; 并给出状态身份'用指针当身份'的统一口径 (实现位于 `families/action_card/status/state.rs`, 不在 `base/` 目录) .
+提供**不含行为与状态**的基础数据: `Element`, `CardFamily` (= id 区域) , `CardId` / `SkillId`, `Perspective`; 并给出状态身份"用指针当身份"的统一口径 (实现位于 `families/action_card/status/state.rs`, 不在 `base/` 目录) .
 
 ## 2. 关键概念与类型
 
@@ -175,7 +175,7 @@ pub fn same_state_identity(
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> id 的唯一性按牌族: 查找 / 存储一律用 `(CardFamily, CardId)`; 游戏逻辑里没有'名字 → 卡'的查找.
+> id 的唯一性按牌族: 查找 / 存储一律用 `(CardFamily, CardId)`; 游戏逻辑里没有"名字 → 卡"的查找.
 > 身份比较只用 `same_state_identity` (内部比较 `identity_address`) , 不得引入 TypeId, 字符串名或数字编号.
 
 - `Element` / `CardFamily` 的变体顺序不表示规则语义, 不要拿 `as usize` 当优先级.

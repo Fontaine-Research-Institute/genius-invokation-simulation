@@ -8,7 +8,7 @@
 
 ## 1. 职责
 
-按**五个牌族 (L1 `CardFamily`) **组织'类型定义 + 区域状态 + 区域操作'.**具体卡牌不在本 crate**: 按 D240 它们位于 `gi-genius-invokation-cards` (`new/crates/cards/`) .
+按**五个牌族 (L1 `CardFamily`) **组织"类型定义 + 区域状态 + 区域操作".**具体卡牌不在本 crate**: 按 D240 它们位于 `gi-genius-invokation-cards` (`new/crates/cards/`) .
 
 ## 2. 关键概念与类型
 
@@ -18,7 +18,7 @@
 |---|---|---|---|
 | L1 | 牌族 | `src/base/family.rs` 的 `CardFamily` | `ActionCard` / `Summon` / `Character` / `Enemy` / `Status`; **牌族决定 id 区域**, 跨牌族 id 不保证唯一 |
 | L2 | 类型 | **只有行动牌与状态有**: `src/families/action_card/mod.rs` 的 `ActionCardType`, `src/families/status/mod.rs` 的 `StatusType` | 角色 / 召唤物 / 敌人没有类型; `src/families/mod.rs` 用穷尽 match 钉死 |
-| L3 | 标签 | 顶层 `src/tags/` (与 families 同级, D53)  | 每个标签 = 一个**零大小类型 + 一份静态 `TagText`** (D54 / D57 / D58 / D64) ; 没有'标签总枚举', 没有编号 |
+| L3 | 标签 | 顶层 `src/tags/` (与 families 同级, D53)  | 每个标签 = 一个**零大小类型 + 一份静态 `TagText`** (D54 / D57 / D58 / D64) ; 没有"标签总枚举", 没有编号 |
 
 ### 2.2 五个牌族一览
 
@@ -32,19 +32,19 @@
 
 ### 2.3 区的口径 (D40 / D42 / D182 / D183) 
 
-- **区 = 状态结构里的一个字段 (变量) **: 没有 `AreaId`, 没有区登记表, 没有'实体 → 所属区'映射.
+- **区 = 状态结构里的一个字段 (变量) **: 没有 `AreaId`, 没有区登记表, 没有"实体 → 所属区"映射.
 - 敌我 = **同一套容器类型建两个具名实例** (`DefState.me` / `DefState.opp`) , 不传 side 参数, 不用 0/1 编码 (D29 / D34) .
 - 区对外只给**只读指针** (`entries()` / `len()` / `stats()` 等) ; 更新一律是**纯函数** (吃 `&self` 返回新值) .
 - 时机: 每个区自己定义时机键 (如 `SupportTiming` / `SummonTiming` / `CharacterZoneTiming` / `CombatStatusTiming`) → `timeline::dispatch` **只排序, 不执行** (D185 / D186) .
 
 > [!IMPORTANT]
-> 区就是结构体字段 (D42) : 不要给区编号, 也不要建'实体 → 区'表; 实体在哪, 由取它的那份代码自己知道.
+> 区就是结构体字段 (D42) : 不要给区编号, 也不要建"实体 → 区"表; 实体在哪, 由取它的那份代码自己知道.
 > 敌我靠两个具名实例表达 (D29 / D34) , 不靠参数或数字编码.
 
 ## 3. 公开入口
 
 > [!NOTE]
-> 本节代码取自当前仓库 (含 use / derive / 文档注释等样板) .超长函数体截断为'签名 + 开头几行'并注明从略; 未截断的即为全文.
+> 本节代码取自当前仓库 (含 use / derive / 文档注释等样板) .超长函数体截断为"签名 + 开头几行"并注明从略; 未截断的即为全文.
 
 ### 3.1 牌族与类型枚举
 
@@ -111,7 +111,7 @@ pub enum StatusType {
 
 | 主题 | 依据 |
 |---|---|
-| 三个区域 (角色 / 支援 / 召唤物) + 手牌 / 牌库 / 装备附属 | 规则书'游戏区域 I–VI'; `families/*/zones/` |
+| 三个区域 (角色 / 支援 / 召唤物) + 手牌 / 牌库 / 装备附属 | 规则书"游戏区域 I–VI"; `families/*/zones/` |
 | 牌族 = id 区域; 类型 / 标签分层 | D51 / D53 / D54 / D55 |
 | 敌我不进引擎, 两个具名实例 | D29 / D30 / D34 |
 | 区 = 字段, 无区号 / 区表 | D40 / D42 |
@@ -132,15 +132,15 @@ pub enum StatusType {
 ## 6. 常见误用
 
 > [!WARNING]
-> 下面几类写法会破坏'区 = 字段''数据只有一份''不建注册表'三条全局约定.
+> 下面几类写法会破坏"区 = 字段""数据只有一份""不建注册表"三条全局约定.
 
 1. **把 tag 当编号**: 标签是零大小类型 + 静态元数据指针 (D54 / D57) , 不能 `as u32`, 不能按字符串比较.
-2. **给区加编号 / 建'实体 → 区'表**: 违反 D42.
+2. **给区加编号 / 建"实体 → 区"表**: 违反 D42.
 3. **在 `families/` 里建注册表或统计中枢**: 违反 D20 / D240.
 4. **同一 id 不带牌族就引用**: 不同牌族 id 可重复 (D51) , 必须 `(CardFamily, CardId)`.
 5. **把 stats 算进局面等价**: 各区 `PartialEq` 明确排除统计 (D187) .
 6. **在定义里抄文案**: 文案从 `generated` 取 (D61 / D64 / D120) .
-7. **把'持续回合'当'可用次数'**: 可用次数按触发次数递减 (D12) , 持续回合按结束阶段递减 (规则书; D13 旧口径已被覆盖) .
+7. **把"持续回合"当"可用次数"**: 可用次数按触发次数递减 (D12) , 持续回合按结束阶段递减 (规则书; D13 旧口径已被覆盖) .
 
 ## 7. 测试
 
@@ -149,11 +149,11 @@ pub enum StatusType {
 | `src/families/mod.rs` | `tests::only_action_card_and_status_have_types`, `tests::type_enums_belong_to_their_own_family` |
 | `src/families/action_card/mod.rs` | `tests::action_card_has_exactly_three_types` |
 | `src/families/status/mod.rs` | `tests::status_types_share_one_id_region` |
-| 各牌族专页 | 见 [[定义层-Character]] / [[定义层-Action-Card]] / [[定义层-Summon-Enemy-Status]] 的'测试'节 |
+| 各牌族专页 | 见 [[定义层-Character]] / [[定义层-Action-Card]] / [[定义层-Summon-Enemy-Status]] 的"测试"节 |
 
 ## 8. 待接入与待实测
 
-- **敌人牌没有区 / 运行期承载**: 代码标'待接入'; `留空.md` 目前没有专条 (建议补登) .
+- **敌人牌没有区 / 运行期承载**: 代码标"待接入"; `留空.md` 目前没有专条 (建议补登) .
 - **具体卡牌只有 1 张样板** (`cards/src/cards/character`) : 属卡牌实现阶段; `留空 #12` 记角色牌实现结构待问用户, 多版本加载见 `留空 #24` (D248 / D249 / D251) .
 - **卡牌版本区间加载**未实现: `留空 #24`.
 - **行动牌 / 状态没有 `types/` 子目录**: 见 §5.1.

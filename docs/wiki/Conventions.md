@@ -26,7 +26,7 @@
 
 > [!WARNING]
 > 零大小静态实例的地址可能相同, 直接对 ZST 做 `ptr::addr_eq` / `ptr::eq` 会把不同身份判成同一个 (D200 实测) .
-> 身份必须落到'定义数据'的地址.
+> 身份必须落到"定义数据"的地址.
 
 ## 2. 数据只一份
 
@@ -37,7 +37,7 @@
 - 同一份格式只允许一个定义处: `CostComponent` 归骰子模块, 其它地方只再导出 (D161) ; 源码嵌入宏与类型归 `definitions`, 只有汇总表跟 crate 走 (D242) .
 
 > [!TIP]
-> 需要'方便访问'时, 先问: 这份数据是不是已经有唯一的一份?有就从那一份走, 别再抄.
+> 需要"方便访问"时, 先问: 这份数据是不是已经有唯一的一份?有就从那一份走, 别再抄.
 
 ## 3. 纯函数 + `Option` / `Result`
 
@@ -49,7 +49,7 @@
 - 多分支用 `Vec<(DefState, Fraction)>`, 不采样, 不合并概率.
 
 > [!IMPORTANT]
-> 选型说明见 `definitions/src/state/flows/mod.rs`: 搜索必须能分叉, 插入式结算要能'不执行也返回', 回滚 / 对照 / 单测都要求入参不变.
+> 选型说明见 `definitions/src/state/flows/mod.rs`: 搜索必须能分叉, 插入式结算要能"不执行也返回", 回滚 / 对照 / 单测都要求入参不变.
 
 ## 4. 零浮点
 
@@ -58,7 +58,7 @@
 - `crates/` 下不出现 `f64` (D159; `grep -r "f64" new/crates` 应为 0 命中) .
 - 概率 / 权重 / 概率质量一律 `Fraction` (分子 / 分母 `ExactNat128`; D152 / D153 / D158) .
 - 随机源对外只给 128 位整数: `Rng::next_u128` / `Rng::next_below_u128` (D160) .
-- 观测点展开成'确定分支 + 精确概率', 不采样 (D190) .
+- 观测点展开成"确定分支 + 精确概率", 不采样 (D190) .
 
 > [!NOTE]
 > 只有将来对外展示 / 求解器边界才允许一次性转浮点, 且不在核心 crate 内 (留空 #14) .
@@ -86,7 +86,7 @@
 **落点**: `engine/src/nat.rs` 的 `saturating_add/sub/mul`, `Div` 与四个宏; `Fraction::new` 分母 0 → panic.
 
 > [!WARNING]
-> 不要依赖'溢出会 panic'发现业务问题, 也不要用 `max/min` 手动兜底代替饱和语义.
+> 不要依赖"溢出会 panic"发现业务问题, 也不要用 `max/min` 手动兜底代替饱和语义.
 
 ## 7. 一步 (Step) 是原子单位
 
@@ -100,7 +100,7 @@
 **落点**: `definitions/src/keywords/step.rs`, `keywords/mod.rs` 的硬约束, `flow/skill_use.rs` 的步末 flush.
 
 > [!IMPORTANT]
-> 反例: 在关键字函数内部直接执行 pending / 插入子结算 (破坏原子性) ; 把'一步'理解成'一个动作'.
+> 反例: 在关键字函数内部直接执行 pending / 插入子结算 (破坏原子性) ; 把"一步"理解成"一个动作".
 
 ## 8. 效果 = 执行函数指针
 
@@ -134,9 +134,9 @@
 
 **要求**
 
-- 敌我 = 同一套结构的两个具名实例 (`me` / `opp`) ; 一切'对某一方'的入口成对出现 (`xxx_me` / `xxx_opp`) , 共用一份实现.
+- 敌我 = 同一套结构的两个具名实例 (`me` / `opp`) ; 一切"对某一方"的入口成对出现 (`xxx_me` / `xxx_opp`) , 共用一份实现.
 - 不传 `Side`, 不用 `[T; 2]` + 下标, 不用 0/1 编码.
-- 区 = 状态里的字段: 没有区号, 没有区表, 引擎不记录'实体属于哪个区'; 容器只有 `Area` / `SingleArea` 两种类型.
+- 区 = 状态里的字段: 没有区号, 没有区表, 引擎不记录"实体属于哪个区"; 容器只有 `Area` / `SingleArea` 两种类型.
 
 **落点**: `definitions/src/state/def_state.rs`, `state/player.rs`; `engine/src/area.rs` / `entity.rs`.
 
@@ -153,7 +153,7 @@
 **落点**: `definitions/src/timeline/mod.rs`, `timeline/suspend.rs`, `rules/ops/order.rs`.
 
 > [!WARNING]
-> 不要在别处再写一份'角色牌 → … → 支援牌'的顺序表, 不要用 LIFO 栈实现触发队列.
+> 不要在别处再写一份"角色牌 → … → 支援牌"的顺序表, 不要用 LIFO 栈实现触发队列.
 
 ## 12. 相关页面
 

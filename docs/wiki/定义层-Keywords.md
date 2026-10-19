@@ -8,13 +8,13 @@
 
 ## 1. 职责
 
-`keywords/*` 是**关键字层**: 把卡面写法拆成'目标选择器 + 关键字操作 (`Step` 一步) + 关键字函数', 在 `&DefState` 上执行并返回'分支 + 精确概率 + 待执行 + 反应子结算'.本层**不执行**自己派发出来的触发 (D186) , **步内不插入** (D204) .
+`keywords/*` 是**关键字层**: 把卡面写法拆成"目标选择器 + 关键字操作 (`Step` 一步) + 关键字函数", 在 `&DefState` 上执行并返回"分支 + 精确概率 + 待执行 + 反应子结算".本层**不执行**自己派发出来的触发 (D186) , **步内不插入** (D204) .
 
 ## 2. 关键概念与类型
 
 | 文件 | 职责 |
 |---|---|
-| `crates/definitions/src/keywords/target.rs` | `TargetSelector` 把卡面写法解析成候选实体集合 (含'距离最近'`NearestToActive`)  |
+| `crates/definitions/src/keywords/target.rs` | `TargetSelector` 把卡面写法解析成候选实体集合 (含"距离最近"`NearestToActive`)  |
 | `keywords/op.rs` | 关键字操作的数据表达: `KeywordOp` + 各 `*Args` + `KeywordBranch` / `KeywordResult` |
 | `keywords/keyword.rs` | 一个关键字一个函数 (伤害 / 治疗 / 附着 / 状态 / 召唤 / 抽牌 / 弃置 / 骰子 / 生成卡 / 切换 / 充能 / 手牌卡状态 / 置底)  |
 | `keywords/step.rs` | `Step` 一步原子: 按书写顺序跑 ops, 步内不插, 步末 flush, 步边界插入反应 |
@@ -24,9 +24,9 @@
 | `keywords/trace.rs` | 回放轨迹: `Trace` / `StepTrace` / `BranchTrace` / `OpTrace` / `ReactionTrace` + `*_traced` 入口 |
 | `keywords/record.rs` | 关键字记录 (`KeywordRecord`) 与 recorded 入口 |
 
-### 2.1 目标选择器 (含'最近目标') 
+### 2.1 目标选择器 (含"最近目标") 
 
-`TargetSelector` 只描述**候选集合**, 不决定'选哪个' (D25/D26) ; 需要随机时由 `TargetPick::OneUniform` 在关键字函数里展开成'每支 1/N'的分支 (D190) .`SideScope::{Own, Opponent, Both}` 相对**视角方** (D29/D34) .
+`TargetSelector` 只描述**候选集合**, 不决定"选哪个" (D25/D26) ; 需要随机时由 `TargetPick::OneUniform` 在关键字函数里展开成"每支 1/N"的分支 (D190) .`SideScope::{Own, Opponent, Both}` 相对**视角方** (D29/D34) .
 
 | 变体 | 语义 / 备注 |
 |---|---|
@@ -1610,7 +1610,7 @@ pub fn discard_self_step() -> Step {
 > 步内不插入 (D204) : 只把派发结果装进 `pending: PendingSet`, 反应请求装进 `reactions`; 执行 / 插入只在步末 / 步边界.
 
 > [!WARNING]
-> 不采样 (D190) : 随机点展开成'分支 + 精确 `Fraction`', 概率之和应为 1.
+> 不采样 (D190) : 随机点展开成"分支 + 精确 `Fraction`", 概率之和应为 1.
 > 反应执行不重写执行器: `settle_reaction` 复用 `damage_chain::executor::execute_reaction`; 非伤害反应先 `without_damage()` (S5.2) .
 > 动态张数在步开始时取样: 用 `EffectEnv.step_start_*_hand`, 不要在 op 执行中途读当前手牌.
 
@@ -1619,8 +1619,8 @@ pub fn discard_self_step() -> Step {
 | 规则 / 决策 | 落点 |
 |---|---|
 | 游戏区域 I / 使用技能 (攻击对方出战角色)  | `Active(Opponent)` / `opponent_active()` |
-| 卡面'(下)(n)个角色''所有敌方后台角色''生命值最低' | `AfterActive` / `Standby` / `HpRank` |
-| 权威关键字'距离最近' (规则书正文无, L12)  | `NearestToActive` (留空 #62/#69)  |
+| 卡面"(下)(n)个角色""所有敌方后台角色""生命值最低" | `AfterActive` / `Standby` / `HpRank` |
+| 权威关键字"距离最近" (规则书正文无, L12)  | `NearestToActive` (留空 #62/#69)  |
 | S5.2 元素反应 / 非伤害附着也引发反应 (忽略伤害类效果)  | `attach_element` + `ReactionRequest.non_damage` |
 | 结算顺序 §二 插入式结算 (不是栈)  | `ReactionFrames` / `timeline::Resolution` |
 | S7.5 结算顺序 | `flow` 层排序; 关键字层只派发 |
@@ -1644,14 +1644,14 @@ pub fn discard_self_step() -> Step {
 ## 6. 常见误用
 
 > [!WARNING]
-> 在 `Step` 里塞'等触发效果执行完再继续'的假设; 步内不插, 把后续动作写成下一步.
+> 在 `Step` 里塞"等触发效果执行完再继续"的假设; 步内不插, 把后续动作写成下一步.
 > 在关键字函数里直接执行 `pending` / `reactions`; 应由 `Step` / flow 在步末 / 步边界统一做.
 > 用定义数据 `CharacterDef::max_hp` 算生命排名 / 受伤量; 必须读运行期 `CharacterState::max_hp` (D237/D238) .
 
-- 给 `resolve` 传错视角: `SideScope::Own` 是视角方自己 (成对入口自动绑) , 不是全局'我方'.
+- 给 `resolve` 传错视角: `SideScope::Own` 是视角方自己 (成对入口自动绑) , 不是全局"我方".
 - 期望 `TargetSelector` 帮你选随机目标: 随机由 `TargetPick::OneUniform` 在关键字层展开分支.
 - 用 `settle_reactions` 替代 `settle_inserted`: 前者按顺序结算一组请求 (不插入) , 后者是步边界插入执行入口.
-- 用 `Equipments` 当'某角色装备栏': 装备选择器是'该方所有角色装备栏里的装备'.
+- 用 `Equipments` 当"某角色装备栏": 装备选择器是"该方所有角色装备栏里的装备".
 - 在 `migrate` 里期待 1:1 无损: `EffectOp::Status` 的 `uses / stack_cap` 无入参, 迁移时丢弃 (待接入) .
 
 ## 7. 测试
@@ -1665,12 +1665,12 @@ pub fn discard_self_step() -> Step {
 ## 8. 待接入与待实测
 
 > [!NOTE]
-> 规则书没写的口径一律标'待实测', 不自行规定; 下列编号对应 `留空.md`.
+> 规则书没写的口径一律标"待实测", 不自行规定; 下列编号对应 `留空.md`.
 
-- '距离最近' : 距离是否镜像, 击倒角色是否占位, 并列口径 (留空 #62/#69) .
+- "距离最近" : 距离是否镜像, 击倒角色是否占位, 并列口径 (留空 #62/#69) .
 - 生命 / 受伤排名并列口径 (出战优先, 左右方向) 规则书没写 (留空; D229/D230 已记待实测) .
 - `stack_cap` 超限处理 (留空 #70) ; 召唤物 `stack_limit` 按可用次数解释 (留空 #71) ; 手牌卡状态未加 stack_cap (留空 #72) .
-- 非伤害附着的'反应后附着怎么消耗'按 D167 同口径, 待实测; 风 / 岩天生不可附着不判反应 (`reaction.rs` 待复核) .
+- 非伤害附着的"反应后附着怎么消耗"按 D167 同口径, 待实测; 风 / 岩天生不可附着不判反应 (`reaction.rs` 待复核) .
 - 反应效果造成的伤害是否再引发第二层反应 (`damage_chain/executor` 待复核) ; 反应效果给手牌加牌 / 状态后费用表未同步 (待接入) .
 - 迁移丢失项: `EffectOp::Status` 的 `uses / stack_cap` 无入参; `SkillEffectPlan` 伤害来源类别固定 `Other` (待由技能定义给) .
 - 关键字层没有'加支援牌'op (留空 #117 只做 flow 侧 `CardPlacement::Support`) .

@@ -8,7 +8,7 @@
 
 ## 1. 职责
 
-具体卡牌层: 只放'这张卡具体是什么'——每张卡自己的数据 (id / 标签 / 生命 / 充能 / 技能 / 文案) 与效果逻辑.卡牌的资源与形状定义留在 `definitions` (D240 / D241) ; 单向依赖 `definitions` / `engine`, 不反向.
+具体卡牌层: 只放"这张卡具体是什么"——每张卡自己的数据 (id / 标签 / 生命 / 充能 / 技能 / 文案) 与效果逻辑.卡牌的资源与形状定义留在 `definitions` (D240 / D241) ; 单向依赖 `definitions` / `engine`, 不反向.
 
 - 目录: `new/crates/cards/`
 - package / lib: `gi-genius-invokation-cards` / `gi_genius_invokation_cards`
@@ -184,13 +184,13 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 
 - 卡牌结构 = 原 definitions 结构: `src/cards/<牌族>/[<类型>/]<卡>`, 一卡一目录 (D163) ; 源码 `path` 仍以 `src/cards/` 开头.
 - 资源 / 形状不搬: `CardId` / `CardFamily` / 类型 / 标签 / `CostComponent` / `CharacterDef` / `SkillDef` 等留在 `definitions` (D241) .
-- 每张卡必须声明 `card_game_version!`; 数值 = 该卡'已同步到的最新版本'; 新版本没调整只改数字 (D245 / D246) .
+- 每张卡必须声明 `card_game_version!`; 数值 = 该卡"已同步到的最新版本"; 新版本没调整只改数字 (D245 / D246) .
 - 源码自声明后还要在 `SOURCE_FILES` 加一行 (漏加不编译失败, 但 `source_of` 找不到) ; 清单按 path 升序.
 - 文案按 D120 只填中文; 四语文本在 `definitions/generated/data/descriptions.json` (测试语料) .
 - 数字口径: `Nat` / 常量; crate 级 `deny(clippy::arithmetic_side_effects)`.
 
 > [!WARNING]
-> 禁止从参考实现取具体卡牌信息 (D122) ; 卡牌数据取自'游戏内文本描述'.
+> 禁止从参考实现取具体卡牌信息 (D122) ; 卡牌数据取自"游戏内文本描述".
 
 ## 5. 依据 (规则书与 D 编号) 
 
@@ -204,7 +204,7 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 | 资源与形状留 definitions, 只搬具体实例 | D241 |
 | 源码嵌入宏与机制留 definitions, 只有 `SOURCE_FILES` 跟卡牌走 | D242 |
 | simulation 默认不含具体卡牌 | D243 |
-| 版本同步宏口径 (只写'已同步到')  | D244 / D245 / D246 |
+| 版本同步宏口径 (只写"已同步到")  | D244 / D245 / D246 |
 | 卡牌多版本 (未实现)  | D248 (留空 #24)  |
 | 卡牌数据依据 | 规则书 / 卡面文本 (文件头注释)  |
 
@@ -216,7 +216,7 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 - 新版本同步时顺手改卡牌内容: 没调整的卡只改版本数字 (D246) .
 - 在卡牌层重新实现规则 / 复制 definitions 的结算逻辑.
 - 从参考实现抄卡牌具体数据 (D122) .
-- 现在就开始写'多版本卡牌': D248 未实现 (留空 #24) .
+- 现在就开始写"多版本卡牌": D248 未实现 (留空 #24) .
 - 爱诺的 4 个效果体是 `todo!`: 调用即 panic, 只作数据样板.
 
 ## 7. 测试
@@ -240,10 +240,10 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 | 编号 | 事项 |
 |---|---|
 | #24 | 卡牌多版本 (区间不重叠) + 加载时选一个版本 (D248) 未实现; 按卡独立选版本, 默认最新 (D249 / D251) 待做 |
-| #32 | 卡面'翻倍'类效果需要在 cards 层声明 `DamageArgs::with_modifiers`; 卡牌尚未接入 |
+| #32 | 卡面"翻倍"类效果需要在 cards 层声明 `DamageArgs::with_modifiers`; 卡牌尚未接入 |
 | #92 | `has_combat_action_tag` 的数据来源在 cards 层 (flow 只收 bool)  |
 | #81 / #109 | 料理 (含复苏料理) 的调度归 cards + flow; definitions 只给纯操作与 `flow::revive` |
-| 无编号 | 注册机制缺: `cards/mod.rs` 明说'没有集中注册表, 等注册机制 (缺, P3) 建好再接'; 爱诺暂未注册 |
+| 无编号 | 注册机制缺: `cards/mod.rs` 明说"没有集中注册表, 等注册机制 (缺, P3) 建好再接"; 爱诺暂未注册 |
 | 无编号 | 爱诺 4 个效果体是占位: 伤害结算入口 / 状态生成 / 召唤物区 / 被动触发注册等接口在文件注释里列出 |
 
 ---

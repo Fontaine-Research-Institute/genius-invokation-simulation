@@ -8,7 +8,7 @@
 
 ## 1. 职责
 
-承载'除具体卡牌以外的全部游戏定义': 牌族 / 类型 / 标签, 被花资源 (骰池) , 三级统一基础操作, 状态与串联流程, 关键字与'一步', 触发调度, 元素反应, 统一记录, 编译期源码嵌入, 版本同步, 以及 `build.rs` 生成的数据与富文本渲染.
+承载"除具体卡牌以外的全部游戏定义": 牌族 / 类型 / 标签, 被花资源 (骰池) , 三级统一基础操作, 状态与串联流程, 关键字与"一步", 触发调度, 元素反应, 统一记录, 编译期源码嵌入, 版本同步, 以及 `build.rs` 生成的数据与富文本渲染.
 
 - 目录: `new/crates/definitions/`
 - package / lib: `gi-genius-invokation-definitions` / `gi_genius_invokation_definitions`
@@ -23,7 +23,7 @@
 |---|---|
 | `src/base/` | `CardFamily` (id 区域) + `CardId` / `SkillId` / `Element` / `Perspective` |
 | `src/families/` | 每个牌族的框架: 类型枚举 + 定义载体 + 区域状态 + 底层操作 (行动牌: 支援区 / 手牌卡状态 / 当前费用 / 牌库 / 查询; 角色: 伤害 / 伤害修正链 / 技能流程 / 形态与成长 / 装备栏 / 状态区; 召唤物: 定义 + 召唤物区; 状态: 类型枚举 + 定义; 敌人: 定义)  |
-| `src/tags/` | L3 标签: 顶层目录, 按'牌族 / 类型'分组; 一个标签一个文件, 一个零大小类型 (D54) , 共 52 个 |
+| `src/tags/` | L3 标签: 顶层目录, 按"牌族 / 类型"分组; 一个标签一个文件, 一个零大小类型 (D54) , 共 52 个 |
 | `src/resources/` | 被花的东西: `dice/` 骰池 —— 纯计数 (不是实体, D47) , 三块表示 (D49) , 生成 / 支付 / 转化 / 查询 / 折叠展开 |
 | `src/rules/` | 三级统一基础操作: `RuleRow` 静态规则表 + `ops/` 纯函数 (槽位 / 上限 / 开局 / 料理 / 伤害 / 查询 / 结算顺序; 排除自走牌)  |
 | `src/timeline/` | 触发 / 事件调度: 泛型注册表 (时机键 + 条件函数指针 + 执行函数指针, D186) + 有序派发 + 结算帧 (D196)  |
@@ -34,7 +34,7 @@
 | `src/generated/` | `build.rs` 生成的数据表 + 访问器 + `Localized` (D56) + 富文本 `render` (解析由 richtext 提供)  |
 | `src/state/` | `DefState` (`me` / `opp` + `round` + `first_player`) / `PlayerDefs` + 终局判定 + `state::flows` (开局 / 切换 / 击倒 / 复苏 / 结束阶段 / 回合开始 / 下落标记)  |
 | `src/flow/` | 端到端动作入口: 使用技能 / 打牌 / 切换角色 / 元素调和 / 特技 / 回合骨架 / `pending` 执行器 / `recorded` 包装 / 钩子 |
-| `src/keywords/` | 关键字函数 + 一步 `Step` (D204) + 目标选择器 (含'自己', D205 / D206) + 反应子结算 + `trace` / `record` |
+| `src/keywords/` | 关键字函数 + 一步 `Step` (D204) + 目标选择器 (含"自己", D205 / D206) + 反应子结算 + `trace` / `record` |
 
 **数据文件**: `generated/data/{terms,keywords,descriptions}.json` (入库) ; `build.rs` 编译期生成静态表到 `$OUT_DIR/generated_data.rs`, 运行期不读文件; 标签数据是 `generated::TAGS.<字段>` 字段访问 (D67) .
 
@@ -46,7 +46,7 @@
 |---|---|
 | `card_source!(path: ["character", "aino"])` | 卡牌文件源码自声明 (自动绑定模块的 `pub const ID`, D215)  |
 | `module_source!(path: [...], name: MODULE_NAME)` | 非卡牌模块源码自声明 + 多语名字 |
-| `card_game_version!(6, 2)` | 声明'本卡已同步到的最新版本' (D244–D246)  |
+| `card_game_version!(6, 2)` | 声明"本卡已同步到的最新版本" (D244–D246)  |
 
 **主要公开类型 / 入口**
 
@@ -983,7 +983,7 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 - 敌我不编号, 区 = 变量 (D29 / D34 / D42) ; 成对入口共用一份实现.
 - 一步原子 (D204) : 步内禁止插入; 插入只能发生在步与步之间.
 - 插入式结算不是栈 (D196) ; 结算顺序唯一权威是 `结算顺序.md`, 常量只在 `rules::ops::order`.
-- 不确定先不物化 (D190 / D191) : 观测点展开成'分支 + 精确概率', 之后折叠回.
+- 不确定先不物化 (D190 / D191) : 观测点展开成"分支 + 精确概率", 之后折叠回.
 - feature 关闭不改变语义 (`records` / `stats` / `embed-source`) .
 - 不持有全局状态: 注册表 / 记录器 / 骰池都是普通值字段.
 

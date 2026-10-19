@@ -86,7 +86,7 @@ pub use gi_genius_invokation_cards as cards;
 ## 6. 常见误用
 
 > [!WARNING]
-> 不要往门面里加'方便函数'或业务逻辑; 不要把 `cards` 设成默认 feature.
+> 不要往门面里加"方便函数"或业务逻辑; 不要把 `cards` 设成默认 feature.
 
 - 下游同时依赖 `simulation` 和内部 crate, 从两条路径导入类型 (容易版本漂移) .
 - 忘了对具体卡牌打开 `--features cards`: 默认 `simulation::cards` 不存在 (编译期报错是预期) .
@@ -106,7 +106,7 @@ cargo build --offline -p gi-genius-invokation-simulation --features cards
 
 | 编号 | 事项 |
 |---|---|
-| #24 / #25 | 卡牌多版本与加载期选版本 (D248–D251) 未实现; 将来'默认最新 / 加载后可单独指定'的入口预期落在加载 / 门面层 |
+| #24 / #25 | 卡牌多版本与加载期选版本 (D248–D251) 未实现; 将来"默认最新 / 加载后可单独指定"的入口预期落在加载 / 门面层 |
 | 无编号 | `solver` crate 尚未建 (`new/Cargo.toml` 注释) ; 将来作为独立 crate |
 | 无编号 | 文档站 (D239: GitHub Pages 为主) 与本 Wiki 的关系待维护者定; 本 crate 无文档代码 |
 

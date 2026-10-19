@@ -8,7 +8,7 @@
 
 ## 1. 职责
 
-资源层管'被花的东西': 骰池是纯计数 (不是实体) ; 提供三类费用, `can_afford` / `pay`, 折叠组的按需展开与查询快照; 行动牌的'当前元素骰费用'在同目录的 cost 块.id / 元素约定见 [[定义层-Base]].
+资源层管"被花的东西": 骰池是纯计数 (不是实体) ; 提供三类费用, `can_afford` / `pay`, 折叠组的按需展开与查询快照; 行动牌的"当前元素骰费用"在同目录的 cost 块.id / 元素约定见 [[定义层-Base]].
 
 ## 2. 关键概念与类型
 
@@ -31,7 +31,7 @@
 |---|---|---|
 | `DicePool::{empty, new, total, add, remove, convert}` | `resources/dice/mod.rs` | 构造 / 计数 / 增减 / 转化; `add` 与 `new` 按上限 16 截断 |
 | `DicePool::{expand_source, condition}` | 同上 | 同源组一起展开; 按谓词条件化, 均返回分支 + 精确概率 |
-| `DicePool::{can_afford, pay, all_dice}` | 同上 | '可能够'判定; 确定性扣减; 查询快照 |
+| `DicePool::{can_afford, pay, all_dice}` | 同上 | "可能够"判定; 确定性扣减; 查询快照 |
 | `DicePool::{generate_random, generate}` | 同上 | 随机 n 颗 / 按有序内容表达式生成 |
 | `validate_cost` / `apply_delta` | 同上 | 校验费用 (非法组合 panic) ; 叠加一次增减费 |
 | `CurrentCost::{new, base, deltas, current, total, with_delta, with_increase, with_decrease}` | `families/action_card/areas/cost.rs` | 当前费用纯数据 |
@@ -295,7 +295,7 @@ impl CurrentCost {
 ## 6. 常见误用
 
 > [!WARNING]
-> 以下写法会让'看起来够'变成运行时 `None` / panic; 先检查折叠组与费用合法性.
+> 以下写法会让"看起来够"变成运行时 `None` / panic; 先检查折叠组与费用合法性.
 
 1. `can_afford` 成功后直接 `expect` `pay`: 折叠组未展开时 `pay` 返回 `None`.
 2. 给 `SameColor` 传 `None` 并期望自动挑色: 本模块不猜, 由调用方给.
