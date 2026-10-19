@@ -1,0 +1,25 @@
+# 对外门面（facade）：唯一入口，只有 re-export，没有逻辑。
+# 默认**不含具体卡牌**（D243）：cards crate 是可选依赖，由 feature `cards` 打开。
+[package]
+name = "gi-genius-invokation-simulation"
+version = "0.1.0"
+edition.workspace = true
+description = "对外唯一入口：统一转发 engine / definitions / richtext（只有 re-export，无逻辑；具体卡牌是可选 feature cards）"
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "gi_genius_invokation_simulation"
+path = "src/lib.rs"
+
+[features]
+# D243：默认不带具体卡牌（用户口径「整个模拟 crate 默认不含具体 cards」）。
+default = []
+# 需要具体卡牌时显式打开：cargo build -p gi-genius-invokation-simulation --features cards
+cards = ["dep:gi-genius-invokation-cards"]
+
+[dependencies]
+gi-genius-invokation-engine = { path = "../engine" }
+gi-genius-invokation-definitions = { path = "../definitions" }
+gi-genius-invokation-richtext = { path = "../richtext" }
+gi-genius-invokation-cards = { path = "../cards", optional = true }

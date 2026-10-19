@@ -1,0 +1,30 @@
+# 游戏定义层：基础通用数据 + 牌族 / 类型 / 标签（卡牌资源与形状）。
+# **不含具体卡牌**（D240 / D241 / D243）：具体卡牌在 gi-genius-invokation-cards crate。
+# 依赖机制原语 crate gi-genius-invokation-engine；**默认零外部依赖**（本块不引任何第三方 crate）。
+[package]
+name = "gi-genius-invokation-definitions"
+version = "0.1.0"
+edition.workspace = true
+description = "游戏定义层：基础通用数据 + 牌族 / 类型 / 标签（卡牌资源与形状，不含具体卡牌；依赖 gi-genius-invokation-engine，默认零外部依赖）"
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "gi_genius_invokation_definitions"
+path = "src/lib.rs"
+
+[features]
+# D213：默认开启「编译期嵌入本文件源码」。关掉时不嵌入全文、汇总表为空、不占体积。
+default = ["embed-source", "records"]
+# 编译期嵌入各文件源码（D213：每文件用 card_source! 自声明）。
+embed-source = []
+# 统计子模块开关（D187）：关掉时各块 stats/ 里的统计变为空操作、不产生运算。
+stats = []
+# 统一记录器开关（D223 / D224）：关掉时 Recorder 是零大小类型、push 为空操作（零开销）。
+records = []
+# 求解接口适配（engine::rules::GameRules；D24：engine 的 rules 默认不编译，这里显式打开）。
+rules = ["gi-genius-invokation-engine/rules"]
+
+[dependencies]
+gi-genius-invokation-engine = { path = "../engine" }
+gi-genius-invokation-richtext = { path = "../richtext" }

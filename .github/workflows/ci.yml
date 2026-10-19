@@ -1,0 +1,133 @@
+# GitHub Actions CI
+#
+# 用途（对应分工计划 §8.4）：
+#   build-linux  —— Linux 上编译 + clippy（-D warnings）+ 三个代码扫描脚本
+#   test-windows —— Windows 上跑测试 + 三个代码扫描脚本（防止只在一边过）
+#   ci-ok        —— 汇总 job，分支保护只需要检查这一个状态
+#
+# 约定：
+#   - 三个扫描脚本均为只读：文件以共享只读方式打开（不加锁、不独占，读取期间别人可编辑），
+#     只打印普通日志、退出码恒为 0，不写任何文件、不产生 GitHub 注解，不会让 job 变红；
+#   - 扫描期间文件被改 / 删时由脚本自己记入「读取失败」并跳过，不阻断其它文件与 job；
+#   - 不开 dll feature（crates/engine/src/load.rs 尚未实现，开了编不过）；
+#   - 缓存用 Swatinem/rust-cache（自动缓存 cargo registry 与 target/）。
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "伪代码/**"
+      - "不入库/**"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # 每周一 03:00 UTC——兜住依赖 / runner 环境漂移
+    - cron: "0 3 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+  PYTHONUTF8: 1
+
+jobs:
+  # Linux：编译 + clippy + 扫描（扫描只提示，不阻断）
+  build-linux:
+    name: build-linux
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable, clippy + rustfmt)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry and target (rust-cache)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Check Cargo.lock is in sync (cargo check --locked)
+        run: cargo check --locked --workspace
+
+      - name: Build (features rules,dedup,opt-all)
+        run: cargo build --locked --workspace --features rules,dedup,opt-all
+
+      - name: Clippy (all targets, -D warnings)
+        run: cargo clippy --locked --workspace --all-targets --features rules,dedup,opt-all -- -D warnings
+
+      - name: Scan non-32-bit Nat usage (informational only)
+        run: python3 tools/check_nat_width.py
+
+      - name: Scan bare ints / bare arithmetic (informational only)
+        run: python3 tools/check_bare_int.py
+
+      - name: Scan index access / subscripts (informational only)
+        run: python3 tools/check_no_index.py
+
+  # Windows：测试 + 扫描（扫描只提示，不阻断）
+  test-windows:
+    name: test-windows
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable, clippy + rustfmt)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry and target (rust-cache)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Test (features rules,dedup,opt-all, locked)
+        run: cargo test --workspace --features rules,dedup,opt-all --locked
+
+      - name: Scan non-32-bit Nat usage (informational only)
+        run: python tools/check_nat_width.py
+
+      - name: Scan bare ints / bare arithmetic (informational only)
+        run: python tools/check_bare_int.py
+
+      - name: Scan index access / subscripts (informational only)
+        run: python tools/check_no_index.py
+
+  # 汇总：分支保护只需要勾选 ci-ok
+  ci-ok:
+    name: ci-ok
+    needs: [build-linux, test-windows]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Verify required jobs succeeded
+        shell: bash
+        run: |
+          echo "build-linux result: ${{ needs.build-linux.result }}"
+          echo "test-windows result: ${{ needs.test-windows.result }}"
+          if [ "${{ needs.build-linux.result }}" != "success" ] || [ "${{ needs.test-windows.result }}" != "success" ]; then
+            echo "required jobs did not all succeed"
+            exit 1
+          fi
+          echo "all required jobs succeeded"

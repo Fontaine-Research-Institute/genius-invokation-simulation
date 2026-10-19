@@ -1,0 +1,9 @@
+# 固定工具链。
+# 注意：离线构建环境下不能写 channel = "1.98.1"，否则 rustup 会去下载独立命名的
+# "1.98.1" toolchain（本机只装了 stable，且没有网络），cargo 直接失败。
+# 本机 rustc/cargo 版本：
+#   rustc 1.98.1 (48a229cea 2026-09-01)
+#   cargo 1.98.1 (797e8a9bc 2026-08-05)
+# 所以这里用 stable；它的版本恰好就是 1.98.1（ABI 校验仍能对应上）。
+[toolchain]
+channel = "stable"

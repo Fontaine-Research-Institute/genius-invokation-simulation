@@ -1,0 +1,62 @@
+name: Bug 报告
+description: 报告引擎、求解器或工具链的缺陷（可复现优先）
+title: "[bug] "
+labels: ["type: bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请给出最小可复现信息；贴日志时只保留相关片段，不要整段粘贴。
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么
+      description: 实际观察到的现象；有报错的话，说明它在哪一步出现。
+      placeholder: 例如：cargo test 在某个用例上 panic，原因是……
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望发生什么
+      description: 你认为正确的行为是什么；若有依据（决策编号 Dxx 或设计文档的哪一节），请一并写出。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从干净 checkout 开始的最短步骤。
+      placeholder: |
+        1. …
+        2. …
+        3. …
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 请填写 OS、rustc -V、cargo -V，以及构建时是否断网（是否加 --offline）。
+      value: |
+        - OS：
+        - rustc -V：
+        - cargo -V：
+        - 是否断网构建（--offline）：
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: 最小相关片段即可（报错、panic backtrace 的关键几行）。
+      render: shell
+    validations:
+      required: true

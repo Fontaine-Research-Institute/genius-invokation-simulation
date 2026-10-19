@@ -1,0 +1,11 @@
+# 兜底：所有文件默认由维护者负责
+* @genius-invokation-lover
+
+# 协作配套与 CI 配置
+/.github/ @genius-invokation-lover
+
+# 引擎原语
+/crates/engine/ @genius-invokation-lover
+
+# 代码扫描脚本
+/tools/ @genius-invokation-lover

@@ -1,0 +1,721 @@
+{
+  "version": "5.2.14",
+  "source": "游戏内文本描述",
+  "entries": [
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ABC",
+      "rust": "AUTOMATON_CARD",
+      "texts": {
+        "zh": "自走牌",
+        "en": "Automaton Card",
+        "ja": "オートカード",
+        "ko": "자동 카드"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_SLOWLY",
+      "rust": "COMBAT_ACTION",
+      "texts": {
+        "zh": "战斗行动",
+        "en": "Combat Action",
+        "ja": "戦闘アクション",
+        "ko": "전투 행동"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_SUB_HURT",
+      "rust": "DAMAGE_REDUCTION",
+      "texts": {
+        "zh": "减伤",
+        "en": "Damage Reduction",
+        "ja": "ダメージ軽減",
+        "ko": "피해 감소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_DISABLE",
+      "rust": "SCRAPPED",
+      "texts": {
+        "zh": "弃用",
+        "en": "Scrapped",
+        "ja": "破棄",
+        "ko": "폐기"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_SHEILD",
+      "rust": "SHIELD",
+      "texts": {
+        "zh": "护盾",
+        "en": "Shield",
+        "ja": "シールド",
+        "ko": "보호막"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NON_DISCOVERABLE",
+      "rust": "UNDISCOVERABLE",
+      "texts": {
+        "zh": "不可发现",
+        "en": "Undiscoverable",
+        "ja": "発見不能",
+        "ko": "발견 불가"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ARTIFACT",
+      "rust": "ARTIFACT",
+      "texts": {
+        "zh": "圣遗物",
+        "en": "Artifact",
+        "ja": "聖遺物",
+        "ko": "성유물"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON_BOW",
+      "rust": "BOW",
+      "texts": {
+        "zh": "弓",
+        "en": "Bow",
+        "ja": "弓",
+        "ko": "활"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON_CATALYST",
+      "rust": "CATALYST",
+      "texts": {
+        "zh": "法器",
+        "en": "Catalyst",
+        "ja": "法器",
+        "ko": "법구"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON_CLAYMORE",
+      "rust": "CLAYMORE",
+      "texts": {
+        "zh": "双手剑",
+        "en": "Claymore",
+        "ja": "両手剣",
+        "ko": "양손검"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_HEXENZIRKEL",
+      "rust": "HEXEREI",
+      "texts": {
+        "zh": "魔导",
+        "en": "Hexerei",
+        "ja": "魔導",
+        "ko": "마도"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON_POLE",
+      "rust": "POLEARM",
+      "texts": {
+        "zh": "长柄武器",
+        "en": "Polearm",
+        "ja": "長柄武器",
+        "ko": "장병기"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON_SWORD",
+      "rust": "SWORD",
+      "texts": {
+        "zh": "单手剑",
+        "en": "Sword",
+        "ja": "片手剣",
+        "ko": "한손검"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_TALENT",
+      "rust": "TALENT",
+      "texts": {
+        "zh": "天赋",
+        "en": "Talent",
+        "ja": "天賦",
+        "ko": "특성"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_VEHICLE",
+      "rust": "TECHNIQUE",
+      "texts": {
+        "zh": "特技",
+        "en": "Technique",
+        "ja": "特技",
+        "ko": "특수 스킬"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON",
+      "rust": "WEAPON",
+      "texts": {
+        "zh": "武器",
+        "en": "Weapon",
+        "ja": "武器",
+        "ko": "무기"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_LEGEND",
+      "rust": "ARCANE_LEGEND",
+      "texts": {
+        "zh": "秘传",
+        "en": "Arcane Legend",
+        "ja": "秘伝",
+        "ko": "비기"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_FOOD",
+      "rust": "FOOD",
+      "texts": {
+        "zh": "料理",
+        "en": "Food",
+        "ja": "料理",
+        "ko": "요리"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_RESONANCE",
+      "rust": "RESONANCE",
+      "texts": {
+        "zh": "元素共鸣",
+        "en": "Elemental Resonance",
+        "ja": "元素共鳴",
+        "ko": "원소 공명"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_SIMULANKA",
+      "rust": "SIMULANKA",
+      "texts": {
+        "zh": "希穆兰卡",
+        "en": "Simulanka",
+        "ja": "シムランカ",
+        "ko": "시뮬랑카"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ADVENTURE_PLACE",
+      "rust": "ADVENTURE_SPOT",
+      "texts": {
+        "zh": "冒险地点",
+        "en": "Adventure Spot",
+        "ja": "冒険地点",
+        "ko": "모험 장소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ALLY",
+      "rust": "COMPANION",
+      "texts": {
+        "zh": "伙伴",
+        "en": "Companion",
+        "ja": "仲間",
+        "ko": "동료"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CARD_BLESSING",
+      "rust": "ELEMENTAL_TRANSMUTATION",
+      "texts": {
+        "zh": "元素幻变",
+        "en": "Elemental Transfiguration",
+        "ja": "元素変幻",
+        "ko": "원소 변환"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ITEM",
+      "rust": "ITEM",
+      "texts": {
+        "zh": "道具",
+        "en": "Item",
+        "ja": "アイテム",
+        "ko": "아이템"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_PLACE",
+      "rust": "LOCATION",
+      "texts": {
+        "zh": "场地",
+        "en": "Location",
+        "ja": "フィールド",
+        "ko": "필드"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NOT_HENSHIN",
+      "rust": "UNTRANSFORMED",
+      "texts": {
+        "zh": "未变身",
+        "en": "Untransformed",
+        "ja": "未変身",
+        "ko": "변신 전"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ARKHE_PNEUMA",
+      "rust": "OUSIA",
+      "texts": {
+        "zh": "始基力：荒性",
+        "en": "Arkhe: Ousia",
+        "ja": "アルケー：ウーシア",
+        "ko": "아르케의 힘: 우시아"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ARKHE_OUSIA",
+      "rust": "PNEUMA",
+      "texts": {
+        "zh": "始基力：芒性",
+        "en": "Arkhe: Pneuma",
+        "ja": "アルケー：プネウマ",
+        "ko": "아르케의 힘: 프뉴마"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_ANEMO",
+      "rust": "ANEMO",
+      "texts": {
+        "zh": "风元素",
+        "en": "Anemo",
+        "ja": "風元素",
+        "ko": "바람 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_CRYO",
+      "rust": "CRYO",
+      "texts": {
+        "zh": "冰元素",
+        "en": "Cryo",
+        "ja": "氷元素",
+        "ko": "얼음 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_DENDRO",
+      "rust": "DENDRO",
+      "texts": {
+        "zh": "草元素",
+        "en": "Dendro",
+        "ja": "草元素",
+        "ko": "풀 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_ELECTRO",
+      "rust": "ELECTRO",
+      "texts": {
+        "zh": "雷元素",
+        "en": "Electro",
+        "ja": "雷元素",
+        "ko": "번개 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_GEO",
+      "rust": "GEO",
+      "texts": {
+        "zh": "岩元素",
+        "en": "Geo",
+        "ja": "岩元素",
+        "ko": "바위 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_HYDRO",
+      "rust": "HYDRO",
+      "texts": {
+        "zh": "水元素",
+        "en": "Hydro",
+        "ja": "水元素",
+        "ko": "물 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_PYRO",
+      "rust": "PYRO",
+      "texts": {
+        "zh": "火元素",
+        "en": "Pyro",
+        "ja": "炎元素",
+        "ko": "불 원소"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CAMP_SACREAD",
+      "rust": "CONSECRATED_BEAST",
+      "texts": {
+        "zh": "圣骸兽",
+        "en": "Consecrated Beast",
+        "ja": "聖骸獣",
+        "ko": "성해 짐승"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_COSMIC_CALAMITY",
+      "rust": "COSMIC_CALAMITY",
+      "texts": {
+        "zh": "寰宇劫灭",
+        "en": "Cosmic Calamity",
+        "ja": "宇宙の劫災",
+        "ko": "우주적 재앙"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CAMP_EREMITE",
+      "rust": "EREMITES",
+      "texts": {
+        "zh": "镀金旅团",
+        "en": "The Eremites",
+        "ja": "エルマイト旅団",
+        "ko": "도금 여단"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CAMP_FATUI",
+      "rust": "FATUI",
+      "texts": {
+        "zh": "愚人众",
+        "en": "Fatui",
+        "ja": "ファデュイ",
+        "ko": "우인단"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_FONTAINE",
+      "rust": "FONTAINE",
+      "texts": {
+        "zh": "枫丹",
+        "en": "Fontaine",
+        "ja": "フォンテーヌ",
+        "ko": "폰타인"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CAMP_HILICHURL",
+      "rust": "HILICHURL",
+      "texts": {
+        "zh": "丘丘人",
+        "en": "Hilichurl",
+        "ja": "ヒルチャール",
+        "ko": "츄츄족"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_INAZUMA",
+      "rust": "INAZUMA",
+      "texts": {
+        "zh": "稻妻",
+        "en": "Inazuma",
+        "ja": "稲妻",
+        "ko": "이나즈마"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CAMP_KAIRAGI",
+      "rust": "KAIRAGI",
+      "texts": {
+        "zh": "海乱鬼",
+        "en": "Kairagi",
+        "ja": "海乱鬼",
+        "ko": "해란귀"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_LIYUE",
+      "rust": "LIYUE",
+      "texts": {
+        "zh": "璃月",
+        "en": "Liyue",
+        "ja": "璃月",
+        "ko": "리월"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_MONDSTADT",
+      "rust": "MONDSTADT",
+      "texts": {
+        "zh": "蒙德",
+        "en": "Mondstadt",
+        "ja": "モンド",
+        "ko": "몬드"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_CAMP_MONSTER",
+      "rust": "MONSTER",
+      "texts": {
+        "zh": "魔物",
+        "en": "Monster",
+        "ja": "魔物",
+        "ko": "마물"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_NATLAN",
+      "rust": "NATLAN",
+      "texts": {
+        "zh": "纳塔",
+        "en": "Natlan",
+        "ja": "ナタ",
+        "ko": "나타"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_NODKRAI",
+      "rust": "NOD_KRAI",
+      "texts": {
+        "zh": "挪德卡莱",
+        "en": "Nod-Krai",
+        "ja": "ナド・クライ",
+        "ko": "노드크라이"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_NATION_SUMERU",
+      "rust": "SUMERU",
+      "texts": {
+        "zh": "须弥",
+        "en": "Sumeru",
+        "ja": "スメール",
+        "ko": "수메르"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_WEAPON_NONE",
+      "rust": "OTHER_WEAPONS",
+      "texts": {
+        "zh": "其他武器",
+        "en": "Other Weapons",
+        "ja": "他の武器",
+        "ko": "기타 무기"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_ELEMENT_NONE",
+      "rust": "NO_ELEMENTAL_TYPE",
+      "texts": {
+        "zh": "无元素类型",
+        "en": "No Elemental Type",
+        "ja": "元素タイプなし",
+        "ko": "원소 타입 없음"
+      }
+    },
+    {
+      "kind": "tag",
+      "code": "GCG_TAG_DENDRO_PRODUCE",
+      "rust": "DENDRO_CONSTRUCT",
+      "texts": {
+        "zh": "草元素产物",
+        "en": "Dendro Construct",
+        "ja": "草元素の産物",
+        "ko": "풀 원소 산물"
+      }
+    },
+    {
+      "kind": "type",
+      "code": "GCG_CARD_ASSIST",
+      "rust": "SUPPORT",
+      "texts": {
+        "zh": "支援牌",
+        "en": "Support Card",
+        "ja": "支援カード",
+        "ko": "서포트 카드"
+      }
+    },
+    {
+      "kind": "type",
+      "code": "GCG_CARD_MODIFY",
+      "rust": "EQUIPMENT",
+      "texts": {
+        "zh": "装备牌",
+        "en": "Equipment Card",
+        "ja": "装備カード",
+        "ko": "장비 카드"
+      }
+    },
+    {
+      "kind": "type",
+      "code": "GCG_CARD_EVENT",
+      "rust": "EVENT",
+      "texts": {
+        "zh": "事件牌",
+        "en": "Event Card",
+        "ja": "イベントカード",
+        "ko": "이벤트 카드"
+      }
+    },
+    {
+      "kind": "type",
+      "code": "GCG_CARD_STATE",
+      "rust": "CHARACTER_STATUS",
+      "texts": {
+        "zh": "角色状态",
+        "en": "Character Status",
+        "ja": "キャラ状態",
+        "ko": "캐릭터 상태"
+      }
+    },
+    {
+      "kind": "type",
+      "code": "GCG_CARD_ONSTAGE",
+      "rust": "COMBAT_STATUS",
+      "texts": {
+        "zh": "出战状态",
+        "en": "Combat Status",
+        "ja": "出撃状態",
+        "ko": "출전 상태"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_PHYSIC",
+      "rust": "PHYSIC",
+      "texts": {
+        "zh": "物理伤害",
+        "en": "Physical DMG",
+        "ja": "物理ダメージ",
+        "ko": "물리 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_PYRO",
+      "rust": "PYRO",
+      "texts": {
+        "zh": "火元素伤害",
+        "en": "Pyro DMG",
+        "ja": "炎元素ダメージ",
+        "ko": "불 원소 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_HYDRO",
+      "rust": "HYDRO",
+      "texts": {
+        "zh": "水元素伤害",
+        "en": "Hydro DMG",
+        "ja": "水元素ダメージ",
+        "ko": "물 원소 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_ELECTRO",
+      "rust": "ELECTRO",
+      "texts": {
+        "zh": "雷元素伤害",
+        "en": "Electro DMG",
+        "ja": "雷元素ダメージ",
+        "ko": "번개 원소 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_DENDRO",
+      "rust": "DENDRO",
+      "texts": {
+        "zh": "草元素伤害",
+        "en": "Dendro DMG",
+        "ja": "草元素ダメージ",
+        "ko": "풀 원소 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_CRYO",
+      "rust": "CRYO",
+      "texts": {
+        "zh": "冰元素伤害",
+        "en": "Cryo DMG",
+        "ja": "氷元素ダメージ",
+        "ko": "얼음 원소 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_ANEMO",
+      "rust": "ANEMO",
+      "texts": {
+        "zh": "风元素伤害",
+        "en": "Anemo DMG",
+        "ja": "風元素ダメージ",
+        "ko": "바람 원소 피해"
+      }
+    },
+    {
+      "kind": "damage",
+      "code": "GCG_ELEMENT_GEO",
+      "rust": "GEO",
+      "texts": {
+        "zh": "岩元素伤害",
+        "en": "Geo DMG",
+        "ja": "岩元素ダメージ",
+        "ko": "바위 원소 피해"
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# workspace 顶层配置。
+# 目前有 engine、definitions、cards（具体卡牌，D240）、richtext、simulation（对外门面）、
+# compute（算力 bin 集合）；solver 以后再加。
+[workspace]
+resolver = "2"
+members = [
+    "crates/engine",
+    "crates/definitions",
+    "crates/cards",
+    "crates/richtext",
+    "crates/simulation",
+    "crates/compute",
+]
+
+# 统一 edition（各 crate 用 edition.workspace = true 继承；直接写字面量也可以）
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/Fontaine-Research-Institute/genius-invokation-simulation"

@@ -1,0 +1,21 @@
+# 算力工具链（D231 / D232）：按「计算名」运行仓库里的 Rust 计算程序。
+#
+# 约定：一个计算 = crates/compute/src/bin/<计算名>/ 一个文件夹
+#   - 入口固定是文件夹里的 main.rs；
+#   - 同目录下其它 .rs 用 `mod xxx;` 当子模块，可以写多个文件；
+#   - 文件夹名就是计算名（同时是 Cargo 的 bin target 名），脚本按名字精确匹配。
+#
+# Cargo 会自动把 src/bin/<名字>/main.rs 识别为名为 <名字> 的 bin target，
+# 所以这里不需要逐个写 [[bin]]；新增计算只要加文件夹，不加这个文件。
+#
+# 默认零依赖：某个计算需要 engine / definitions / simulation 或第三方库时，
+# 自己往下面的 [dependencies] 里加（会影响全部计算的编译，慎加重的依赖）。
+[package]
+name = "gi-genius-invokation-compute"
+version = "0.1.0"
+edition.workspace = true
+description = "按计算名组织的 Rust 计算程序集合（每个计算一个 bin 文件夹；不承载游戏逻辑）"
+license.workspace = true
+repository.workspace = true
+
+[dependencies]

@@ -1,0 +1,42 @@
+name: 功能建议
+description: 提出新的机制、卡牌、求解或工具链能力
+title: "[feature] "
+labels: ["type: feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提建议前请先读 README 的「核心设计」一节：框架只提供接口与原语，具体功能由卡牌/牌族自己实现。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题
+      description: 先说清动机与使用场景，再谈方案。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 你设想的方案
+      description: 接口大致长什么样、放在哪一层、对现有设计有什么影响。
+    validations:
+      required: true
+
+  - type: textarea
+    id: design-basis
+    attributes:
+      label: 是否有设计依据
+      description: 有就写决策编号（Dxx）或设计文档的哪一节；没有就写「无」，并说明为什么需要新增设计。
+      placeholder: 例如：D34；或「无，需要新增一条决策」。
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 其它替代方案
+      description: 你考虑过但放弃的方案，以及放弃的原因；没有可留空。
+    validations:
+      required: false

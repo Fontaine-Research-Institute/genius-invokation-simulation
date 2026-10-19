@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "name": "默认",
+      "cmd": [],
+      "expected_file": "expected/default.json"
+    },
+    {
+      "name": "大样本",
+      "cmd": ["--samples", "4000000"],
+      "expected_file": "expected/big.json"
+    },
+    {
+      "name": "只跑（无正确答案）",
+      "cmd": ["--samples", "1234"]
+    }
+  ],
+  "timeout_minutes": 10
+}

@@ -1,0 +1,28 @@
+# 具体卡牌层（D240 / D241 / D243）：只放「这张卡具体是什么」（每张卡的数据 + 效果逻辑）。
+# 卡牌**资源与形状**（CardId / CardFamily / 类型 / 标签 / CostComponent / CharacterDef 等定义载体）
+# 仍留在 gi-genius-invokation-definitions（D241）；本 crate 单向依赖 definitions，不反向。
+# 零外部依赖：只依赖工作区内的 definitions 与 engine。
+[package]
+name = "gi-genius-invokation-cards"
+version = "0.1.0"
+edition.workspace = true
+description = "具体卡牌层：每张卡自己的识别信息 + 效果逻辑（依赖 gi-genius-invokation-definitions / engine，零外部依赖）"
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "gi_genius_invokation_cards"
+path = "src/lib.rs"
+
+[features]
+# D243：默认不带任何 feature（保持干净）。源码嵌入是**本 crate 的必备能力**（拿到卡牌原文），
+# 所以不设开关，而是在依赖上显式打开 definitions 的 embed-source。
+default = []
+
+[dependencies]
+# D213 / D216 / D242：card_source! / module_source! / SourceFile / use 依赖解析器都是**通用定义**，
+# 留在 definitions；本 crate 用 definitions::card_source! 声明每张卡，因此必须让 definitions
+# 嵌入源码（显式打开 embed-source，避免被上游 --no-default-features 关掉）。
+gi-genius-invokation-definitions = { path = "../definitions", features = ["embed-source"] }
+# 效果逻辑直接调用引擎的机制原语（Nat 等）。
+gi-genius-invokation-engine = { path = "../engine" }

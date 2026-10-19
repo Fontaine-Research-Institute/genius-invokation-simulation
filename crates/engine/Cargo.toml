@@ -1,0 +1,25 @@
+[package]
+name = "gi-genius-invokation-engine"
+version = "0.1.0"
+edition.workspace = true
+description = "机制原语：饱和数值 / 实体 / 区 / 随机与选择（零依赖、无上层语义）"
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "gi_genius_invokation_engine"
+path = "src/lib.rs"
+
+[features]
+default = []
+# 求解接口 GameRules（决策日志 D24：默认不编译）
+rules = []
+# 概率去重（只为计算优化，不改分布）
+dedup = []
+# 全部计算优化：必然包含 dedup
+opt-all = ["dedup"]
+# 机制 dll 加载（唯一允许的外部依赖，且必须显式打开）
+dll = ["dep:libloading"]
+
+[dependencies]
+libloading = { version = "0.8", optional = true }

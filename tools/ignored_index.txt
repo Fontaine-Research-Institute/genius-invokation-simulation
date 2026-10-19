@@ -1,0 +1,19 @@
+# 下标访问扫描忽略清单（tools/check_no_index.py 用）
+# 格式：<相对路径> :: <该处唯一代码片段>    # 理由（可选）
+# 规则：路径精确 + 片段在命中行内精确子串出现；不用行号（行号会漂）。
+#      片段在该文件里必须出现且只出现 1 次：
+#        - 0 次 = 失效（报告提醒清理）；
+#        - >1 次 = 不成立（条目不生效，对应下标按未忽略处理）。
+# 原则：只有确实必要（解析器内部按位置切片、测试断言等）才登记，理由写清楚。
+
+crates/definitions/build.rs :: text.as_bytes()[0]                              # 生成器解析文本：按字节判断首字符，属于生成阶段取数
+crates/definitions/build.rs :: self.bytes[self.pos..]                         # 生成器词法扫描：按 pos 切片读取当前 token
+crates/definitions/src/generated/mod.rs :: &KEYWORDS[index]                   # 关键字表按 index 查表（渲染 $[K…] 用），解析实现
+crates/definitions/src/generated/mod.rs :: pair[0].code < pair[1].code        # 测试断言：关键字表必须按 K 码严格升序
+crates/definitions/src/generated/mod.rs :: &text[index.saturating_add(name.len())..]    # 文本解析：按名字长度切出剩余片段
+crates/definitions/src/generated/mod.rs :: &text[index.saturating_add(marker.len())..]  # 文本解析：按标记长度切出剩余片段
+crates/definitions/src/generated/text/tests.rs :: value[1..]                  # 富文本解析测试：断言十六进制字符串内容
+crates/engine/src/id.rs :: ids[0]                                             # 引擎 id 测试：取第一个 id 做断言
+crates/engine/tests/entity_area.rs :: pair[0] < pair[1]                       # 引擎测试：断言 id 严格递增
+crates/engine/tests/random.rs :: &branches[0]                                 # 引擎测试：取第一个分支断言
+crates/engine/tests/select.rs :: branch.picked[0]                             # 引擎测试：取选择结果首项断言

@@ -1,0 +1,16 @@
+# Rust build artifacts
+/target
+**/*.rs.bk
+*.pdb
+
+# Editor / IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 本地下载的临时素材（登记后应放到 assets/cards/）
+.tmp-assets/

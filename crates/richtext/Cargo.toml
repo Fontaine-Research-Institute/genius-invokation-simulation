@@ -1,0 +1,14 @@
+# 富文本解析 crate（D75 / D76）：原始标记文本 → 中性片段序列。
+# **零依赖**：不依赖 gi-genius-invokation-engine / gi-genius-invokation-definitions，也不引任何第三方 crate。
+# 只做字符串处理；不认识语言 / 名字表 / 卡牌 / 标签（名字替换由 definitions 侧渲染器做）。
+[package]
+name = "gi-genius-invokation-richtext"
+version = "0.1.0"
+edition.workspace = true
+description = "富文本解析：原始标记文本 → 中性片段序列（零依赖、无游戏语义）"
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "gi_genius_invokation_richtext"
+path = "src/lib.rs"

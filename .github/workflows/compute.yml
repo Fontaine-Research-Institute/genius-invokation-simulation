@@ -1,0 +1,150 @@
+# 算力工作流（D231 - D236）：按计算名编译并运行仓库里的 Rust 计算程序。
+#
+# 结构（D234：每个计算一个独立 runner 并行跑）：
+#   discover -> 扫 crates/compute/src/bin/*/compute.json，输出 names（JSON 数组）
+#   compute  -> strategy.matrix.compute = fromJSON(needs.discover.outputs.names)，
+#               fail-fast: false，一个计算一个 job / 一个 runner，互不影响；
+#               每个 job 单独上传 artifact（名字带计算名）。
+#
+# 触发方式：Actions -> Compute -> Run workflow
+#   name            （可选）只跑指定计算；留空 = 跑所有带 compute.json 的计算
+#   timeout-minutes （可选）每个 matrix job 的超时分钟数，默认 30
+#                   （单次编译+运行更细的超时写在计算目录的 compute.json 里）
+#
+# 约定：
+#   - 一个计算 = crates/compute/src/bin/<name>/ 文件夹，入口 main.rs；
+#   - 本工作流只做「checkout -> 装 Rust -> 编译运行 -> 收 stdout」；
+#     **不向计算程序传任何计算参数**；程序自己从环境变量 / 文件读输入；
+#   - 用例配了 expected_file 且文件存在：脚本把 stdout 解析成 JSON 与答案文件深度比较，
+#     不一致 job 变红；没有 expected_file / 答案文件缺失：只运行并输出结果，视作绿
+#     （答案文件缺失会在日志与汇总里标警告）；
+#   - 同一计算内的多条用例由脚本串行跑；不同计算走下面的 matrix，各自一个 runner 并行；
+#   - 名字只通过环境变量传给脚本，不拼进 shell 命令。
+name: Compute
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "计算名（可选；留空 = 跑所有带 compute.json 的计算，如 ftk_state_count）"
+        required: false
+        type: string
+        default: ""
+      timeout-minutes:
+        description: "每个 matrix job 的超时分钟数（可选，默认 30；大计算可以调大）"
+        required: false
+        type: number
+        default: 30
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+  PYTHONUTF8: 1
+
+jobs:
+  # 1) 扫描配置，输出要跑的计算名（JSON 数组）。不在 CI 里硬编码名单。
+  discover:
+    name: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      names: ${{ steps.scan.outputs.names }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan compute configs
+        id: scan
+        shell: bash
+        env:
+          COMPUTE_NAME: ${{ inputs.name }}
+        run: |
+          set -euo pipefail
+          names_file=compute-names.txt
+          if [ -n "$COMPUTE_NAME" ]; then
+            printf '%s\n' "$COMPUTE_NAME" > "$names_file"
+          else
+            python3 tools/run-compute.py --configs > "$names_file"
+          fi
+          python3 -c 'import json,sys; names=[l.strip() for l in open(sys.argv[1], encoding="utf-8") if l.strip()]; print(json.dumps(names))' "$names_file" > compute-names.json
+          cat compute-names.json
+          cat compute-names.json > /dev/null
+          echo "names=$(cat compute-names.json)" >> "$GITHUB_OUTPUT"
+          if [ "$(cat compute-names.json)" = "[]" ]; then
+            echo "错误：没有可运行的计算（需要在 crates/compute/src/bin/<名字>/ 下放 compute.json，或手动填 name）。" >&2
+            exit 1
+          fi
+
+  # 2) 每个计算一个独立 runner 并行跑；fail-fast: false 保证一个红不影响其它。
+  compute:
+    name: compute-${{ matrix.compute }}
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs['timeout-minutes'] || 30 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        compute: ${{ fromJSON(needs.discover.outputs.names) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry and target (rust-cache)
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+          key: compute-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Compute artifact name
+        id: artifact
+        shell: bash
+        env:
+          COMPUTE_NAME: ${{ matrix.compute }}
+        run: |
+          safe=$(printf '%s' "$COMPUTE_NAME" | tr -c 'A-Za-z0-9._-' '-')
+          echo "name=compute-output-$safe" >> "$GITHUB_OUTPUT"
+
+      # stdout 与 stderr 分开落盘；stdout 就是这次计算的结果。
+      - name: Run compute
+        id: run
+        shell: bash
+        env:
+          COMPUTE_NAME: ${{ matrix.compute }}
+        run: |
+          set +e
+          mkdir -p compute-output
+          python3 tools/run-compute.py "$COMPUTE_NAME" \
+            > "compute-output/$COMPUTE_NAME.stdout.txt" \
+            2> "compute-output/$COMPUTE_NAME.stderr.txt"
+          code=$?
+          echo "$code" > "compute-output/$COMPUTE_NAME.exit-code.txt"
+          echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+          echo "===== stdout ====="
+          cat "compute-output/$COMPUTE_NAME.stdout.txt" || true
+          echo "===== stderr (last 200 lines) ====="
+          tail -n 200 "compute-output/$COMPUTE_NAME.stderr.txt" || true
+          # 先不在这里失败：让 artifact 先上传，最后一步再按真实退出码收尾。
+          exit 0
+
+      - name: Upload result artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: compute-output/
+          if-no-files-found: warn
+
+      - name: Propagate compute exit code
+        shell: bash
+        run: |
+          code="${{ steps.run.outputs.exit-code }}"
+          if [ -z "$code" ]; then code=1; fi
+          echo "compute exit code: $code"
+          exit "$code"

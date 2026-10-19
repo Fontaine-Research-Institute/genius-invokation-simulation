@@ -1,0 +1,2144 @@
+{
+  "version": "5.2.14",
+  "source": "七圣召唤 keyword 数据（142 个 K 码 × 4 语名字 + 说明；游戏内文本描述）",
+  "provenance": {
+    "note": "关键字名字与说明来自权威七圣召唤 keyword 数据，不是从卡牌描述反推的。",
+    "source_file": "游戏内文本描述（仓库只提交本文件）",
+    "fetched_at": "2026-10-18",
+    "coverage": "142 个 K 码；129 个码有 4 语说明（zh/en/ja/ko 齐全）；13 个码无说明：1044/1045/1046/1047/1053/3011/3012 与手牌状态 3003/3004/3005/3006/3007/3008 —— 数据里没有，保持空、不回退、不编造。",
+    "supersedes": "旧的 descriptionraw↔descriptionreplaced 反推法（126 码、2 例人工修正、约 182 个低票样本）已作废。",
+    "replacement": "换数据只改本文件 entries 的 name/description，不动代码；build.rs 重新生成静态表即可。"
+  },
+  "entries": [
+    {
+      "code": 1,
+      "name": {
+        "zh": "战斗行动",
+        "en": "Combat Action",
+        "ja": "戦闘アクション",
+        "ko": "전투 행동"
+      },
+      "description": {
+        "zh": "我方执行了一次战斗行动后，会轮到对方行动。\n打出具有此规则的手牌是一个战斗行动，而非快速行动。",
+        "en": "After you finish 1 Combat Action, it will be your opponent's turn.\nPlaying a card from your Hand with this rule is also a Combat Action rather than a Fast Action.",
+        "ja": "味方が戦闘アクションを1回行った後、相手のターンに移ります。\nこのようなルールを持つ手札を出すのはクイックアクションではなく、戦闘アクションと見なされます。",
+        "ko": "아군이 전투 행동을 1회 진행하면 행동 순서가 상대에게 넘어간다.\n해당 규칙에 속하는 카드는 사용 시 빠른 행동이 아닌 전투 행동으로 간주한다."
+      }
+    },
+    {
+      "code": 2,
+      "name": {
+        "zh": "快速行动",
+        "en": "Fast Action",
+        "ja": "クイックアクション",
+        "ko": "빠른 행동"
+      },
+      "description": {
+        "zh": "执行了一次快速行动后，我方可以继续进行其他行动。\n只有执行了一次战斗行动后，才会轮到对方行动。",
+        "en": "You can continue with other actions after conducting 1 Fast Action.\nOnly after conducting 1 Combat Action will the turn pass over to your opponent.",
+        "ja": "クイックアクションを1回行った後、あなたは他のアクションを続けて行うことができます。\nただし、戦闘アクションを1回行うと、相手のターンに移ります。",
+        "ko": "빠른 행동을 1회 진행하면 아군은 계속해서 다른 행동을 진행할 수 있다.\n전투 행동을 1회 진행해야만 행동 순서가 상대에게 넘어간다."
+      }
+    },
+    {
+      "code": 3,
+      "name": {
+        "zh": "可用次数",
+        "en": "Usage(s)",
+        "ja": "使用可能回数",
+        "ko": "사용 가능 횟수"
+      },
+      "description": {
+        "zh": "此牌效果触发后，会消耗1次可用次数；\n可用次数耗尽后，立刻弃置此牌。",
+        "en": "After this card's effect is triggered, 1 Usage of it will be consumed.\nThis card will be discarded immediately once it has 0 Usages remaining.",
+        "ja": "このカードの効果が発動された後、使用可能回数が1回消費されます。\n使用可能回数が尽きてしまうと、このカードは直ちに破棄されます。",
+        "ko": "해당 카드의 효과가 발동하면 사용 가능 횟수가 1회 차감된다.\n사용 가능 횟수가 전부 소진되면 즉시 해당 패를 버린다."
+      }
+    },
+    {
+      "code": 4,
+      "name": {
+        "zh": "持续回合",
+        "en": "Duration (Rounds)",
+        "ja": "継続ラウンド数",
+        "ko": "지속 턴"
+      },
+      "description": {
+        "zh": "每回合结束阶段，持续回合-1；\n持续回合耗尽后，立刻弃置此牌。",
+        "en": "Each time you reach the end of a Round, Duration (Rounds) -1.\nThis card will be discarded immediately once Duration (Rounds) runs out.",
+        "ja": "各ラウンドのエンドフェーズで、継続ラウンド数が1マイナスされます。\n継続ラウンド数が尽きてしまうと、このカードは直ちに破棄されます。",
+        "ko": "턴이 종료 단계에 진입할 때마다 지속 턴이 1회씩 감소한다.\n지속 턴이 전부 소진되면 즉시 해당 패를 버린다."
+      }
+    },
+    {
+      "code": 5,
+      "name": {
+        "zh": "穿透伤害",
+        "en": "Piercing DMG",
+        "ja": "貫通ダメージ",
+        "ko": "관통 피해"
+      },
+      "description": {
+        "zh": "穿透伤害无法受到伤害加成，但是也无法被护盾、伤害免疫等效果抵消。",
+        "en": "Piercing DMG cannot be increased by any bonuses, but cannot be defended against using Shields or DMG Immunity either.",
+        "ja": "貫通ダメージはダメージアップ効果を受けられません。また、シールド、ダメージ無効化などの効果で相殺されることもありません。",
+        "ko": "관통 피해는 피해 보너스를 획득할 수 없으나, 주는 피해가 보호막 또는 피해 면역과 같은 효과에 의해 상쇄되지 않는다."
+      }
+    },
+    {
+      "code": 6,
+      "name": {
+        "zh": "护盾",
+        "en": "Shield",
+        "ja": "シールド",
+        "ko": "보호막"
+      },
+      "description": {
+        "zh": "此护盾所保护的角色受到伤害时，将会消耗护盾来抵消伤害。",
+        "en": "This Shield will be consumed to protect the character who equips it from DMG.",
+        "ja": "該当シールドに守られたキャラがダメージを受けた時、シールドを消費してダメージと相殺することができます。",
+        "ko": "해당 보호막의 보호를 받는 캐릭터가 피격 시, 보호막을 소모해 피해를 상쇄한다."
+      }
+    },
+    {
+      "code": 7,
+      "name": {
+        "zh": "距离我方出战角色最近的角色",
+        "en": "Character Closest to Your Current Active Character",
+        "ja": "味方の出撃キャラと最も距離が近いキャラ",
+        "ko": "아군 출전 캐릭터와 가장 가까운 캐릭터"
+      },
+      "description": {
+        "zh": "对方场上距离我方出战角色「最近」的角色，指的是位置与我方出战角色最接近的敌方角色。\n如果存在多个位置最接近的角色，则其中靠前的角色被视为「最近」。",
+        "en": "The opposing \"character closest to your current active character\" is the opposing character whose position is closest to that of your active character.\nIf multiple such characters exist, the one with the foremost position will be viewed as being \"closest.\"",
+        "ja": "味方の出撃キャラと「最も距離が近い」相手のフィールド上キャラとは、文字通り位置が一番近い相手キャラのことを指す。\n「最も距離が近い」キャラが複数いる場合、一番左側にいるキャラが「最も距離が近い」キャラとして見なされる。",
+        "ko": "아군 출전 캐릭터와 「가장 가까운」 적 캐릭터란 위치가 아군 출전 캐릭터와 가장 가까운 적 캐릭터를 가리킨다.\n가장 가까운 캐릭터가 복수 존재할 경우, 가장 앞에 있는 캐릭터가 「가장 가까운」 것으로 간주된다."
+      }
+    },
+    {
+      "code": 51,
+      "name": {
+        "zh": "重击",
+        "en": "Charged Attack",
+        "ja": "重撃",
+        "ko": "강공격"
+      },
+      "description": {
+        "zh": "我方行动开始前，如果元素骰总数为偶数，则进行的「普通攻击」将被视为「重击」。",
+        "en": "Before your Action Phase, should the total number of your Elemental Dice be even, your Normal Attack will be considered a Charged Attack.",
+        "ja": "味方のアクションが始まる前、元素サイコロの数が偶数の時に行われる「通常攻撃」は、「重撃」と見なされる。",
+        "ko": "아군이 행동을 시작하기 전에 원소 주사위 총개수가 짝수인 경우, 발동한 「일반 공격」을 「강공격」으로 간주한다."
+      }
+    },
+    {
+      "code": 52,
+      "name": {
+        "zh": "下落攻击",
+        "en": "Plunging Attack",
+        "ja": "落下攻撃",
+        "ko": "낙하 공격"
+      },
+      "description": {
+        "zh": "角色被切换为「出战角色」后，本回合内使用的下一个技能若为「普通攻击」，则被视为「下落攻击」。",
+        "en": "After a character is switched in to be the Active Character, should the next Skill they use within this Round be a Normal Attack, it will be considered a Plunging Attack.",
+        "ja": "キャラを「出撃キャラ」にチェンジした後、本ラウンドで次に発動するスキルが「通常攻撃」の場合、「落下攻撃」として見なされる。",
+        "ko": "캐릭터가 「출전 캐릭터」로 교체된 후, 이번 턴에서 사용한 스킬이 「일반 공격」일 경우 「낙하 공격」으로 간주합니다."
+      }
+    },
+    {
+      "code": 53,
+      "name": {
+        "zh": "准备技能",
+        "en": "Prepare Skill",
+        "ja": "スキル準備",
+        "ko": "스킬 준비"
+      },
+      "description": {
+        "zh": "有些技能无法被直接使用，而是需要一定次数的行动轮来进行准备。\n轮到一位牌手行动时，如果该牌手的「出战角色」正在准备技能，则跳过该牌手的行动；如果技能已经完成准备，角色将会在此时直接使用此技能。（此类需要准备的技能，无法触发「使用技能后」「角色引发元素反应后」等效果。）\n只有「出战角色」才能准备技能；如果正在准备技能的「出战角色」被切换到后台，技能的准备就会被打断。",
+        "en": "Some Skills cannot be used directly. Instead, they need to be prepared over a certain number of turns.\nWhen it is a certain player's turn, and this player's active character is currently preparing a Skill, this player's turn will be skipped. If the Skill has finished being prepared, the character will directly use that Skill at this time. (Skills that require preparing cannot activate effects triggered by \"using a Skill\" or \"triggering an Elemental Reaction\" or other such effects.)\nOnly active characters can prepare Skills, and if an active character who is preparing a Skill gets switched off-field, their preparation will be interrupted.",
+        "ja": "スキルの中には、直接発動のできないものもあります。発動するには、一定のターン数準備する必要があります。\nプレイヤーがアクションするとき、もし該当プレイヤーの「出撃キャラ」がスキルを準備している場合、該当プレイヤーのアクションはスキップされます。もしスキルの準備が完了した場合、そのスキルは直ちに発動されます（このような準備を必要とするスキルは、「スキルを発動した後」、「キャラが元素反応を起こした後」に生じる効果を発動させることができません）。\nスキルを準備できるのは「出撃キャラ」のみとなります。スキルを準備している「出撃キャラ」が待機キャラにチェンジすると、スキルの準備は中断されます。",
+        "ko": "일부 스킬은 바로 발동할 수 없고, 일정 횟수의 행동 순서 동안 준비를 해야 한다.\n한 플레이어의 행동 순서가 됐을 때, 해당 플레이어의 「출전 캐릭터」가 현재 스킬을 준비 중이면 해당 플레이어의 행동을 건너뛴다. 스킬 준비를 끝냈을 경우, 캐릭터는 해당 스킬을 즉시 발동한다. (준비가 필요한 유형의 스킬은 「스킬 사용 후」 및 「캐릭터가 원소 반응 발동 후」 등의 효과를 발동할 수 없다)\n오직 「출전 캐릭터」만 스킬을 준비할 수 있다. 만약 스킬을 준비 중인 「출전 캐릭터」가 교체되어 대기 상태가 되면, 스킬의 준비가 중단된다."
+      }
+    },
+    {
+      "code": 54,
+      "name": {
+        "zh": "免于被击倒",
+        "en": "Immunity to Defeat",
+        "ja": "戦闘不能にならない",
+        "ko": "처치 면역"
+      },
+      "description": {
+        "zh": "一些效果会使角色在生命值被降为0的时候免于被击倒，并治疗该角色到一定生命值。\n此时，角色不视为被击倒过。（因此，角色所附属的装备和状态不会被弃置，充能也不会被清空。）",
+        "en": "Certain effects will grant characters an immunity to being defeated when their HP hits 0, and will heal them for a certain amount thereafter.\nWhen this occurs, characters will not be regarded as having experienced a defeat. (Hence, their attached equipment and statuses will not be removed, and their Energy will remain uncleared.)",
+        "ja": "一部の効果によってキャラのHPが0になる時も、戦闘不能にならず、該当キャラのHPを一定値まで回復する。\nこの時、キャラは戦闘不能にカウントされない。（そのため、キャラに装備または付与されたものは破棄されず、チャージもクリアされない。）",
+        "ko": "일부 효과는 캐릭터의 HP가 0이 될 때, 해당 캐릭터에게 처치 면역 및 일정 HP 회복 효과를 부여한다.\n이때 캐릭터는 처치된 적 없는 것으로 간주한다. (따라서 캐릭터에 부착된 장비와 상태를 버리지 않고, 원소 에너지도 모두 사라지지 않는다)"
+      }
+    },
+    {
+      "code": 55,
+      "name": {
+        "zh": "眩晕",
+        "en": "Stunned",
+        "ja": "スタン",
+        "ko": "기절"
+      },
+      "description": {
+        "zh": "角色无法使用技能。（持续到回合结束）",
+        "en": "Character cannot use Skills. (Lasts until the end of this Round)",
+        "ja": "キャラはスキルを発動できなくなる。（ラウンド終了まで続く）",
+        "ko": "캐릭터 스킬 사용 불가 (턴 종료까지 지속)"
+      }
+    },
+    {
+      "code": 56,
+      "name": {
+        "zh": "舍弃",
+        "en": "Discard",
+        "ja": "破棄",
+        "ko": "포기"
+      },
+      "description": {
+        "zh": "通过行动牌或角色技能的效果，将行动牌从手牌或牌库中弃置。",
+        "en": "Use Action Cards or Character Skill effects to Discard Action Cards from Hand or Deck.",
+        "ja": "アクションカードまたはキャラのスキル効果によって、手札または山札からアクションカードを破棄する。",
+        "ko": "행동 카드 또는 캐릭터 스킬의 효과를 통해, 핸드 카드 또는 카드 더미에서 행동 카드를 버린다."
+      }
+    },
+    {
+      "code": 57,
+      "name": {
+        "zh": "调和",
+        "en": "Tune",
+        "ja": "調和",
+        "ko": "조정"
+      },
+      "description": {
+        "zh": "为了进行元素调和，而将行动牌从手牌中弃置。",
+        "en": "Discard Action Cards from Hand to initiate Elemental Tuning",
+        "ja": "元素調和を行うために、アクションカードを手札から破棄する。",
+        "ko": "원소 조정을 진행하기 위해 핸드 카드에서 행동 카드를 버린다."
+      }
+    },
+    {
+      "code": 58,
+      "name": {
+        "zh": "特技",
+        "en": "Technique",
+        "ja": "特技",
+        "ko": "특수 스킬"
+      },
+      "description": {
+        "zh": "出战角色装备有「特技」卡牌时，就可以使用对应的「特技」。\n使用「特技」是一种「战斗行动」。角色因冻结、石化、眩晕等原因无法使用技能时，也会同时无法使用「特技」。\n角色使用「特技」时不视为使用技能，无法触发「使用技能后」「角色引发元素反应后」等效果；角色使用「特技」造成的伤害不被视为角色造成的伤害。",
+        "en": "When the active character is equipped with a Technique card, they can use the corresponding Technique.\nUsing a  Technique counts as a Combat Action. If the character is unable to use Skills due to conditions like Frozen, Petrification, or Stun, they are also unable to use the Technique.\nUsing a Technique is not considered as using a Skill. Therefore, it cannot trigger effects such as \"After using a skill\" or \"After the character triggers an Elemental Reaction.\" Damage dealt by using a Technique is not considered Damage dealt by the character.",
+        "ja": "出撃キャラが「特技」カードを装備している場合、対応する「特技」を使用できる。\n「特技」の使用は「戦闘アクション」と見なされる。キャラが凍結、石化、スタンなどの原因でスキルを発動できない時、「特技」も発動できなくなる。\nキャラが「特技」を発動した場合、スキル発動として見なされることなく、対応する効果（「スキルを発動した後」「キャラが元素反応を起こした後」などによって発動される効果）も発動されない。また、キャラが「特技」で与えたダメージは、キャラ自身のダメージとして見なされない。",
+        "ko": "출전 캐릭터가 「특수 스킬」 카드 장착 시, 상응하는 「특수 스킬」을 사용할 수 있다.\n「특수 스킬」 사용은 「전투 행동」으로 간주한다. 캐릭터가 빙결, 석화, 기절 등의 원인으로 스킬 사용 불가 시, 「특수 스킬」 역시 사용할 수 없다.\n캐릭터가 「특수 스킬」 사용 시, 스킬 사용으로 간주하지 않아, 「스킬 사용 후」 「캐릭터가 원소 반응 발동 후」 등의 효과를 발동할 수 없다. 캐릭터가 「특수 스킬」로 주는 피해는 캐릭터가 주는 피해로 간주하지 않는다"
+      }
+    },
+    {
+      "code": 59,
+      "name": {
+        "zh": "挑选",
+        "en": "Select",
+        "ja": "選択",
+        "ko": "선정"
+      },
+      "description": {
+        "zh": "从特定的多张牌中选择1张执行效果。",
+        "en": "Select 1 card from a specific number of cards and activate its effects.",
+        "ja": "所定の複数枚のカードのうちから1枚を選択して発動させる。",
+        "ko": "특정 카드 중에서 1장을 선택해 효과를 발동한다"
+      }
+    },
+    {
+      "code": 60,
+      "name": {
+        "zh": "整局",
+        "en": "Whole Match",
+        "ja": "対局中",
+        "ko": "영구"
+      },
+      "description": {
+        "zh": "直到整轮对局结束前，此效果持续生效。",
+        "en": "This effect will remain active until the entire match ends.",
+        "ja": "今回の対戦が終わるまで、この効果は持続します。",
+        "ko": "이번 라운드 대전이 종료될 때까지 해당 효과가 계속 적용된다."
+      }
+    },
+    {
+      "code": 61,
+      "name": {
+        "zh": "蓄力",
+        "en": "Charge",
+        "ja": "蓄力",
+        "ko": "차지"
+      },
+      "description": {
+        "zh": "完成对应次数的蓄力行动后，才能释放对应技能。",
+        "en": "Complete certain amounts of charging actions to unleash corresponding Skills.",
+        "ja": "対応するスキルを発動するには、所定回数分の蓄力を行う必要があります。",
+        "ko": "상응하는 횟수의 차지 행동을 완료한 후 상응하는 스킬을 발동할 수 있다."
+      }
+    },
+    {
+      "code": 62,
+      "name": {
+        "zh": "元素精通",
+        "en": "Elemental Mastery",
+        "ja": "元素熟知",
+        "ko": "원소 마스터리"
+      },
+      "description": {
+        "zh": "每点元素精通使得敌方受到的元素反应中特定效果提升1倍。",
+        "en": "Every 1 Elemental Mastery increases the effects of Elemental Reactions that the opponent receives by a factor of 1.",
+        "ja": "元素熟知1につき、相手キャラが受ける元素反応の特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にします。",
+        "ko": "원소 마스터리 1pt당 적이 받는 원소 반응의 특정 효과가 1배 증가한다."
+      }
+    },
+    {
+      "code": 63,
+      "name": {
+        "zh": "额外行动",
+        "en": "Extra Action",
+        "ja": "追加アクション",
+        "ko": "추가 행동"
+      },
+      "description": {
+        "zh": "角色不会因为额外行动而获得充能。",
+        "en": "Characters will not gain Energy from Extra Actions.",
+        "ja": "キャラは追加アクションではチャージできません。",
+        "ko": "캐릭터는 추가 행동으로 원소 에너지를 획득하지 않는다."
+      }
+    },
+    {
+      "code": 64,
+      "name": {
+        "zh": "角色等级",
+        "en": "Character Level",
+        "ja": "キャラレベル",
+        "ko": "캐릭터 레벨"
+      },
+      "description": {
+        "zh": "重复获取角色可以提高其角色等级，提高角色等级可以强化角色属性。",
+        "en": "Obtaining the same character multiple times allows you to increase their level, thereby enhancing their attributes.",
+        "ja": "同じキャラを複数回獲得すると、そのレベルが上がります。レベルが上がると、そのキャラのステータスが強化されます。",
+        "ko": "캐릭터 중복 획득 시 해당 캐릭터의 레벨이 증가하며, 레벨이 증가하면 캐릭터 속성이 강화된다."
+      }
+    },
+    {
+      "code": 65,
+      "name": {
+        "zh": "角色等阶",
+        "en": "Character Rank",
+        "ja": "キャラランク",
+        "ko": "캐릭터 등급"
+      },
+      "description": {
+        "zh": "角色等级达到2，4，7时，会突破等阶。\n突破后可以获得天赋选择或是技能效果提升。",
+        "en": "Characters' ranks will ascend when they reach levels 2, 4, and 7.\nWhen a character ascends, they can gain the chance to choose a Talent or upgrade a Skill.",
+        "ja": "キャラがLv.2、4、7に達すると、ランクアップできます。\nランクアップ後、「天賦の獲得」または「スキル効果のアップ」を選ぶことができます。",
+        "ko": "캐릭터 레벨 Lv.2, Lv.4, Lv.7 달성 시 등급을 돌파한다.\n돌파 후 특성 선택 또는 스킬 효과 증가를 획득할 수 있다."
+      }
+    },
+    {
+      "code": 66,
+      "name": {
+        "zh": "冒险",
+        "en": "Adventure",
+        "ja": "冒険",
+        "ko": "모험"
+      },
+      "description": {
+        "zh": "从冒险地点中挑选1个生成。\n如果我方已存在冒险地点，则改为使该冒险地点的冒险经历+1。",
+        "en": "Select 1 available adventure spot to create.\nIf you already have an adventure spot, its Adventure Experience will be increased by 1.",
+        "ja": "冒険地点から1つ選択して生成する。\n味方に冒険地点が既に存在する場合、その冒険地点の冒険経験+1。",
+        "ko": "모험 장소에서 1개를 선택해 생성한다.\n아군에 이미 모험 장소가 존재할 경우, 해당 모험 장소의 모험 경험+1pt"
+      }
+    },
+    {
+      "code": 67,
+      "name": {
+        "zh": "元素幻变",
+        "en": "Elemental Transfiguration",
+        "ja": "元素変幻",
+        "ko": "원소 변환"
+      },
+      "description": {
+        "zh": "行动阶段开始时，若队伍中包含元素幻变的两种元素类型的角色且不包含其他元素的角色，则将此牌抓起，然后弃置并生成至场上，然后将4个骰子转化为幻变的元素类型。",
+        "en": "When the Action Phase starts, if your team includes characters of the two elemental types corresponding to the Elemental Transfiguration and no characters of other elements, take this card into your hand, then discard it and generate it on the field, then convert 4 dice to those elemental types.",
+        "ja": "アクションフェーズ開始時、チームに元素変幻の2種類の元素タイプのキャラが含まれており、かつ他元素のキャラが含まれていない場合、このカードを引いて、破棄してフィールド上に生成し、サイコロ4個を変幻する元素タイプに転換します。",
+        "ko": "행동 단계 시작 시, 파티에 원소 변환의 두 가지 원소 타입의 캐릭터가 포함되어 있으며 다른 원소 캐릭터가 없을 경우, 이 카드를 드로우한 뒤 버리고 필드에 생성해, 주사위 4개를 변환한 원소 타입으로 전환한다"
+      }
+    },
+    {
+      "code": 100,
+      "name": {
+        "zh": "物理伤害",
+        "en": "Physical DMG",
+        "ja": "物理ダメージ",
+        "ko": "물리 피해"
+      },
+      "description": {
+        "zh": "物理伤害不会附着元素，也不会发生元素反应。",
+        "en": "Physical DMG will not apply any Elements, nor can it engage in Elemental Reactions.",
+        "ja": "物理ダメージは元素付着させたり、元素反応を起こしたりはしません。",
+        "ko": "물리 피해는 원소를 부착할 수 없고, 원소 반응이 발생하지 않는다."
+      }
+    },
+    {
+      "code": 101,
+      "name": {
+        "zh": "冰元素伤害",
+        "en": "Cryo DMG",
+        "ja": "氷元素ダメージ",
+        "ko": "얼음 원소 피해"
+      },
+      "description": {
+        "zh": "附着冰元素，可发生元素反应：\n融化：本伤害+2\n超导：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n冻结：本伤害+1，使目标本回合无法行动（受到物理或火元素伤害后提前解除，但是伤害+2）",
+        "en": "Applies Cryo and can trigger the following Elemental Reactions:\nMelt: DMG +2 for this instance\nSuperconduct: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target\nFrozen: DMG +1 for this instance, the target is unable to perform any Actions this Round (Can be removed in advance after the target receives Physical or Pyro DMG, in which case they will take +2 DMG)",
+        "ja": "氷元素付着では、以下の元素反応を起こすことができます。\n溶解：ダメージ+2\n超電導：ダメージ+1、目標以外の相手チーム全員に貫通ダメージを1与える\n凍結：ダメージ+1、目標はこのラウンドで行動不能になる（物理ダメージまたは炎ダメージを受けると、即座に解除されるがダメージ+2となる）",
+        "ko": "얼음 원소 부착 시 원소 반응이 발생할 수 있다.\n융해: 이번 피해+2pt\n초전도: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n빙결: 이번 피해+1pt, 이번 턴에 대상을 행동 불가로 만든다. (물리 피해 또는 불 원소 피해를 받으면 조기 해제되지만, 해당 피해로 받는 피해량이 2pt 추가된다)"
+      }
+    },
+    {
+      "code": 102,
+      "name": {
+        "zh": "水元素伤害",
+        "en": "Hydro DMG",
+        "ja": "水元素ダメージ",
+        "ko": "물 원소 피해"
+      },
+      "description": {
+        "zh": "附着水元素，可发生元素反应：\n蒸发：本伤害+2\n感电：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n冻结：本伤害+1，使目标本回合无法行动（受到物理或火元素伤害后提前解除，但是伤害+2）\n绽放：本伤害+1，生成使下次火元素或雷元素伤害+2的[草原核]\n月感电：生成回合结束时造成2点雷元素伤害的[雷暴云]。（可用次数1，可叠加，没有上限，入场或可用次数增加时，赋予敌方随机1张手牌[电击]）\n月绽放：本伤害+1，并赋予我方随机1张手牌[费用降低]\n月结晶：本伤害+1，并生成1张可以召唤并强化月笼的[月笼协奏]加入手牌",
+        "en": "Applies Hydro and can trigger the following Elemental Reactions:\nVaporize: DMG +2 for this instance\nElectro-Charged: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target.\nFrozen: DMG +1 for this instance, the target is unable to perform any Actions this Round. (Can be removed in advance after the target receives +2 Physical or Pyro DMG)\nBloom: DMG +1 for this instance, creates a Dendro Core that grants +2 DMG to the next instance of Pyro or Electro DMG.\nLunar-Charged: Creates a Thundercloud that deals 2 Electro DMG at the end of the Round. (Usage: 1. Can stack, no stack limit. When created, or when its usages increase, apply Electric Shock to a random card in your opponent's Hand.)\nLunar Bloom: Deal +1 DMG for this instance, and apply Cost Reduction to a random card in your Hand.\nLunar-Crystallize: This DMG +1, and create 1 Moondrift Harmony that can summon and enhance Moondrift and add it to your Hand.",
+        "ja": "水元素付着では、以下の元素反応を起こすことができます。\n蒸発：ダメージ+2\n感電：ダメージ+1、目標以外の相手チーム全員に貫通ダメージを1与える\n凍結：ダメージ+1、目標はこのラウンドで行動不能になる（物理ダメージまたは炎ダメージを受けると、即座に解除されるがダメージ+2となる）\n開花：ダメージ+1、次の炎元素または雷元素ダメージを+2できる「草原核」を生成する\n月感電：ラウンド終了時、雷元素ダメージを2与える「雷雲」を生成する。（使用可能回数1回、上限なく重ねられる）雷雲の登場時または使用可能回数が増えた時、相手のランダムな手札1枚に「電撃」を付与する）。\n月開花：ダメージ+1。さらに味方のランダムな手札1枚に「コストダウン」を付与する。\n月結晶：ダメージ+1。さらに月籠を召喚して強化できる「月籠の共鳴」を1枚生成し、手札に加える。",
+        "ko": "물 원소 부착 시 원소 반응이 발생할 수 있다.\n증발: 이번 피해+2pt\n감전: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n빙결: 이번 피해+1pt, 이번 턴에 대상을 행동 불가로 만든다. (물리 피해 또는 불 원소 피해를 받으면 조기 해제되지만, 피해+2pt)\n개화: 이번 피해+1pt, 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다.\n달 감전: 턴 종료 시 2pt의 번개 원소 피해를 주는 [번개구름]을 생성한다. (사용 가능 횟수 1, 중첩 가능, 상한 없음. 입장 또는 사용 가능 횟수 증가 시, 랜덤한 상대 핸드 카드 1장에 [전격]을 부여한다)\n달 개화: 이번 피해+1pt 및 랜덤한 아군 핸드 카드 1장에 [코스트 감소] 부여.\n달 결정: 이번 피해+1pt 및 달빛 조각을 소환 및 강화할 수 있는 [달빛 조각 화음] 1장을 생성 후 핸드 카드로 가져온다."
+      }
+    },
+    {
+      "code": 103,
+      "name": {
+        "zh": "火元素伤害",
+        "en": "Pyro DMG",
+        "ja": "炎元素ダメージ",
+        "ko": "불 원소 피해"
+      },
+      "description": {
+        "zh": "附着火元素，可发生元素反应：\n融化：本伤害+2\n蒸发：本伤害+2\n超载：本伤害+2，目标强制切换到下一个角色\n燃烧：本伤害+1，生成回合结束时造成1点火元素伤害的[燃烧烈焰]（可用次数1，最多叠加到2）",
+        "en": "Applies Pyro and can trigger the following Elemental Reactions:\nMelt: DMG +2 for this instance\nVaporize: DMG +2 for this instance\nOverloaded: DMG +2 for this instance, the target is forcibly switched to the next character\nBurning: DMG +1 for this instance, creates a [Burning Flame] that will deal 1 Pyro DMG at the end of the Round (Takes effect once, max 2 stacks)",
+        "ja": "炎元素付着では、以下の元素反応を起こすことができます。\n溶解：ダメージ+2\n蒸発：ダメージ+2\n過負荷：ダメージ+2、目標を強制的に次のキャラにチェンジさせる\n燃焼：ダメージ+1、ラウンド終了時に炎元素ダメージを1与える「燃焼烈焔」を生成する（使用可能回数1回、最大2まで重ねられる）",
+        "ko": "불 원소 부착 시 원소 반응이 발생할 수 있다.\n융해: 이번 피해+2pt\n증발: 이번 피해+2pt\n과부하: 이번 피해+2pt, 대상이 다음 캐릭터로 강제 교체된다.\n연소: 이번 피해+1pt, 턴 종료 시 불 원소 피해를 1pt 주는 [불타는 화염]을 생성한다. (사용 가능 횟수: 1, 최대 중첩수: 2)"
+      }
+    },
+    {
+      "code": 104,
+      "name": {
+        "zh": "雷元素伤害",
+        "en": "Electro DMG",
+        "ja": "雷元素ダメージ",
+        "ko": "번개 원소 피해"
+      },
+      "description": {
+        "zh": "附着雷元素，可发生元素反应：\n超载：本伤害+2，目标强制切换到下一个角色\n超导：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n感电：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n原激化：本伤害+1，生成使下2次草元素或雷元素伤害+1的[激化领域]\n月感电：生成回合结束时造成2点雷元素伤害的[雷暴云]。（可用次数1，可叠加，没有上限，入场或可用次数增加时，赋予敌方随机1张手牌[电击]）",
+        "en": "Applies Electro and can trigger the following Elemental Reactions:\nOverloaded: DMG +2 for this instance, the target is forcibly switched to the next character\nSuperconduct: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target\nElectro-Charged: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target\nQuicken: DMG +1 for this instance, creates a [Catalyzing Field] that grants +1 DMG to the next 2 instances of Dendro or Electro DMG\nLunar-Charged: Creates a [Thundercloud] that deals 2 Electro DMG at the end of the Round. (Usage: 1. Can stack, no stack limit. When created, or when its usages increase, apply [Electric Shock] to a random card in your opponent's Hand.)",
+        "ja": "雷元素が付着すると、以下の元素反応を起こせる：\n過負荷：ダメージ+2、ターゲットを強制的に次のキャラにチェンジさせる\n超電導：ダメージ+1、ターゲット以外の相手チーム全員に貫通ダメージを1与える\n感電：ダメージ+1、ターゲット以外の相手チーム全員に貫通ダメージを1与える\n原激化：ダメージ+1、次の草元素または雷元素ダメージを2回まで+1できる「激化領域」を生成する\n月感電：ラウンド終了時、雷元素ダメージを2与える「雷雲」を生成する。（使用可能回数1、上限なく重ねられる。登場または使用可能回数が増える時、相手のランダムな手札1枚に「電撃」を付与する）",
+        "ko": "번개 원소 부착 시 다음 원소 반응이 발생할 수 있다.\n과부하: 이번 피해+2pt, 대상이 다음 캐릭터로 강제 교체된다.\n초전도: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n감전: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n활성: 이번 피해+1pt, 다음 2회의 풀 원소 또는 번개 원소 피해를 1pt 증가시키는 [격화 영역]을 생성한다.\n달 감전: 턴 종료 시, 번개 원소 피해를 2pt 주는 [번개구름]을 생성한다. (사용 가능 횟수: 1, 중첩 가능, 상한 없음, 필드 입장 또는 사용 가능 횟수 증가 시, 상대의 랜덤한 핸드 카드 1장에 [전기 충격]을 부여한다)"
+      }
+    },
+    {
+      "code": 105,
+      "name": {
+        "zh": "风元素伤害",
+        "en": "Anemo DMG",
+        "ja": "風元素ダメージ",
+        "ko": "바람 원소 피해"
+      },
+      "description": {
+        "zh": "和已附着的元素发生元素反应：\n扩散（冰）：对目标以外的所有敌方角色造成1点冰元素伤害\n扩散（水）：对目标以外的所有敌方角色造成1点水元素伤害\n扩散（火）：对目标以外的所有敌方角色造成1点火元素伤害\n扩散（雷）：对目标以外的所有敌方角色造成1点雷元素伤害",
+        "en": "Reacts with Elements if they are already applied:\nCryo Swirl: Deals 1 Cryo DMG to all opposing characters except the target\nHydro Swirl: Deals 1 Hydro DMG to all opposing characters except the target\nPyro Swirl: Deals 1 Pyro DMG to all opposing characters except the target\nElectro Swirl: Deals 1 Electro DMG to all opposing characters except the target",
+        "ja": "付着した元素と以下の元素反応を起こすことができます。\n拡散（氷）：目標以外の相手チーム全員に氷元素ダメージを1与える\n拡散（水）：目標以外の相手チーム全員に水元素ダメージを1与える\n拡散（炎）：目標以外の相手チーム全員に炎元素ダメージを1与える\n拡散（雷）：目標以外の相手チーム全員に雷元素ダメージを1与える",
+        "ko": "이미 부착된 원소와 원소 반응이 발생한다.\n확산(얼음): 대상 이외의 모든 상대 캐릭터에게 얼음 원소 피해를 1pt 준다.\n확산(물): 대상 이외의 모든 상대 캐릭터에게 물 원소 피해를 1pt 준다.\n확산(불): 대상 이외의 모든 상대 캐릭터에게 불 원소 피해를 1pt 준다.\n확산(번개): 대상 이외의 모든 상대 캐릭터에게 번개 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 106,
+      "name": {
+        "zh": "岩元素伤害",
+        "en": "Geo DMG",
+        "ja": "岩元素ダメージ",
+        "ko": "바위 원소 피해"
+      },
+      "description": {
+        "zh": "和已附着的元素发生元素反应：\n结晶（冰）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）\n结晶（水）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）\n结晶（火）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）\n结晶（雷）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）\n月结晶：本伤害+1，并生成1张可以召唤并强化月笼的[月笼协奏]加入手牌",
+        "en": "Reacts with Elements if they are already applied:\nCryo Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nHydro Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nPyro Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nElectro Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nLunar-Crystallize: This DMG +1, and create 1 Moondrift Harmony that can summon and enhance Moondrift and add it to your Hand.",
+        "ja": "付着した元素と以下の元素反応を起こすことができます。\n結晶（氷）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n結晶（水）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n結晶（炎）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n結晶（雷）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n月結晶：ダメージ+1、月籠を召喚して強化できる「月籠の共鳴」を1枚生成し、手札に加える。",
+        "ko": "이미 부착된 원소와 원소 반응이 발생한다:\n결정(얼음): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다 (중첩 가능, 최대 2pt)\n결정(물): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다 (중첩 가능, 최대 2pt)\n결정(불): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다 (중첩 가능, 최대 2pt)\n결정(번개): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다 (중첩 가능, 최대 2pt)\n달 결정: 이번 피해+1pt, 달빛 조각을 소환 및 강화할 수 있는 [달빛 조각 화음] 1장을 생성해 핸드 카드에 추가한다"
+      }
+    },
+    {
+      "code": 107,
+      "name": {
+        "zh": "草元素伤害",
+        "en": "Dendro DMG",
+        "ja": "草元素ダメージ",
+        "ko": "풀 원소 피해"
+      },
+      "description": {
+        "zh": "附着草元素，可发生元素反应：\n绽放：本伤害+1，生成使下次火元素或雷元素伤害+2的[草原核]\n燃烧：本伤害+1，生成回合结束时造成1点火元素伤害的[燃烧烈焰]（可用次数1，最多叠加到2）\n原激化：本伤害+1，生成使下2次草元素或雷元素伤害+1的[激化领域]。\n月绽放：本伤害+1，并赋予我方随机1张手牌[费用降低]",
+        "en": "Applies Dendro and can trigger the following Elemental Reactions:\nBloom: DMG +1 for this instance, creates a [Dendro Core] that grants +2 DMG to the next instance of Pyro or Electro DMG\nBurning: DMG +1 for this instance, creates a [Burning Flame] that will deal 1 Pyro DMG at the end of the Round (Takes effect once, max 2 stacks)\nQuicken: DMG +1 for this instance, creates a [Catalyzing Field] that grants +1 DMG to the next 2 instances of Dendro or Electro DMG\nLunar Bloom: Deal +1 DMG for this instance, and apply [Cost Reduction] to a random card in your Hand",
+        "ja": "草元素付着では、以下の元素反応を起こすことができます。\n開花：ダメージ+1、次の炎元素または雷元素ダメージを2アップできる「草原核」を生成する\n燃焼：ダメージ+1、ラウンド終了時に炎元素ダメージを1与える「燃焼烈焔」を生成する（使用可能回数1回、最大2回まで重ね掛け可能）\n原激化：ダメージ+1、次2回の草元素または雷元素ダメージを+1できる「激化領域」を生成する。\n月開花：ダメージ+1。さらに味方のランダムな手札1枚に[コストダウン]を付与する。",
+        "ko": "풀 원소 부착 시 다음 원소 반응이 발생할 수 있다.\n개화: 이번 피해+1pt, 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다.\n연소: 이번 피해+1pt, 턴 종료 시 불 원소 피해를 1pt 주는 [불타는 화염]을 생성한다. (사용 가능 횟수: 1회, 최대 중첩수: 2)\n활성: 이번 피해+1pt, 다음 2회의 풀 원소 또는 번개 원소 피해를 1pt 증가시키는 [격화 영역]을 생성한다.\n달 개화: 이번 피해+1pt, 아군의 랜덤한 핸드 카드 1장에 [코스트 감소]를 부여한다."
+      }
+    },
+    {
+      "code": 150,
+      "name": {
+        "zh": "物理伤害",
+        "en": "Physical DMG",
+        "ja": "物理ダメージ",
+        "ko": "물리 피해"
+      },
+      "description": {
+        "zh": "物理伤害不会附着元素，也不会发生元素反应。",
+        "en": "Physical DMG will not apply any Elements, nor can it engage in Elemental Reactions.",
+        "ja": "物理ダメージは元素付着させたり、元素反応を起こしたりはしません。",
+        "ko": "물리 피해는 원소를 부착할 수 없고, 원소 반응이 발생하지 않는다."
+      }
+    },
+    {
+      "code": 151,
+      "name": {
+        "zh": "冰元素伤害",
+        "en": "Cryo DMG",
+        "ja": "氷元素ダメージ",
+        "ko": "얼음 원소 피해"
+      },
+      "description": {
+        "zh": "附着冰元素，可发生元素反应\n每点元素精通使特定效果提升1倍。\n融化：本伤害翻倍，每8点元素精通额外翻1倍\n超导：所有敌方角色附属1层冻伤\n冻结：目标附属4层冻伤",
+        "en": "Applies Cryo and can trigger the following Elemental Reactions:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1\nMelt: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nSuperconduct: Apply 1 stack of Frostbite to all opposing characters\nFrozen: Apply 4 stacks of Frostbite to the target",
+        "ja": "氷元素付着では、以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n溶解：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n超電導：相手のチーム全員に凍傷を1層付与する\n凍結：目標に凍傷を4層付与する",
+        "ko": "얼음 원소 부착 시 원소 반응이 발생할 수 있다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n융해: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n초전도: 모든 상대 캐릭터에게 동상을 1스택 부착한다.\n빙결: 대상에게  동상을 4스택 부착한다."
+      }
+    },
+    {
+      "code": 152,
+      "name": {
+        "zh": "水元素伤害",
+        "en": "Hydro DMG",
+        "ja": "水元素ダメージ",
+        "ko": "물 원소 피해"
+      },
+      "description": {
+        "zh": "附着水元素，可发生元素反应\n每点元素精通使特定效果提升1倍。\n蒸发：本伤害翻倍，每8点元素精通额外翻1倍\n感电：所有敌方角色受到1点穿透伤害\n冻结：目标附属4层冻伤\n绽放：生成1层草原核",
+        "en": "Applies Hydro and can trigger the following Elemental Reactions:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1\nVaporize: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nElectro-Charged: Deal 1 Piercing DMG to all opposing characters\nFrozen: Apply 4 stacks of Frostbite to the target\nBloom: Create 1 stack of Dendro Core",
+        "ja": "水元素付着では、以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n蒸発：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n感電：相手のチーム全員に貫通ダメージを1与える\n凍結：目標に凍傷を4層付与する\n開花：草原核を1層生成する",
+        "ko": "물 원소 부착 시 원소 반응이 발생할 수 있다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n증발: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n감전: 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n빙결: 대상에게  동상을 4스택 부착한다.\n개화: 풀 원핵을 1스택 생성한다."
+      }
+    },
+    {
+      "code": 153,
+      "name": {
+        "zh": "火元素伤害",
+        "en": "Pyro DMG",
+        "ja": "炎元素ダメージ",
+        "ko": "불 원소 피해"
+      },
+      "description": {
+        "zh": "附着火元素，可发生元素反应\n每点元素精通使特定效果提升1倍。\n蒸发：本伤害翻倍，每8点元素精通额外翻1倍\n融化：本伤害翻倍，每8点元素精通额外翻1倍\n超载：伤害+1，目标切换到上一个角色，他们交换位置并受到1点穿透伤害\n燃烧：目标附属1层[持续燃烧]",
+        "en": "Applies Pyro and can trigger the following Elemental Reactions:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1.\nVaporize: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nMelt: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nOverloaded: DMG +1, the target is switched to the previous character, with the two characters switching places and taking 1 Piercing DMG\nBurning: Apply 1 stack of Perpetual Burn to the target",
+        "ja": "炎元素付着では、以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n蒸発：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n溶解：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n過負荷：ダメージ+1。目標を一つ前のキャラに切り替える。相手の一つ前のキャラと出撃キャラの位置を交換し、貫通ダメージを1与える\n燃焼：目標に[持続的燃焼]を1層付与する",
+        "ko": "불 원소 부착 시 원소 반응이 발생할 수 있다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n증발: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n융해: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n과부하: 피해+1pt, 대상을 이전 캐릭터로 교체한다. 영향을 받은 두 캐릭터는 서로 위치를 교체하고 관통 피해를 1pt 받는다.\n연소: 대상에게 [지속 연소]를 1스택 부착한다."
+      }
+    },
+    {
+      "code": 154,
+      "name": {
+        "zh": "雷元素伤害",
+        "en": "Electro DMG",
+        "ja": "雷元素ダメージ",
+        "ko": "번개 원소 피해"
+      },
+      "description": {
+        "zh": "附着雷元素，可发生元素反应\n每点元素精通使特定效果提升1倍。\n超载：伤害+1，目标切换到上一个角色，他们交换位置并受到1点穿透伤害\n超导：所有敌方角色附属1层冻伤\n感电：所有敌方角色受到1点穿透伤害\n原激化：生成2层[激化领域]，最多叠加2层",
+        "en": "Applies Electro and can trigger the following Elemental Reactions:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1.\nOverloaded: DMG +1, the target is switched to the previous character, with the two characters switching places and taking 1 Piercing DMG\nSuperconduct: Apply 1 stack of Frostbite to all opposing characters\nElectro-Charged: Deal 1 Piercing DMG to all opposing characters\nQuicken: Create 2 stacks of Catalyzing Field (Max 2 stacks)",
+        "ja": "雷元素付着では、以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n過負荷：ダメージ+1。目標を一つ前のキャラに切り替える。相手の一つ前のキャラと出撃キャラの位置を交換し、貫通ダメージを1与える\n超電導：相手のチーム全員に凍傷を1層付与する\n感電：相手のチーム全員に貫通ダメージを1与える\n原激化：[激化領域]を2層生成する。最大2層まで重ねられる",
+        "ko": "번개 원소 부착 시 원소 반응이 발생할 수 있다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n과부하: 피해+1pt, 대상을 이전 캐릭터로 교체한다. 영향을 받은 두 캐릭터는 서로 위치를 교체하고 관통 피해를 1pt 받는다.\n초전도: 모든 상대 캐릭터에게 동상을 1스택 부착한다.\n감전: 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n활성: [격화 영역]을 2스택 생성한다. 최대 중첩수: 2스택."
+      }
+    },
+    {
+      "code": 155,
+      "name": {
+        "zh": "风元素伤害",
+        "en": "Anemo DMG",
+        "ja": "風元素ダメージ",
+        "ko": "바람 원소 피해"
+      },
+      "description": {
+        "zh": "和已附着的元素发生元素反应\n每点元素精通使特定效果提升1倍。\n扩散（冰）：伤害+1，对目标以外的所有敌方角色造成1点冰元素伤害\n扩散（水）：伤害+1，对目标以外的所有敌方角色造成1点水元素伤害\n扩散（火）：伤害+1，对目标以外的所有敌方角色造成1点火元素伤害\n扩散（雷）：伤害+1，对目标以外的所有敌方角色造成1点雷元素伤害",
+        "en": "Reacts with Elements if they are already applied:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1.\nCryo Swirl: DMG +1, deals 1 Cryo DMG to all opposing characters except the target\nHydro Swirl: DMG +1, deals 1 Hydro DMG to all opposing characters except the target\nPyro Swirl: DMG +1, deals 1 Pyro DMG to all opposing characters except the target\nElectro Swirl: DMG +1, deals 1 Electro DMG to all opposing characters except the target",
+        "ja": "付着した元素と以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n拡散（氷）：ダメージ+1、目標を除く相手のチーム全員に氷元素ダメージを1与える\n拡散（水）：ダメージ+1、目標を除く相手のチーム全員に水元素ダメージを1与える\n拡散（炎）：ダメージ+1、目標を除く相手のチーム全員に炎元素ダメージを1与える\n拡散（雷）：ダメージ+1、目標を除く相手のチーム全員に雷元素ダメージを1与える",
+        "ko": "이미 부착된 원소와 원소 반응이 발생한다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n확산(얼음): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 얼음 원소 피해를 1pt 준다.\n확산(물): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 물 원소 피해를 1pt 준다.\n확산(불): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 불 원소 피해를 1pt 준다.\n확산(번개): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 번개 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 156,
+      "name": {
+        "zh": "岩元素伤害",
+        "en": "Geo DMG",
+        "ja": "岩元素ダメージ",
+        "ko": "바위 원소 피해"
+      },
+      "description": {
+        "zh": "和已附着的元素发生元素反应\n每点元素精通使特定效果提升1倍。\n结晶（冰）：生成3点护盾。\n结晶（水）：生成3点护盾。\n结晶（火）：生成3点护盾。\n结晶（雷）：生成3点护盾。",
+        "en": "Reacts with Elements if they are already applied:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1\nCryo Crystallize: Create 3 Shield points\nHydro Crystallize: Create 3 Shield points\nPyro Crystallize: Create 3 Shield points\nElectro Crystallize: Create 3 Shield points",
+        "ja": "付着した元素と以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n結晶（氷）：シールドを3生成する。\n結晶（水）：シールドを3生成する。\n結晶（炎）：シールドを3生成する。\n結晶（雷）：シールドを3生成する。",
+        "ko": "이미 부착된 원소와 원소 반응이 발생한다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n결정(얼음): 보호막을 3pt 생성한다.\n결정(물): 보호막을 3pt 생성한다.\n결정(불): 보호막을 3pt 생성한다.\n결정(번개): 보호막을 3pt 생성한다."
+      }
+    },
+    {
+      "code": 157,
+      "name": {
+        "zh": "草元素伤害",
+        "en": "Dendro DMG",
+        "ja": "草元素ダメージ",
+        "ko": "풀 원소 피해"
+      },
+      "description": {
+        "zh": "附着草元素，可发生元素反应\n每点元素精通使特定效果提升1倍。\n绽放：生成1层草原核\n燃烧：目标附属1层[持续燃烧]\n原激化：生成2层[激化领域]，最多叠加2层",
+        "en": "Applies Dendro and can trigger the following Elemental Reactions:\nEvery 1 Elemental Mastery increases the specified effect by a factor of 1.\nBloom: Create 1 stack of Dendro Core\nBurning: Apply 1 stack of Perpetual Burn to the target\nQuicken: Create 2 stacks of Catalyzing Field (Max 2 stacks)",
+        "ja": "草元素付着では、以下の元素反応を起こすことができます\n元素熟知1につき、特定効果を+1倍（例：元素熟知1なら2倍、元素熟知2なら3倍）にする。\n開花：草原核を1層生成する\n燃焼：目標に[持続的燃焼]を1層付与する\n原激化：[激化領域]を2層生成する。最大2層まで重ねられる",
+        "ko": "풀 원소 부착 시 원소 반응이 발생할 수 있다.\n원소 마스터리 1pt당 특정 효과가 1배 증가한다.\n개화: 풀 원핵을 1스택 생성한다.\n연소: 대상에게 [지속 연소]를 1스택 부착한다.\n활성: [격화 영역]을 2스택 생성한다. 최대 중첩수: 2스택."
+      }
+    },
+    {
+      "code": 201,
+      "name": {
+        "zh": "附着冰元素",
+        "en": "Cryo Application",
+        "ja": "氷元素付着",
+        "ko": "얼음 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着冰元素时，发生的元素反应会忽略伤害效果：\n融化：没有效果\n超导：没有效果\n冻结：使目标本回合无法行动（受到物理或火元素伤害后提前解除，但是伤害+2）",
+        "en": "When Cryo is applied without dealing any DMG, the Elemental Reaction triggered will ignore DMG-dealing effects:\nMelt: No effect\nSuperconduct: No effect\nFrozen: The target is unable to perform any Actions this Round (Can be removed in advance after the target receives Physical or Pyro DMG, in which case they will take +2 DMG)",
+        "ja": "ダメージによる方法以外で氷元素が付着した場合、引き起こした元素反応にダメージ効果が乗りません。\n溶解：効果なし\n超電導：効果なし\n凍結：目標はこのラウンドで行動不能になる（物理ダメージまたは炎ダメージを受けると、即座に解除されるがダメージ+2となる）",
+        "ko": "피해를 입히지 않고 얼음 원소를 부착하여 발생한 원소 반응은 피해 효과를 무시한다.\n융해: 효과 없음.\n초전도: 효과 없음.\n빙결: 이번 턴에 대상을 행동 불가로 만든다. (물리 피해 또는 불 원소 피해를 받으면 조기 해제, 해당 피해로 받는 피해량이 2pt 추가된다)"
+      }
+    },
+    {
+      "code": 202,
+      "name": {
+        "zh": "附着水元素",
+        "en": "Hydro Application",
+        "ja": "水元素付着",
+        "ko": "물 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着水元素时，发生的元素反应会忽略伤害效果：\n蒸发：没有效果\n感电：没有效果\n冻结：目标本回合无法行动（受到物理或火元素伤害后提前解除，但是伤害+2）\n绽放：生成使下次火元素或雷元素伤害+2的[草原核]",
+        "en": "When Hydro is applied without dealing any DMG, the Elemental Reaction triggered will ignore DMG-dealing effects:\nVaporize: No effect\nElectro-Charged: No effect\nFrozen: The target is unable to perform any Actions this Round (Can be removed in advance after the target receives Physical or Pyro DMG, in which case they will take +2 DMG)\nBloom: Creates a [Dendro Core] that grants +2 DMG to the next instance of Pyro or Electro DMG",
+        "ja": "ダメージによる方法以外で水元素が付着した場合、引き起こした元素反応にダメージ効果は乗りません。\n蒸発：効果なし\n感電：効果なし\n凍結：目標はこのラウンドで行動不能になる（物理ダメージまたは炎ダメージを受けると、即座に解除されるがダメージ+2となる）\n開花：次の炎元素または雷元素ダメージを2アップできる「草原核」を生成する",
+        "ko": "피해를 입히지 않고 물 원소를 부착하여 발생한 원소 반응은 피해 효과를 무시한다.\n증발: 효과 없음.\n감전: 효과 없음.\n빙결: 이번 턴에 대상을 행동 불가로 만든다. (물리 피해 또는 불 원소 피해를 받으면 조기 해제되지만, 해당 피해로 받는 피해량이 2pt 추가된다)\n개화: 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다."
+      }
+    },
+    {
+      "code": 203,
+      "name": {
+        "zh": "附着火元素",
+        "en": "Pyro Application",
+        "ja": "炎元素付着",
+        "ko": "불 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着火元素时，发生的元素反应会忽略伤害效果：\n融化：没有效果\n蒸发：没有效果\n超载：目标强制切换到下一个角色\n燃烧：生成回合结束时造成1点火元素伤害的[燃烧烈焰]（可用次数1，最多叠加到2）",
+        "en": "When Pyro is applied without dealing any DMG, the Elemental Reaction triggered will ignore DMG-dealing effects:\nMelt: No effect\nVaporize: No effect\nOverloaded: The target is forcibly switched to the next character\nBurning: Creates a [Burning Flame] that will deal 1 Pyro DMG at the end of the Round (Takes effect once, max 2 stacks)",
+        "ja": "ダメージによる方法以外で炎元素が付着した場合、引き起こした元素反応にダメージ効果が乗りません。\n溶解：効果なし\n蒸発：効果なし\n過負荷：目標を強制的に次のキャラにチェンジさせる\n燃焼：ラウンド終了時に炎元素ダメージを1与える「燃焼烈焔」を生成する（使用可能回数1回、最大2まで重ねられる）",
+        "ko": "피해를 입히지 않고 불 원소를 부착하여 발생한 원소 반응은 피해 효과를 무시한다.\n융해: 효과 없음.\n증발: 효과 없음.\n과부하: 대상이 다음 캐릭터로 강제 교체된다.\n연소: 턴 종료 시 불 원소 피해를 1pt 주는 [불타는 화염]을 생성한다. (사용 가능 횟수: 1, 최대 중첩수: 2)"
+      }
+    },
+    {
+      "code": 204,
+      "name": {
+        "zh": "附着雷元素",
+        "en": "Electro Application",
+        "ja": "雷元素付着",
+        "ko": "번개 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着雷元素时，发生的元素反应会忽略伤害效果：\n超载：目标强制切换到下一个角色\n超导：没有效果\n感电：没有效果\n原激化：生成使下2次草元素或雷元素伤害+1的[激化领域]",
+        "en": "When Electro is applied without dealing any DMG, the Elemental Reactions triggered will ignore DMG-dealing effects:\nOverloaded: The target is forcibly switched to the next character\nSuperconduct: No effect\nElectro-Charged: No effect\nQuicken: Creates a [Catalyzing Field] that grants +1 DMG to the next 2 instances of Dendro or Electro DMG",
+        "ja": "ダメージによる方法以外で雷元素が付着した場合、引き起こした元素反応にダメージ効果は乗りません。\n過負荷：目標を強制的に次のキャラにチェンジさせる\n超電導：効果なし\n感電：効果なし\n原激化：次2回の草元素または雷元素ダメージを+1できる「激化領域」を生成する",
+        "ko": "피해를 입히지 않고 번개 원소를 부착하여 발생한 원소 반응은 피해 효과를 무시한다.\n과부하: 대상이 다음 캐릭터로 강제 교체된다.\n초전도: 효과 없음.\n감전: 효과 없음.\n활성: 다음 2회의 풀 원소 또는 번개 원소 피해를 1pt 증가시키는 [격화 영역]을 생성한다."
+      }
+    },
+    {
+      "code": 206,
+      "name": {
+        "zh": "附着岩元素",
+        "en": "Geo Application",
+        "ja": "岩元素付着",
+        "ko": "바위 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着岩元素时，发生的元素反应会忽略伤害效果：\n结晶（冰）：敌方出战角色获得1点护盾（可叠加，最多2点）。\n结晶（水）：敌方出战角色获得1点护盾（可叠加，最多2点）。\n结晶（火）：敌方出战角色获得1点护盾（可叠加，最多2点）。\n结晶（雷）：敌方出战角色获得1点护盾（可叠加，最多2点）。",
+        "en": "When Geo is applied without dealing any DMG, the Elemental Reaction triggered will ignore DMG-dealing effects:\nCryo Crystallize: The opponent's active character gains 1 Shield point (Can stack, max 2 points).\nHydro Crystallize: The opponent's active character gains 1 Shield point (Can stack, max 2 points).\nPyro Crystallize: The opponent's active character gains 1 Shield point (Can stack, max 2 points).\nElectro Crystallize: The opponent's active character gains 1 Shield point (Can stack, max 2 points).",
+        "ja": "ダメージによる方法以外で岩元素が付着した場合、引き起こした元素反応にダメージ効果が乗りません。\n結晶（氷）：相手の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n結晶（水）:相手の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n結晶（炎）：相手の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n結晶（雷）：相手の出撃キャラはシールドを1獲得する（最大2まで重ねられる）。",
+        "ko": "피해가 아닌 방식으로 바위 원소 부착 시, 발생한 원소 반응은 피해 효과를 무시한다:\n결정(얼음): 이번 피해+1pt, 상대 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)\n결정(물): 상대 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)\n결정(불): 상대 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)\n결정(번개): 이번 피해+1pt, 상대 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)"
+      }
+    },
+    {
+      "code": 207,
+      "name": {
+        "zh": "附着草元素",
+        "en": "Dendro Application",
+        "ja": "草元素付着",
+        "ko": "풀 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着草元素时，发生的元素反应会忽略伤害效果：\n绽放：生成使下次火元素或雷元素伤害+2的[草原核]\n燃烧：生成回合结束时造成1点火元素伤害的[燃烧烈焰]（可用次数1，最多叠加到2）\n原激化：生成使下2次草元素或雷元素伤害+1的[激化领域]",
+        "en": "When Dendro is applied without dealing any DMG, the Elemental Reaction triggered will ignore DMG-dealing effects:\nBloom: Creates a [Dendro Core] that grants +2 DMG to the next instance of Pyro or Electro DMG\nBurning: Creates a [Burning Flame] that will deal 1 Pyro DMG at the end of the Round (Takes effect once, max 2 stacks)\nQuicken: Creates a [Catalyzing Field] that grants +1 DMG to the next 2 instances of Dendro or Electro DMG",
+        "ja": "ダメージによる方法以外で草元素が付着した場合、引き起こした元素反応にダメージ効果は乗りません。\n開花：次の炎元素または雷元素ダメージを+2できる「草原核」を生成する\n燃焼：ラウンド終了時に炎元素ダメージを1与える「燃焼烈焔」を生成する（使用可能回数1回、最大2回まで重ね掛け可能）\n原激化：次2回の草元素または雷元素ダメージを+1できる「激化領域」を生成する",
+        "ko": "피해를 입히지 않고 풀 원소를 부착하여 발생한 원소 반응은 피해 효과를 무시한다.\n개화: 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다.\n연소: 턴 종료 시 불 원소 피해를 1pt 주는 [불타는 화염]을 생성한다. (사용 가능 횟수: 1, 최대 중첩수: 2)\n활성: 다음 2회의 풀 원소 또는 번개 원소 피해를 1pt 증가시키는 [격화 영역]을 생성한다."
+      }
+    },
+    {
+      "code": 211,
+      "name": {
+        "zh": "冰元素相关反应",
+        "en": "Cryo-Related Reactions",
+        "ja": "氷元素関連反応",
+        "ko": "얼음 원소 관련 반응"
+      },
+      "description": {
+        "zh": "冻结：本伤害+1，目标本回合无法行动。（受到物理或火元素伤害后提前解除，但是伤害+2）\n融化：本伤害+2。\n超导：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害。\n扩散（冰）：对目标以外的所有敌方角色造成1点冰元素伤害。\n结晶（冰）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）。",
+        "en": "Frozen: Deals +1 DMG for this instance, the target is unable to perform any Actions this Round (Can be removed in advance after the target receives Physical or Pyro DMG, in which case they will take +2 DMG)\nMelt: Deals +2 DMG for this instance.\nSuperconduct: Deals +1 DMG for this instance, deals 1 Piercing DMG to all opposing characters except the target.\nCryo Swirl: Deals 1 Cryo DMG to all opposing characters except the target.\nCryo Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points).",
+        "ja": "凍結：ダメージ+1、目標はこのラウンドで行動不能になる。（物理ダメージまたは炎ダメージを受けると、即座に解除されるがダメージ+2となる）\n溶解：ダメージ+2。\n超電導：ダメージ+1、目標を除く相手のチーム全員に貫通ダメージを1与える。\n拡散（氷）：目標以外の相手チーム全員に氷元素ダメージを1与える。\n結晶（氷）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ね掛け可能）。",
+        "ko": "빙결: 이번 피해+1pt, 이번 턴에 대상을 행동 불가로 만든다. (물리 또는 불 원소 피해를 받으면 조기 해제되지만, 해당 피해로 받는 피해량+2pt)\n융해: 이번 피해+2pt\n초전도: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n확산(얼음): 대상 이외의 모든 상대 캐릭터에게 얼음 원소 피해를 1pt 준다.\n결정(얼음): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)"
+      }
+    },
+    {
+      "code": 212,
+      "name": {
+        "zh": "水元素相关反应",
+        "en": "Hydro-Related Reactions",
+        "ja": "水元素関連反応",
+        "ko": "물 원소 관련 반응"
+      },
+      "description": {
+        "zh": "蒸发：本伤害+2\n感电：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n冻结：本伤害+1，目标本回合无法行动（受到物理或火元素伤害后提前解除，但是伤害+2）\n绽放：生成使下次火元素或雷元素伤害+2的[草原核]\n结晶（水）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）。\n扩散（水）：对目标以外的所有敌方角色造成1点水伤害。\n月感电：生成回合结束时造成2点雷元素伤害的[雷暴云]。（可用次数1，可叠加，没有上限，入场或可用次数增加时，赋予敌方随机1张手牌[电击]）\n月绽放：本伤害+1，并赋予我方随机1张手牌[费用降低]\n月结晶：本伤害+1，并生成1张可以召唤并强化月笼的[月笼协奏]加入手牌",
+        "en": "Vaporize: DMG +2 for this instance\nElectro-Charged: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target\nFrozen: DMG +1 for this instance, the target is unable to perform any Actions this Round (Can be removed in advance after the target receives Physical or Pyro DMG, in which case they will take +2 DMG)\nBloom: Creates a Dendro Core that grants +2 DMG to the next instance of Pyro or Electro DMG\nHydro Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nHydro Swirl: Deals 1 Hydro DMG to all opposing characters except the target.\nLunar-Charged: Creates a Thundercloud that deals 2 Electro DMG at the end of the Round. (Usage: 1. Can stack, no stack limit. When created, or when its usages increase, apply Electric Shock to a random card in your opponent's Hand.)\nLunar-Bloom: Deal +1 DMG for this instance, and apply Cost Reduction to a random card in your Hand.\nLunar-Crystallize: This DMG +1, and create 1 Moondrift Harmony that can summon and enhance Moondrift and add it to your Hand.",
+        "ja": "蒸発：ダメージ+2\n感電：ダメージ+1、目標以外の相手のチーム全員に貫通ダメージを1与える\n凍結：ダメージ+1、目標はこのラウンドで行動不能になる（物理ダメージまたは炎ダメージを受けると、即座に解除されるがダメージ+2となる）\n開花：次の炎元素または雷元素ダメージを2アップできる「草原核」を生成する\n結晶（水）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ね掛け可能）\n拡散（水）：目標以外の相手チーム全員に水元素ダメージを1与える\n月感電：ラウンド終了時に雷元素ダメージを2与える「雷雲」を生成する（使用可能回数1、上限なく重ねられる。登場時または使用可能回数が増加した時、相手の手札にランダムで「電撃」を1枚付与する）\n月開花：ダメージ+1。さらに味方のランダムな手札1枚に「コストダウン」を付与する\n月結晶：ダメージ+1、月籠を召喚して強化できる「月籠の共鳴」を1枚生成し、手札に加える。",
+        "ko": "증발: 이번 피해+2pt\n감전: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n빙결: 이번 피해+1pt, 이번 턴에 대상을 행동 불가로 만든다. (물리 피해 또는 불 원소 피해를 받은 후 조기 해제되지만, 해당 피해로 받는 피해량이 2pt 추가된다)\n개화: 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다.\n결정(물): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)\n확산(물): 대상 이외의 모든 상대 캐릭터에게 물 원소 피해를 1pt 준다.\n달 감전: 턴 종료 시 2pt의 번개 원소 피해를 주는 [번개구름]을 생성한다. (사용 가능 횟수 1, 중첩 가능, 상한 없음. 입장 또는 사용 가능 횟수 증가 시, 상대의 랜덤 핸드 카드 1장에 [전격]을 부여한다)\n달 개화: 이번 피해+1 및 아군 랜덤 핸드 카드 1장에 [코스트 감소] 부여.\n달 결정: 이번 피해+1. 또한 달빛 조각을 소환 및 강화할 수 있는 [달빛 조각 화음]을 핸드 카드로 가져온다."
+      }
+    },
+    {
+      "code": 213,
+      "name": {
+        "zh": "火元素相关反应",
+        "en": "Pyro-Related Reactions",
+        "ja": "炎元素関連反応",
+        "ko": "불 원소 관련 반응"
+      },
+      "description": {
+        "zh": "融化：本伤害+2\n蒸发：本伤害+2\n超载：本伤害+2，目标强制切换到下一个角色\n燃烧：本伤害+1，生成回合结束时造成1点火元素伤害的[燃烧烈焰]（可用次数1，最多叠加到2）\n结晶（火）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）。\n扩散（火）：对目标以外的所有敌方角色造成1点火元素伤害",
+        "en": "Melt: DMG +2 for this instance\nVaporize: DMG +2 for this instance\nOverloaded: DMG +2 for this instance, the target is forcibly switched to the next character\nBurning: DMG +1 for this instance, creates a [Burning Flame] that will deal 1 Pyro DMG at the end of the Round (Takes effect once, max 2 stacks)\nPyro Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nPyro Swirl: Deals 1 Pyro DMG to all opposing characters except the target",
+        "ja": "溶解：ダメージ+2\n蒸発：ダメージ+2\n過負荷：ダメージ+2、目標を強制的に次のキャラにチェンジさせる\n燃焼：ダメージ+1、ラウンド終了時に炎元素ダメージを1与える「燃焼烈焔」を生成する（使用可能回数1回、最大2まで重ねられる）\n結晶（炎）：ダメージ+1、味方の出撃キャラはシールドを1獲得する（最大2まで重ねられる）\n拡散（炎）：目標以外の相手チーム全員に炎元素ダメージを1与える",
+        "ko": "융해: 이번 피해+2pt\n증발: 이번 피해+2pt\n과부하: 이번 피해+2pt, 대상이 다음 캐릭터로 강제 교체된다.\n연소: 이번 피해+1pt, 턴 종료 시 불 원소 피해를 1pt 주는 [불타는 화염]을 생성한다. (사용 가능 횟수: 1, 최대 중첩수: 2)\n결정(불): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)\n확산(불): 대상 이외의 모든 상대 캐릭터에게 불 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 214,
+      "name": {
+        "zh": "雷元素相关反应",
+        "en": "Electro-Related Reactions",
+        "ja": "雷元素関連反応",
+        "ko": "번개 원소 관련 반응"
+      },
+      "description": {
+        "zh": "超载：本伤害+2，目标强制切换到下一个角色\n超导：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n感电：本伤害+1，对目标以外的所有敌方角色造成1点穿透伤害\n原激化：本伤害+1，生成使下2次草元素或雷元素伤害+1的[激化领域]\n结晶（雷）：本伤害+1，我方出战角色获得1点护盾（可叠加，最多2点）。\n扩散（雷）：对目标以外的所有敌方角色造成1点雷元素伤害\n月感电：生成回合结束时造成2点雷元素伤害的[雷暴云]。（可用次数1，可叠加，没有上限，入场或可用次数增加时，赋予敌方随机1张手牌[电击]）",
+        "en": "Overloaded: DMG +2 for this instance, the target is forcibly switched to the next character\nSuperconduct: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target\nElectro-Charged: DMG +1 for this instance, deal 1 Piercing DMG to all opposing characters except the target\nQuicken: DMG +1 for this instance, creates a [Catalyzing Field] that grants +1 DMG to the next 2 instances of Dendro or Electro DMG\nElectro Crystallize: DMG +1 for this instance, your active character gains 1 Shield point (Can stack, max 2 points)\nElectro Swirl: Deal 1 Electro DMG to all opposing characters except the target\nLunar-Charged: Creates a [Thundercloud] that deals 2 Electro DMG at the end of the Round. (Usage: 1. Can stack, no stack limit. When created, or when its usages increase, apply [Electric Shock] to a random card in your opponent's Hand.)",
+        "ja": "過負荷：ダメージ+2、目標を強制的に次のキャラにチェンジさせる\n超電導：ダメージ+1、目標以外の相手チーム全員に貫通ダメージを1与える\n感電：ダメージ+1、目標以外の相手チーム全員に貫通ダメージを1与える\n原激化：ダメージ+1、次2回の草元素または雷元素ダメージを+1できる[激化領域]を生成する\n結晶（雷）：ダメージ+1、味方の出撃キャラがシールドを1獲得する（重ね掛け可能、最大2まで）。\n拡散（雷）：目標以外の相手チーム全員に雷元素ダメージを1与える\n月感電：ラウンド終了時、雷元素ダメージを2与える「雷雲」を生成する。（使用可能回数1、上限なく重ねられる。登場または使用可能回数が増える時、相手のランダムな手札1枚に「電撃」を付与する）",
+        "ko": "과부하: 이번 피해+2pt, 대상이 다음 캐릭터로 강제 교체된다.\n초전도: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n감전: 이번 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n활성: 이번 피해+1pt, 다음 2회의 풀 원소 또는 번개 원소 피해를 1pt 증가시키는 [격화 영역]을 생성한다.\n결정(번개): 이번 피해+1pt, 아군 출전 캐릭터가 보호막을 1pt 획득한다. (중첩 가능, 최대 2pt)\n확산(번개): 대상 이외의 모든 상대 캐릭터에게 번개 원소 피해를 1pt 준다.\n달 감전: 턴 종료 시, 번개 원소 피해를 2pt 주는 [번개구름]을 생성한다. (사용 가능 횟수: 1, 중첩 가능, 상한 없음, 필드 입장 또는 사용 가능 횟수 증가 시, 상대의 랜덤한 핸드 카드 1장에 [전기 충격]을 부여한다)"
+      }
+    },
+    {
+      "code": 215,
+      "name": {
+        "zh": "风元素相关反应",
+        "en": "Anemo-Related Reactions",
+        "ja": "風元素関連反応",
+        "ko": "바람 원소 관련 반응"
+      },
+      "description": {
+        "zh": "扩散（冰）：对目标以外的所有敌方角色造成1点冰元素伤害。\n扩散（水）：对目标以外的所有敌方角色造成1点水元素伤害。\n扩散（火）：对目标以外的所有敌方角色造成1点火元素伤害。\n扩散（雷）：对目标以外的所有敌方角色造成1点雷元素伤害。",
+        "en": "Cryo Swirl: Deals 1 Cryo DMG to all opposing characters except the target\nHydro Swirl: Deals 1 Hydro DMG to all opposing characters except the target\nPyro Swirl: Deals 1 Pyro DMG to all opposing characters except the target\nElectro Swirl: Deals 1 Electro DMG to all opposing characters except the target.",
+        "ja": "拡散（氷）：目標以外の相手チーム全員に氷元素ダメージを1与える。\n拡散（水）：目標以外の相手チーム全員に水元素ダメージを1与える。\n拡散（炎）：目標以外の相手チーム全員に炎元素ダメージを1与える。\n拡散（雷）：目標以外の相手チーム全員に雷元素ダメージを1与える。",
+        "ko": "확산(얼음): 대상 이외의 모든 상대 캐릭터에게 얼음 원소 피해를 1pt 준다.\n확산(물): 대상 이외의 모든 상대 캐릭터에게 물 원소 피해를 1pt 준다.\n확산(불): 대상 이외의 모든 상대 캐릭터에게 불 원소 피해를 1pt 준다.\n확산(번개): 대상 이외의 모든 상대 캐릭터에게 번개 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 217,
+      "name": {
+        "zh": "草元素相关反应",
+        "en": "Dendro-Related Reactions",
+        "ja": "草元素関連反応",
+        "ko": "풀 원소 관련 반응"
+      },
+      "description": {
+        "zh": "绽放：本伤害+1，生成使下次火元素或雷元素伤害+2的[草原核]\n燃烧：本伤害+1，生成回合结束时造成1点火元素伤害的[燃烧烈焰]（可用次数1，最多叠加到2）\n原激化：本伤害+1，生成使下2次草元素或雷元素伤害+1的[激化领域]\n月绽放：本伤害+1，并赋予我方随机1张手牌[费用降低]",
+        "en": "Bloom: DMG +1 for this instance, creates a [Dendro Core] that grants +2 DMG to the next instance of Pyro or Electro DMG\nBurning: DMG +1 for this instance, creates a [Burning Flame] that will deal 1 Pyro DMG at the end of the Round (Takes effect once, max 2 stacks)\nQuicken: DMG +1 for this instance, creates a [Catalyzing Field] that grants +1 DMG to the next 2 instances of Dendro or Electro DMG\nLunar Bloom: Deal +1 DMG for this instance, and apply [Cost Reduction] to a random card in your Hand",
+        "ja": "開花：ダメージ+1、次の炎元素または雷元素ダメージを2アップできる「草原核」を生成する\n燃焼：ダメージ+1、ラウンド終了時に炎元素ダメージを1与える「燃焼烈焔」を生成する（使用可能回数1回、最大2回まで重ね掛け可能）\n原激化：ダメージ+1、次2回の草元素または雷元素ダメージを+1できる「激化領域」を生成する。\n月開花：ダメージ+1。さらに味方のランダムな手札1枚に[コストダウン]を付与する。",
+        "ko": "개화: 이번 피해+1pt, 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다.\n연소: 이번 피해+1pt, 턴 종료 시 불 원소 피해를 1pt 주는 [불타는 화염]을 생성한다. (사용 가능 횟수: 1회, 최대 중첩수: 2)\n활성: 이번 피해+1pt, 다음 2회의 풀 원소 또는 번개 원소 피해를 1pt 증가시키는 [격화 영역]을 생성한다.\n달 개화: 이번 피해+1pt, 아군의 랜덤한 핸드 카드 1장에 [코스트 감소]를 부여한다."
+      }
+    },
+    {
+      "code": 252,
+      "name": {
+        "zh": "附着水元素",
+        "en": "Hydro Application",
+        "ja": "水元素付着",
+        "ko": "물 원소 부착"
+      },
+      "description": {
+        "zh": "不通过伤害附着水元素时，发生的元素反应会忽略伤害效果：\n蒸发：没有效果\n感电：没有效果\n冻结：目标下次行动攻击力-2\n绽放：生成使下次火元素或雷元素伤害+2的[草原核]",
+        "en": "When Hydro is applied without dealing any DMG, the Elemental Reaction triggered will ignore DMG-dealing effects:\nVaporize: No effect\nElectro-Charged: No effect\nFrozen: ATK -2 for target's next action\nBloom: Creates a [Dendro Core] that grants +2 DMG to the next instance of Pyro or Electro DMG",
+        "ja": "ダメージによる方法以外で水元素が付着した場合、引き起こした元素反応にダメージ効果は乗りません。\n蒸発：効果なし\n感電：効果なし\n凍結：目標は次のアクションで攻撃力-2\n開花：次の炎元素または雷元素ダメージを2アップできる「草原核」を生成する",
+        "ko": "피해를 입히지 않고 물 원소를 부착하여 발생한 원소 반응은 피해 효과를 무시한다.\n증발: 효과 없음.\n감전: 효과 없음.\n빙결: 대상의 다음번 행동 공격력-2pt\n개화: 다음번 불 원소 또는 번개 원소 피해를 2pt 증가시키는 [풀 원핵]을 생성한다"
+      }
+    },
+    {
+      "code": 261,
+      "name": {
+        "zh": "冰元素相关反应",
+        "en": "Cryo-Related Reactions",
+        "ja": "氷元素関連反応",
+        "ko": "얼음 원소 관련 반응"
+      },
+      "description": {
+        "zh": "融化：本伤害翻倍，每8点元素精通额外翻1倍\n超导：所有敌方角色附属1层冻伤\n冻结：目标附属4层冻伤\n结晶（冰）：生成3点护盾\n扩散（冰）：伤害+1，对目标以外的所有敌方角色造成1点冰元素伤害",
+        "en": "Melt: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nSuperconduct: Apply 1 stack of Frostbite to all opposing characters\nFrozen: Apply 4 stacks of Frostbite to the target\nCryo Crystallize: Create 3 Shield points\nCryo Swirl: DMG +1, deals 1 Cryo DMG to all opposing characters except the target",
+        "ja": "溶解：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n超電導：相手のチーム全員に凍傷を1層付与する\n凍結：目標に凍傷を4層付与する\n結晶（氷）：シールドを3生成する\n拡散（氷）：ダメージ+1、目標を除く相手のチーム全員に氷元素ダメージを1与える",
+        "ko": "융해: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n초전도: 모든 상대 캐릭터에게 동상을 1스택 부착한다.\n빙결: 대상에게  동상을 4스택 부착한다.\n결정(얼음): 보호막을 3pt 생성한다.\n확산(얼음): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 얼음 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 262,
+      "name": {
+        "zh": "水元素相关反应",
+        "en": "Hydro-Related Reactions",
+        "ja": "水元素関連反応",
+        "ko": "물 원소 관련 반응"
+      },
+      "description": {
+        "zh": "蒸发：本伤害翻倍，每8点元素精通额外翻1倍\n感电：所有敌方角色受到1点穿透伤害\n冻结：目标附属4层冻伤\n绽放：生成1层草原核\n结晶（水）：生成3点护盾\n扩散（水）：伤害+1，对目标以外的所有敌方角色造成1点水元素伤害",
+        "en": "Vaporize: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nElectro-Charged: Deal 1 Piercing DMG to all opposing characters\nFrozen: Apply 4 stacks of Frostbite to the target\nBloom: Create 1 stack of Dendro Core\nHydro Crystallize: Create 3 Shield points\nHydro Swirl: DMG +1, deals 1 Hydro DMG to all opposing characters except the target",
+        "ja": "蒸発：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n感電：相手のチーム全員に貫通ダメージを1与える\n凍結：目標に凍傷を4層付与する\n開花：草原核を1層生成する\n結晶（水）：シールドを3生成する\n拡散（水）：ダメージ+1、目標を除く相手のチーム全員に水元素ダメージを1与える",
+        "ko": "증발: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n감전: 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n빙결: 대상에게  동상을 4스택 부착한다.\n개화: 풀 원핵을 1스택 생성한다.\n결정(물): 보호막을 3pt 생성한다.\n확산(물): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 물 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 263,
+      "name": {
+        "zh": "火元素相关反应",
+        "en": "Pyro-Related Reactions",
+        "ja": "炎元素関連反応",
+        "ko": "불 원소 관련 반응"
+      },
+      "description": {
+        "zh": "蒸发：本伤害翻倍，每8点元素精通额外翻1倍\n融化：本伤害翻倍，每8点元素精通额外翻1倍\n超载：伤害+1，目标切换到上一个角色，他们交换位置并受到1点穿透伤害\n燃烧：目标附属1层[持续燃烧]\n结晶（火）：生成3点护盾\n扩散（火）：伤害+1，对目标以外的所有敌方角色造成1点火元素伤害",
+        "en": "Vaporize: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nMelt: DMG +100% for this instance, with every 8 Elemental Mastery contributing an additional 100%\nOverloaded: DMG + 1, the target is switched to the previous character, with the two characters switching places and taking 1 Piercing DMG\nBurning: Apply 1 stack of Perpetual Burn to the target\nPyro Crystallize: Create 3 Shield points\nPyro Swirl: DMG +1, deals 1 Pyro DMG to all opposing characters except the target",
+        "ja": "蒸発：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n溶解：ダメージが2倍になる。元素熟知8ごとに、さらに+1倍\n過負荷：ダメージ+1。目標を一つ前のキャラに切り替える。相手の一つ前のキャラと出撃キャラの位置を交換し、貫通ダメージを1与える\n燃焼：目標に[持続的燃焼]を1層付与する\n結晶（炎）：シールドを3生成する\n拡散（炎）：ダメージ+1、目標を除く相手のチーム全員に炎元素ダメージを1与える",
+        "ko": "증발: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n융해: 이번 피해 2배, 원소 마스터리 8pt당 추가로 1배 증가한다.\n과부하: 피해+1pt, 대상을 이전 캐릭터로 교체한다. 영향을 받은 두 캐릭터는 서로 위치를 교체하고 관통 피해를 1pt 받는다.\n연소: 대상에게 [지속 연소]를 1스택 부착한다.\n결정(불): 보호막을 3pt 생성한다.\n확산(불): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 불 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 264,
+      "name": {
+        "zh": "雷元素相关反应",
+        "en": "Electro-Related Reactions",
+        "ja": "雷元素関連反応",
+        "ko": "번개 원소 관련 반응"
+      },
+      "description": {
+        "zh": "超载：伤害+1，目标切换到上一个角色，他们交换位置并受到1点穿透伤害\n超导：所有敌方角色附属1层冻伤\n感电：所有敌方角色受到1点穿透伤害\n原激化：生成2层[激化领域]，最多叠加2层\n结晶（雷）：生成3点护盾\n扩散（雷）：伤害+1，对目标以外的所有敌方角色造成1点雷元素伤害",
+        "en": "Overloaded: DMG +1, the target is switched to the previous character, with the two characters switching places and taking 1 Piercing DMG\nSuperconduct: Apply 1 stack of Frostbite to all opposing characters\nElectro-Charged: Deal 1 Piercing DMG to all opposing characters\nQuicken: Create 2 stacks of Catalyzing Field (Max 2 stacks)\nElectro Crystallize: Create 3 Shield points\nElectro Swirl: DMG +1, deals 1 Electro DMG to all opposing characters except the target",
+        "ja": "過負荷：ダメージ+1。目標を一つ前のキャラに切り替える。相手の一つ前のキャラと出撃キャラの位置を交換し、貫通ダメージを1与える\n超電導：相手のチーム全員に凍傷を1層付与する\n感電：相手のチーム全員に貫通ダメージを1与える\n原激化：[激化領域]を2層生成する。最大2層まで重ねられる\n結晶（雷）：シールドを3生成する\n拡散（雷）：ダメージ+1、目標を除く相手のチーム全員に雷元素ダメージを1与える",
+        "ko": "과부하: 피해+1pt, 대상을 이전 캐릭터로 교체한다. 영향을 받은 두 캐릭터는 서로 위치를 교체하고 관통 피해를 1pt 받는다.\n초전도: 모든 상대 캐릭터에게 동상을 1스택 부착한다.\n감전: 모든 상대 캐릭터에게 관통 피해를 1pt 준다.\n활성: [격화 영역]을 2스택 생성한다. 최대 중첩수: 2스택\n결정(번개): 보호막을 3pt 생성한다.\n확산(번개): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 번개 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 265,
+      "name": {
+        "zh": "风元素相关反应",
+        "en": "Anemo-Related Reactions",
+        "ja": "風元素関連反応",
+        "ko": "바람 원소 관련 반응"
+      },
+      "description": {
+        "zh": "扩散（冰）：伤害+1，对目标以外的所有敌方角色造成1点冰元素伤害\n扩散（水）：伤害+1，对目标以外的所有敌方角色造成1点水元素伤害\n扩散（火）：伤害+1，对目标以外的所有敌方角色造成1点火元素伤害\n扩散（雷）：伤害+1，对目标以外的所有敌方角色造成1点雷元素伤害",
+        "en": "Cryo Swirl: DMG +1, deals 1 Cryo DMG to all opposing characters except the target\nHydro Swirl: DMG +1, deals 1 Hydro DMG to all opposing characters except the target\nPyro Swirl: DMG +1, deals 1 Pyro DMG to all opposing characters except the target\nElectro Swirl: DMG +1, deals 1 Electro DMG to all opposing characters except the target",
+        "ja": "拡散（氷）：ダメージ+1、目標を除く相手のチーム全員に氷元素ダメージを1与える\n拡散（水）：ダメージ+1、目標を除く相手のチーム全員に水元素ダメージを1与える\n拡散（炎）：ダメージ+1、目標を除く相手のチーム全員に炎元素ダメージを1与える\n拡散（雷）：ダメージ+1、目標を除く相手のチーム全員に雷元素ダメージを1与える",
+        "ko": "확산(얼음): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 얼음 원소 피해를 1pt 준다.\n확산(물): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 물 원소 피해를 1pt 준다.\n확산(불): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 불 원소 피해를 1pt 준다.\n확산(번개): 피해+1pt, 대상 이외의 모든 상대 캐릭터에게 번개 원소 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 266,
+      "name": {
+        "zh": "岩元素相关反应",
+        "en": "Geo-Related Reactions",
+        "ja": "岩元素関連反応",
+        "ko": "바위 원소 관련 반응"
+      },
+      "description": {
+        "zh": "结晶（冰）：生成3点护盾\n结晶（水）：生成3点护盾\n结晶（火）：生成3点护盾\n结晶（雷）：生成3点护盾",
+        "en": "Cryo Crystallize: Create 3 Shield points\nHydro Crystallize: Create 3 Shield points\nPyro Crystallize: Create 3 Shield points\nElectro Crystallize: Create 3 Shield points",
+        "ja": "結晶（氷）：シールドを3生成する\n結晶（水）：シールドを3生成する\n結晶（炎）：シールドを3生成する\n結晶（雷）：シールドを3生成する",
+        "ko": "결정(얼음): 보호막을 3pt 생성한다.\n결정(물): 보호막을 3pt 생성한다.\n결정(불): 보호막을 3pt 생성한다.\n결정(번개): 보호막을 3pt 생성한다."
+      }
+    },
+    {
+      "code": 267,
+      "name": {
+        "zh": "草元素相关反应",
+        "en": "Dendro-Related Reactions",
+        "ja": "草元素関連反応",
+        "ko": "풀 원소 관련 반응"
+      },
+      "description": {
+        "zh": "绽放：生成1层草原核\n燃烧：目标附属1层[持续燃烧]\n原激化：生成2层[激化领域]，最多叠加2层",
+        "en": "Bloom: Create 1 stack of Dendro Core\nBurning: Apply 1 stack of Perpetual Burn to the target\nQuicken: Create 2 stacks of Catalyzing Field (Max 2 stacks)",
+        "ja": "開花：草原核を1層生成する\n燃焼：目標に[持続的燃焼]を1層付与する\n原激化：[激化領域]を2層生成する。最大2層まで重ねられる",
+        "ko": "개화: 풀 원핵을 1스택 생성한다.\n연소: 대상에게 [지속 연소]를 1스택 부착한다.\n활성: [격화 영역]을 2스택 생성한다. 최대 중첩수: 2스택."
+      }
+    },
+    {
+      "code": 301,
+      "name": {
+        "zh": "冰元素",
+        "en": "Cryo",
+        "ja": "氷元素",
+        "ko": "얼음 원소"
+      },
+      "description": {
+        "zh": "花费投出了冰元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Cryo Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "氷元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 얼음 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 302,
+      "name": {
+        "zh": "水元素",
+        "en": "Hydro",
+        "ja": "水元素",
+        "ko": "물 원소"
+      },
+      "description": {
+        "zh": "花费投出了水元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Hydro Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "水元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 물 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 303,
+      "name": {
+        "zh": "火元素",
+        "en": "Pyro",
+        "ja": "炎元素",
+        "ko": "불 원소"
+      },
+      "description": {
+        "zh": "花费投出了火元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Pyro Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "炎元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 불 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 304,
+      "name": {
+        "zh": "雷元素",
+        "en": "Electro",
+        "ja": "雷元素",
+        "ko": "번개 원소"
+      },
+      "description": {
+        "zh": "花费投出了雷元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Electro Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "雷元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 번개 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 305,
+      "name": {
+        "zh": "风元素",
+        "en": "Anemo",
+        "ja": "風元素",
+        "ko": "바람 원소"
+      },
+      "description": {
+        "zh": "花费投出了风元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Anemo Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "風元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 바람 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 306,
+      "name": {
+        "zh": "岩元素",
+        "en": "Geo",
+        "ja": "岩元素",
+        "ko": "바위 원소"
+      },
+      "description": {
+        "zh": "花费投出了岩元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Geo Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "岩元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 바위 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 307,
+      "name": {
+        "zh": "草元素",
+        "en": "Dendro",
+        "ja": "草元素",
+        "ko": "풀 원소"
+      },
+      "description": {
+        "zh": "花费投出了草元素的元素骰，来支付此费用。\n（万能元素也可以支付此费用。）",
+        "en": "Spend the Dendro Dice you have rolled to pay for this cost.\n(Omni Dice may also be used to pay for this.)",
+        "ja": "草元素の元素サイコロを消費してコストを支払い可能。\n（万能元素で代わりに支払うことも可能。）",
+        "ko": "굴려서 나온 풀 원소 주사위를 소모해 사용할 수 있다.\n(만능 원소 사용 가능)"
+      }
+    },
+    {
+      "code": 308,
+      "name": {
+        "zh": "相同元素",
+        "en": "Matching Element",
+        "ja": "同一元素",
+        "ko": "동일한 원소"
+      },
+      "description": {
+        "zh": "必须用指定数量的相同类型元素骰子，来支付此类费用。\n（万能元素被视为和任何元素相同。）",
+        "en": "You must use Elemental Dice that match the number and element featured here to pay this type of cost.\n(An Omni Die can be considered of any Element.)",
+        "ja": "指定数の同じタイプの元素サイコロを消費して、コストを支払う必要があります。\n（万能元素は任意タイプの元素と同じものとして見なされます。）",
+        "ko": "반드시 지정된 수량의 동일한 원소 타입 원소 주사위를 사용해야 한다.\n(만능 원소는 어떤 원소와도 동일한 원소인 것으로 간주한다)"
+      }
+    },
+    {
+      "code": 309,
+      "name": {
+        "zh": "无色元素",
+        "en": "Unaligned Element",
+        "ja": "無色元素",
+        "ko": "무색 원소"
+      },
+      "description": {
+        "zh": "可以用任意类型的元素骰子组合，来支付此类费用。",
+        "en": "You may use Elemental Dice of any element to pay this type of cost.",
+        "ja": "任意タイプの元素サイコロと組み合わせてコストを支払うことができます。",
+        "ko": "어떤 타입의 원소 주사위든 사용할 수 있다."
+      }
+    },
+    {
+      "code": 310,
+      "name": {
+        "zh": "充能",
+        "en": "Energy",
+        "ja": "チャージ",
+        "ko": "원소 에너지"
+      },
+      "description": {
+        "zh": "角色使用「元素爆发」时，需要消耗充能。\n角色使用「元素战技」或「普通攻击」后，会获得1点充能。",
+        "en": "Characters must consume Energy to use their Elemental Bursts.\nWhen characters use an Elemental Skill or a Normal Attack, they will gain 1 Energy.",
+        "ja": "キャラが「元素爆発」を発動するには、チャージを消費する必要があります。\nキャラが「元素スキル」や「通常攻撃」を発動した後、チャージを1獲得できます。",
+        "ko": "캐릭터가 「원소폭발」을 사용하려면 원소 에너지를 소모해야 한다.\n캐릭터가 「원소전투 스킬」 또는 「일반 공격」을 사용하면 원소 에너지를 1pt 획득한다."
+      }
+    },
+    {
+      "code": 311,
+      "name": {
+        "zh": "秘传揭令",
+        "en": "Arcane Edict",
+        "ja": "秘伝勅令",
+        "ko": "비기 공개령"
+      },
+      "description": {
+        "zh": "在一场对局中，每位牌手只能使用一张「秘传」卡牌。\n只有在「秘传揭令」仍存在时，才能打出「秘传」卡牌。打出「秘传」卡牌后，会消耗掉当前对局的「秘传揭令」使用机会。",
+        "en": "Each player can only use 1 Arcane Legend card per match.\nAn Arcane Legend card can only be played should an Arcane Edict still be present. After an Arcane Legend card is played, the current match's Arcane Edict use will be consumed.",
+        "ja": "1回の対戦で、各プレイヤーは「秘伝」カードを1枚しか使用できません。\n「秘伝勅令」が存在する場合のみ、「秘伝」カードを使用できます。「秘伝」カードを使用すると、その対戦の「秘伝勅令」の使用チャンスが消費されます。",
+        "ko": "각 플레이어는 대전이 진행되는 동안 「비기」 카드를 한 장만 사용할 수 있다.\n「비기 공개령」이 존재할 때만 「비기」 카드를 사용할 수 있으며, 「비기」 카드 사용 후 해당 대전의 「비기 공개령」 사용 기회가 소모된다."
+      }
+    },
+    {
+      "code": 411,
+      "name": {
+        "zh": "万能元素",
+        "en": "Omni Element",
+        "ja": "万能元素",
+        "ko": "만능 원소"
+      },
+      "description": {
+        "zh": "万能元素可以视为任何类型的元素，来支付各种费用。",
+        "en": "The Omni Element can be considered as any kind of element, and can be used to pay for costs of various kinds.",
+        "ja": "万能元素は任意タイプの元素と見なされ、コストの支払いに使えます。",
+        "ko": "만능 원소는 임의의 원소로 여겨지며 어떤 원소 타입에서든 사용할 수 있다."
+      }
+    },
+    {
+      "code": 501,
+      "name": {
+        "zh": "元素爆发",
+        "en": "Elemental Burst",
+        "ja": "元素爆発",
+        "ko": "원소폭발"
+      },
+      "description": {
+        "zh": "角色的充能达到上限时，可以消耗所有的充能，来使用威力强大的「元素爆发」。",
+        "en": "When the character's Energy is maxed out, you can consume that Energy to use a powerful Elemental Burst.",
+        "ja": "キャラのチャージが満タンになると、すべてのチャージを消費し、高威力の「元素爆発」を発動できます。",
+        "ko": "캐릭터의 원소 에너지가 가득 차면 모든 원소 에너지를 소모하여 강력한 위력의 「원소폭발」을 사용할 수 있다."
+      }
+    },
+    {
+      "code": 502,
+      "name": {
+        "zh": "被动技能",
+        "en": "Passive Skill",
+        "ja": "固有スキル",
+        "ko": "패시브 스킬"
+      },
+      "description": {
+        "zh": "这类技能会持续生效，无需主动使用。",
+        "en": "This Skill is constantly in effect and need not to be activated.",
+        "ja": "該当スキルは常に有効であり、発動させる必要はありません。",
+        "ko": "해당 스킬은 계속해서 적용되므로 직접 사용할 필요가 없다."
+      }
+    },
+    {
+      "code": 1001,
+      "name": {
+        "zh": "随机「丘丘人」召唤物",
+        "en": "Random Hilichurl Summon",
+        "ja": "ランダム召喚物「ヒルチャール」",
+        "ko": "랜덤 「츄츄족」 소환물"
+      },
+      "description": {
+        "zh": "可能出现的「丘丘人」召唤物共有4种：\n冰箭丘丘人：结束阶段造成1点冰元素伤害，可用次数2。\n水丘丘萨满：结束阶段造成1点水元素伤害，可用次数2。\n冲锋丘丘人：结束阶段造成1点火元素伤害，可用次数2。\n雷箭丘丘人：结束阶段造成1点雷元素伤害，可用次数2。",
+        "en": "There are 4 kinds of Hilichurl Summons in total:\nCryo Hilichurl Shooter: Deal 1 Cryo DMG at the End Phase. Usage(s): 2.\nHydro Samachurl: Deal 1 Hydro DMG at the End Phase. Usage(s): 2.\nHilichurl Berserker: Deal 1 Pyro DMG at the End Phase. Usage(s): 2.\nElectro Hilichurl Shooter: Deal 1 Electro DMG at the End Phase. Usage(s): 2.",
+        "ja": "出現可能な「ヒルチャール」召喚物は合計4種類あります。\nヒルチャール·氷矢：エンドフェーズで氷元素ダメージを1与える。使用可能回数2回。\nヒルチャールシャーマン·水：エンドフェーズで水元素ダメージを1与える。使用回数2回。\nヒルチャール·突進：エンドフェーズで炎元素ダメージを1与える。使用回数2回。\nヒルチャール·雷矢：エンドフェーズで雷元素ダメージを1与える。使用回数2回。",
+        "ko": "출현할 수 있는 「츄츄족」 소환물 총 4종:\n츄츄 얼음 궁수: 종료 단계에서 얼음 원소 피해를 1pt 준다. 사용 가능 횟수: 2회\n물 츄츄 샤먼: 종료 단계에서 물 원소 피해를 1pt 준다. 사용 가능 횟수: 2회\n츄츄 돌격병: 종료 단계에서 불 원소 피해를 1pt 준다. 사용 가능 횟수: 2회\n츄츄 번개 궁수: 종료 단계에서 번개 원소 피해를 1pt 준다. 사용 가능 횟수: 2회"
+      }
+    },
+    {
+      "code": 1002,
+      "name": {
+        "zh": "雷元素附魔",
+        "en": "Electro Infusion",
+        "ja": "雷元素付与",
+        "ko": "번개 원소 부여"
+      },
+      "description": {
+        "zh": "所附属角色造成的物理伤害变为雷元素伤害。\n持续回合：2",
+        "en": "When the character to which it is attached to deals Physical Damage, it will be turned into Electro DMG.\nDuration (Rounds): 2",
+        "ja": "付与されたキャラの与える物理ダメージが雷元素ダメージへと変わる。\n継続ラウンド数：2",
+        "ko": "부착 캐릭터가 입힌 물리 피해가 번개 원소 피해로 전환된다.\n지속 턴: 2"
+      }
+    },
+    {
+      "code": 1003,
+      "name": {
+        "zh": "鸣煌护持",
+        "en": "Crowfeather Cover",
+        "ja": "鳴煌護持",
+        "ko": "빛나는 깃털의 수호"
+      },
+      "description": {
+        "zh": "所附属角色元素战技和元素爆发造成的伤害+1。\n可用次数：2",
+        "en": "The character with this attached deals +1 Elemental Skill and Elemental Burst DMG.\nUsages: 2",
+        "ja": "付与されたキャラの元素スキルおよび元素爆発の与えるダメージ+1。\n使用可能回数：2",
+        "ko": "부착 캐릭터가 원소전투 스킬 및 원소폭발로 주는 피해+1pt\n사용 가능 횟수: 2"
+      }
+    },
+    {
+      "code": 1004,
+      "name": {
+        "zh": "愚人众伏兵",
+        "en": "Fatui Ambusher",
+        "ja": "ファデュイの伏兵",
+        "ko": "우인단 복병"
+      },
+      "description": {
+        "zh": "「愚人众伏兵」会在自身所在阵营的角色使用技能后触发效果，对自身所在阵营的出战角色造成伤害。（每回合1次）\n可能出现的「愚人众伏兵」共有4种：\n冰萤术士：触发时造成1点冰元素伤害，可用2次。\n藏镜仕女：触发时造成1点水元素伤害，可用2次。\n火铳游击兵：触发时造成1点火元素伤害，可用2次。\n雷锤前锋军：触发时造成1点雷元素伤害，可用2次。",
+        "en": "Fatui Ambushers will trigger their effects after characters on the side of the field they are at use Skills, and will deal DMG to the active character on that side of the field. (Once per Round)\nThere are 4 kinds of Fatui Ambushers in total:\nCryo Cicin Mage: Deals 1 Cryo DMG when triggered, 2 Usages.\nMirror Maiden: Deals 1 Hydro DMG when triggered, 2 Usages.\nPyroslinger Bracer: Deals 1 Pyro DMG when triggered, 2 Usages.\nElectrohammer Vanguard: Deals 1 Electro DMG when triggered, 2 Usages.",
+        "ja": "「ファデュイの伏兵」は自身のいるチームのキャラがスキルを発動した後に効果を発動し、自身のいるチームの出撃キャラにダメージを与える。（各ラウンドで1回のみ）\n出現可能な「ファデュイの伏兵」は合計4種類。\n氷蛍術師：発動すると氷元素ダメージを1与える。使用可能回数2回。\nミラーメイデン：発動すると水元素ダメージを1与える。使用可能回数2回。\n遊撃兵·炎銃：発動すると炎元素ダメージを1与える。使用可能回数2回。\n前鋒軍·雷ハンマー：発動すると雷元素ダメージを1与える。使用可能回数2回。",
+        "ko": "「우인단 복병」은 자신이 소속된 진영의 캐릭터 카드가 스킬을 사용하면 발동해, 소속 진영 출전 캐릭터에게 피해를 준다. (턴당 1회)\n등장할 수 있는 「우인단 복병」은 총 4가지다:\n얼음 치친 술사: 발동 시 얼음 원소 피해를 1pt 준다. (2회 사용 가능)\n거울의 여인: 발동 시 물 원소 피해를 1pt 준다. (2회 사용 가능)\n화승총 유격대: 발동 시 불 원소 피해를 1pt 준다. (2회 사용 가능)\n번개 해머 돌격대: 발동 시 번개 원소 피해를 1pt 준다. (2회 사용 가능)"
+      }
+    },
+    {
+      "code": 1005,
+      "name": {
+        "zh": "断流",
+        "en": "Riptide",
+        "ja": "断流",
+        "ko": "단류"
+      },
+      "description": {
+        "zh": "所附属角色被击倒后：对所在阵营的出战角色附属「断流」。\n（处于「近战状态」的达达利亚攻击所附属角色时，会造成额外伤害。）",
+        "en": "When the character to which this is attached is defeated: Apply Riptide to active character.\nWhen Tartaglia is in Melee Stance, he will deal additional DMG when attacking the character to which this is attached.",
+        "ja": "付与されたキャラが倒された後、そのチームの出撃キャラに「断流」を付与する。\n（「近接モード」にあるタルタリヤが付与されたキャラを攻撃する時、追加ダメージを与える。）",
+        "ko": "부착 캐릭터가 처치된 후: 소속 진영의 출전 캐릭터에게 「단류」를 부착한다.\n(「근접 상태」의 타르탈리아가 부착 캐릭터를 공격하면 추가 피해를 줄 수 있다)"
+      }
+    },
+    {
+      "code": 1006,
+      "name": {
+        "zh": "渊火加护",
+        "en": "Aegis of Abyssal Flame",
+        "ja": "淵炎の加護",
+        "ko": "심연 불꽃의 가호"
+      },
+      "description": {
+        "zh": "为所附属角色提供2点护盾。\n此护盾耗尽后：对所有敌方角色造成1点穿透伤害。",
+        "en": "Provide 2 Shield points to the character to which this card is attached.\nAfter said Shield points are depleted: Deal 1 Piercing DMG to all opposing characters.",
+        "ja": "付与されたキャラはシールドを2獲得する。\n該当シールドが尽きた後、相手のキャラ全員に貫通ダメージを1与える。",
+        "ko": "부착 캐릭터에게  보호막을 2pt 제공한다.\n해당  보호막 소진 후: 모든 적 캐릭터에게 관통 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 1007,
+      "name": {
+        "zh": "乱神之怪力",
+        "en": "Superlative Superstrength",
+        "ja": "乱神の怪力",
+        "ko": "난신의 괴력"
+      },
+      "description": {
+        "zh": "所附属角色进行重击时：造成的伤害+1。如果可用次数至少为2，则少花费1个无色元素。\n可用次数：1（可叠加，最多叠加到3次）",
+        "en": "When the character to which this is attached uses a Charged Attack: Deal +1 DMG. If the Usages are no less than 2, then costs 1 less Unaligned Element.\nUsage(s): 1 (Can stack. Max 3 stacks.)",
+        "ja": "付与されたキャラが重撃を行う時、与えるダメージ+1。使用可能回数が2以上の場合、必要な無色元素-1。\n使用可能回数：1（最大3まで重ねられる）",
+        "ko": "부착 캐릭터가 강공격 시: 주는 피해+1pt. 만약 사용 가능 횟수가 2 이상일 경우 소모하는 무색 원소가 1개 감소한다.\n사용 가능 횟수: 1 (중첩 가능, 최대 중첩수: 3회)"
+      }
+    },
+    {
+      "code": 1008,
+      "name": {
+        "zh": "藏蕴花矢",
+        "en": "Clusterbloom Arrow",
+        "ja": "蔵蘊の花矢",
+        "ko": "꽃을 품은 화살"
+      },
+      "description": {
+        "zh": "结束阶段：造成1点草元素伤害。\n可用次数：1（可叠加，最多叠加到2次）",
+        "en": "End Phase: Deal 1 Dendro DMG.\nUsage(s): 1 (Can stack. Max 2 stacks.)",
+        "ja": "エンドフェーズ：草元素ダメージを1与える。\n使用可能回数：1（最大2まで重ねられる）",
+        "ko": "종료 단계: 풀 원소 피해를 1pt 준다.\n사용 가능 횟수: 1 (중첩 가능, 최대 중첩수: 2회)"
+      }
+    },
+    {
+      "code": 1009,
+      "name": {
+        "zh": "血梅香",
+        "en": "Blood Blossom",
+        "ja": "血梅香",
+        "ko": "혈매향"
+      },
+      "description": {
+        "zh": "结束阶段：对所附属角色造成1点火元素伤害。\n可用次数：1",
+        "en": "End Phase: Deal 1 Pyro DMG to the character to which this is attached.\nUsage(s):1",
+        "ja": "エンドフェーズ：付与されたキャラに炎元素ダメージを1与える。\n使用可能回数：1",
+        "ko": "종료 단계: 부착 캐릭터에게 불 원소 피해를 1pt 준다.\n사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1010,
+      "name": {
+        "zh": "丹火印",
+        "en": "Scarlet Seal",
+        "ja": "丹火の印",
+        "ko": "단화인"
+      },
+      "description": {
+        "zh": "角色进行重击时：造成的伤害+2。\n可用次数：1（可叠加，最多叠加到2次）",
+        "en": "When the character uses a Charged Attack: DMG dealt +2.\nUsage(s): 1 (Can stack. Max 2 stacks.)",
+        "ja": "キャラが重撃を行う時、与えるダメージ+2。\n使用可能回数：1（最大2まで重ねられる）",
+        "ko": "캐릭터가 강공격 발동 시: 주는 피해+2pt\n사용 가능 횟수: 1(중첩 가능, 최대 중첩수: 2회)"
+      }
+    },
+    {
+      "code": 1011,
+      "name": {
+        "zh": "丰穰之核",
+        "en": "Bountiful Core",
+        "ja": "豊穣の核",
+        "ko": "풍요의 핵"
+      },
+      "description": {
+        "zh": "结束阶段：造成2点草元素伤害。\n可用次数：1（可叠加，最多叠加到3次）\n我方宣布结束时：如果此牌的可用次数至少为2，则造成2点草元素伤害。（需消耗可用次数）",
+        "en": "End Phase: Deal 2 Dendro DMG.\nUsage(s): 1 (Can stack, max 3 stacks)\nWhen you declare the end of your Round: If this summon has at least 2 Usages remaining, deal 2 Dendro DMG. (Consumes Usages)",
+        "ja": "エンドフェーズ：草元素ダメージを2与える。\n使用可能回数：1（最大3まで重ねられる）\n味方がラウンド終了宣言をする時、このカードの使用可能回数が2以上の場合、草元素ダメージを2与える。（使用可能回数の消費が必要）",
+        "ko": "종료 단계: 풀 원소 피해를 2pt 준다.\n사용 가능 횟수: 1(중첩 가능, 최대 중첩수: 3회)\n아군이 종료 선언 시: 해당 카드의 사용 가능 횟수가 2회 이상이면 풀 원소 피해를 2pt 준다. (사용 가능 횟수 소모 필요)"
+      }
+    },
+    {
+      "code": 1012,
+      "name": {
+        "zh": "汲取对应元素的力量",
+        "en": "Elemental Absorption",
+        "ja": "対応元素の力を吸収する",
+        "ko": "해당 원소의 힘을 흡수"
+      },
+      "description": {
+        "zh": "若陀龙王可以汲取冰/水/火/雷元素的力量。（同时只能汲取其中一种）\n若陀龙王已汲取上述元素的力量时：根据所汲取的元素类型，获得技能霜刺破袭/洪流重斥/炽焰重斥/霆雷破袭。",
+        "en": "Azhdaha can absorb the power of Cryo/Hydro/Pyro/Electro. (Only 1 can be absorbed at any one time)\nWhen Azhdaha has absorbed any of the above Elements: Based on the type of Element that was absorbed, gain the skills Frostspike Wave/Torrential Rebuke/Blazing Rebuke/Thunderstorm Wave.",
+        "ja": "若陀龍王は、氷/水/炎/雷元素の力を吸収することができる。（同時に1つの元素のみ吸収可能）\n若陀龍王が上記元素の力を吸収した時、吸収した元素のタイプに応じて、スキル氷棘の強襲/激流の掃討/熾焔の掃討/雷霆の強襲を獲得する。",
+        "ko": "야타용왕은 얼음/물/불/번개 원소의 힘을 흡수할 수 있다. (동시에 한 가지만 흡수 가능)\n야타용왕이 상술한 원소의 힘을 흡수했을 시: 흡수한 원소 타입에 따라 다음 스킬을 획득한다: 서리 습격/격류 범람/화염 잠식/벼락 습격"
+      }
+    },
+    {
+      "code": 1013,
+      "name": {
+        "zh": "「焚尽的炽炎魔女」",
+        "en": "Crimson Witch of Embers",
+        "ja": "「焚尽の灼炎魔女」",
+        "ko": "「사그라든 화염의 마녀」"
+      },
+      "description": {
+        "zh": "「女士」可以永久地转换为「焚尽的炽炎魔女」形态。\n转换后，「女士」的元素类型会从冰元素转换为火元素。\n转换后，此角色可以使用「焚尽的炽炎魔女」的技能，但是不再能使用「女士」原本的技能。",
+        "en": "La Signora can permanently change into the \"Crimson Witch of Embers\" state.\nAfter changing, La Signora's Elemental Type changes from Cryo to Pyro.\nAfter changing, this character can use the skills of the Crimson Witch of Embers, but can no longer use La Signora's original skills.",
+        "ja": "「淑女」は「焚尽の灼炎魔女」状態に永久的に切り替わることができる。\n切り替わった後、「淑女」の元素タイプは氷元素から炎元素へと変わる。\n切り替わった後、本キャラは「焚尽の灼炎魔女」のスキルを発動できるが、「淑女」の元のスキルは発動できなくなる。",
+        "ko": "「시뇨라」는 영구적으로 「사그라든 화염의 마녀」 형태로 전환될 수 있다.\n전환 후 「시뇨라」의 원소 타입은 얼음 원소에서 불 원소로 전환된다.\n전환 후 이 캐릭터는 「사그라든 화염의 마녀」의 스킬을 사용할 수 있으며 기존 「시뇨라」의 스킬은 사용할 수 없다."
+      }
+    },
+    {
+      "code": 1014,
+      "name": {
+        "zh": "「失能形态」",
+        "en": "Deactivated",
+        "ja": "「無力化状態」",
+        "ko": "「에너지 상실 형태」"
+      },
+      "description": {
+        "zh": "具有「能源特征：荒性」或「能源特征：芒性」的「发条机关」在受到具有相反性质「始基力」的伤害后，会发生荒芒湮灭效应，并转换为「失能形态」。\n「发条机关」处于「失能形态」时无法使用原本的技能，只能使用「失能形态」的技能。「失能形态」下的技能不会造成元素伤害，只能造成物理伤害。",
+        "en": "When clockwork meka that have either Arkhe: Ousia or Arkhe: Pneuma receive DMG aligned with the opposite Arkhe, a pneuma-ousia annihilation reaction will occur, and they will become Deactivated.\nDeactivated clockwork meka will not be able to use their original abilities, and can only use Deactivated abilities. Deactivated abilities cannot deal Elemental DMG, and can only deal Physical DMG.",
+        "ja": "「エネルギー特徴：ウーシア」、または「エネルギー特徴：プネウマ」を持つ「クロックワーク·マシナリー」は、逆の性質を持つ攻撃を受けると、プネウムシア対消滅が起こり、「無力化状態」にチェンジする。\n「クロックワーク·マシナリー」が「無力化状態」にある場合、元のスキルは使用できなくなり、「無力化状態」のスキルのみ使用可能になる。「無力化状態」のスキルは元素ダメージを与えられず、物理ダメージのみ与える。",
+        "ko": "「에너지원 특징: 우시아」 또는 「에너지원 특징: 프뉴마」를 가진 「태엽 장치」가 반대되는 성질을 가진 「아르케의 힘」의 피해를 받은 후, 프뉴무시아 소멸 효과가 발생하고 「에너지 상실 형태」로 전환된다.\n「태엽 장치」가 「에너지 상실 형태」가 되면 기존 스킬을 사용할 수 없으며 「에너지 상실 형태」의 스킬만 사용할 수 있다. 「에너지 상실 형태」의 스킬은 원소 피해를 줄 수 없고 물리 피해만 준다."
+      }
+    },
+    {
+      "code": 1015,
+      "name": {
+        "zh": "荒芒湮灭效应",
+        "en": "Pneuma-Ousia Annihilation Reaction",
+        "ja": "プネウムシア対消滅",
+        "ko": "프뉴무시아 소멸 효과"
+      },
+      "description": {
+        "zh": "具有「荒性」的角色在受到具有「始基力：芒性」的伤害后，或具有「芒性」的角色在受到具有「始基力：荒性」的伤害后，将会发生荒芒湮灭效应。\n不同的卡牌在发生荒芒湮灭效应后，可能会触发不同的效果。",
+        "en": "After an Ousia-aligned character takes Arkhe: Pneuma-aligned DMG, or after Pneuma-aligned characters take Arkhe: Ousia-aligned DMG, a Pneuma-Ousia Annihilation Reaction will occur.\nPneuma-Ousia Annihilation reactions will have different effects on different types of cards.",
+        "ja": "「ウーシア」を持つキャラが「アルケー：プネウマ」を帯びたダメージを受けた後、または「プネウマ」を持つキャラが「アルケー：ウーシア」を帯びたダメージを受けた後、プネウムシア対消滅が発生する。\nカードによって、プネウムシア対消滅が発生した際に異なる効果が発動することがある。",
+        "ko": "「우시아」를 가진 캐릭터가 「아르케의 힘: 프뉴마」를 가진 피해를 받거나 혹은 「프뉴마」를 가진 캐릭터가 「아르케의 힘: 우시아」를 가진 피해를 받은 후, 프뉴무시아 소멸 효과가 발생한다.\n각기 다른 카드에 프뉴무시아 소멸 효과가 발생하면 서로 다른 효과가 발생할 수 있다."
+      }
+    },
+    {
+      "code": 1016,
+      "name": {
+        "zh": "严寒",
+        "en": "Sheer Cold",
+        "ja": "極寒",
+        "ko": "혹한"
+      },
+      "description": {
+        "zh": "结束阶段：对附属角色造成1点冰元素伤害。\n可用次数：1（所附属角色被附属炽热时，移除此效果。）",
+        "en": "End Phase: Deal 1 Cryo DMG to the character to which this is attached.\nUsage(s):1 (When the character with this attached has Blazing Heat attached to them, remove this effect.)",
+        "ja": "エンドフェーズ：付与されたキャラに氷元素ダメージを1与える。\n使用可能回数：1（付与されたキャラが灼熱を付与された時、この効果を解除する。）",
+        "ko": "종료 단계: 부착 캐릭터에게 얼음 원소 피해를 1pt 준다.\n사용 가능 횟수: 1(부착 캐릭터에게 작열이 부착될 시, 해당 효과는 제거된다)"
+      }
+    },
+    {
+      "code": 1017,
+      "name": {
+        "zh": "炽热",
+        "en": "Blazing Heat",
+        "ja": "灼熱",
+        "ko": "작열"
+      },
+      "description": {
+        "zh": "结束阶段：对所附属角色造成1点火元素伤害。\n可用次数：1（所附属角色被附属严寒时，移除此效果。）",
+        "en": "End Phase: Deal 1 Pyro DMG to the character to which this is attached.\nUsage(s):1 (When the character with this attached has Sheer Cold attached to them, remove this effect.)",
+        "ja": "エンドフェーズ：付与されたキャラに炎元素ダメージを1与える。\n使用可能回数：1（付与されたキャラが極寒を付与された時、この効果を解除する。）",
+        "ko": "종료 단계: 부착 캐릭터에게 불 원소 피해를 1pt 준다.\n사용 가능 횟수: 1(부착 캐릭터에게 혹한이 부착될 시, 해당 효과는 제거된다)"
+      }
+    },
+    {
+      "code": 1018,
+      "name": {
+        "zh": "烈烧佑命护盾",
+        "en": "Blazing Barrier",
+        "ja": "烈炎侍立シールド",
+        "ko": "타오르는 우명의 방패"
+      },
+      "description": {
+        "zh": "为我方出战角色提供1点护盾。（可叠加，最多叠加到3点）",
+        "en": "Grants 1 Shield point to your active character. (Can stack. Max 3 points.)",
+        "ja": "味方の出撃キャラはシールドを1獲得する。（最大3まで重ねられる）",
+        "ko": "아군 출전 캐릭터에게 보호막을 1pt 제공한다. (중첩 가능, 최대 3pt)"
+      }
+    },
+    {
+      "code": 1019,
+      "name": {
+        "zh": "咕噜水泡",
+        "en": "Gurgling Bubble",
+        "ja": "グルバブル",
+        "ko": "꾸륵 물방울"
+      },
+      "description": {
+        "zh": "角色无法使用技能。（持续到回合结束）",
+        "en": "Character cannot use Skills. (Lasts until the end of this Round)",
+        "ja": "キャラはスキルを発動できなくなる。（ラウンド終了まで続く）",
+        "ko": "캐릭터 스킬 사용 불가 (턴 종료까지 지속)"
+      }
+    },
+    {
+      "code": 1020,
+      "name": {
+        "zh": "衡平推裁",
+        "en": "Equitable Judgment",
+        "ja": "衡平な裁量",
+        "ko": "공정한 판결"
+      },
+      "description": {
+        "zh": "普通攻击\n（需准备1个行动轮）\n造成2点水元素伤害，如果本角色生命值至少为6，则此伤害+1并对自身造成1点穿透伤害。",
+        "en": "Normal Attack\n(Prepare for 1 turn)\nDeals 2 Hydro DMG. If this character has at least 6 HP, then this DMG is increased by 1 and this character deals 1 Piercing DMG to self.",
+        "ja": "通常攻撃\n（1ターンの準備が必要）\n水元素ダメージを2与える。本キャラのHPが6以上の場合、このダメージ+1、かつ自身に貫通ダメージを1与える。",
+        "ko": "일반 공격\n(1차례 행동 준비 필요)\n물 원소 피해를 2pt 준다. 만약 본 캐릭터의 HP가 6pt 이상일 경우, 1pt의 피해를 더 주고, 자신에게 관통 피해를 1pt 준다."
+      }
+    },
+    {
+      "code": 1021,
+      "name": {
+        "zh": "愤怒的太郎丸",
+        "en": "Taroumaru Enraged",
+        "ja": "怒った太郎丸",
+        "ko": "분노한 타로마루"
+      },
+      "description": {
+        "zh": "结束阶段：造成2点物理伤害。\n可用次数：2",
+        "en": "End Phase: Deal 2 Physical DMG.\nUsages: 2",
+        "ja": "エンドフェーズ：物理ダメージを2与える。\n使用可能回数：2",
+        "ko": "종료 단계: 물리 피해를 2pt 준다.\n사용 가능 횟수: 2"
+      }
+    },
+    {
+      "code": 1022,
+      "name": {
+        "zh": "暗流的诅咒",
+        "en": "Curse of the Undercurrent",
+        "ja": "暗流の呪い",
+        "ko": "암류의 저주"
+      },
+      "description": {
+        "zh": "所在阵营的角色使用元素战技或元素爆发时：需要多花费1个元素骰。\n可用次数：2",
+        "en": "When character(s) on this side of the playing field use Elemental Skills or Elemental Bursts: They must spend 1 extra Elemental Die.\nUsages: 2",
+        "ja": "チームのキャラが元素スキル、または元素爆発を発動する時、必要な元素サイコロの数+1。\n使用可能回数：2",
+        "ko": "소속 진영의 캐릭터가 원소전투 스킬 또는 원소폭발 사용 시: 원소 주사위 1개를 추가로 소모한다.\n사용 가능 횟수: 2"
+      }
+    },
+    {
+      "code": 1023,
+      "name": {
+        "zh": "重甲蟹壳",
+        "en": "Armored Crab Carapace",
+        "ja": "重甲ヤドカニの殻",
+        "ko": "중갑 게딱지"
+      },
+      "description": {
+        "zh": "每层提供1点护盾，保护所附属角色。",
+        "en": "Each stack provides 1 Shield to protect the equipped character.",
+        "ja": "1層につきシールドを1提供し、付与されたキャラを守る。",
+        "ko": "스택마다 보호막을 1pt 제공해 부착 캐릭터를 보호한다."
+      }
+    },
+    {
+      "code": 1024,
+      "name": {
+        "zh": "风压坍陷",
+        "en": "Pressurized Collapse",
+        "ja": "風圧崩潰",
+        "ko": "풍압의 붕괴"
+      },
+      "description": {
+        "zh": "结束阶段：将所附属角色切换为「出战角色」。\n可用次数：1\n（同一方场上最多存在一个此状态）",
+        "en": "End Phase: Switch the character to which this is attached to be the Active Character.\nUsage(s): 1\n(Only 1 such effect can be on the same side of the playing field)",
+        "ja": "エンドフェーズ：付与されたキャラを「出撃キャラ」にチェンジする。\n使用可能回数：1\n（この状態は同一チーム内で重複不可）",
+        "ko": "종료 단계: 부착 캐릭터를 「출전 캐릭터」로 교체한다.\n사용 가능 횟수: 1\n(해당 상태는 한쪽 필드에 하나만 존재할 수 있다)"
+      }
+    },
+    {
+      "code": 1025,
+      "name": {
+        "zh": "悠远雷暴",
+        "en": "Distant Storm",
+        "ja": "悠遠なる雷暴",
+        "ko": "아득한 뇌폭"
+      },
+      "description": {
+        "zh": "结束阶段：对所附属角色造成2点穿透伤害。\n可用次数：1",
+        "en": "End Phase: Deal 2 Piercing DMG to the character to which this is attached.\nUsage(s):1",
+        "ja": "エンドフェーズ：付与されたキャラに貫通ダメージを2与える。\n使用可能回数：1",
+        "ko": "종료 단계: 부착 캐릭터에게 관통 피해를 2pt 준다.\n사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1027,
+      "name": {
+        "zh": "星辰之躯",
+        "en": "Starry Semblance",
+        "ja": "星々を秘めた体",
+        "ko": "별의 몸"
+      },
+      "description": {
+        "zh": "每层使吞星之鲸获得1点额外最大生命。",
+        "en": "The All-Devouring Narwhal gains 1 extra Max HP per stack.",
+        "ja": "1につき、呑星の鯨の最大HP+1。",
+        "ko": "스택당 별을 삼킨 고래가 최대 HP를 1pt 추가 획득한다."
+      }
+    },
+    {
+      "code": 1028,
+      "name": {
+        "zh": "沙与梦",
+        "en": "Sand and Dreams",
+        "ja": "砂と夢",
+        "ko": "모래와 꿈"
+      },
+      "description": {
+        "zh": "对角色打出「天赋」或角色使用技能时：少花费3个元素骰。\n可用次数：1",
+        "en": "When you play a Talent card or a Character uses a Skill: Spend 3 fewer Elemental Dice.\nUsages: 1",
+        "ja": "キャラに「天賦」を使用する時、またはキャラがスキルを発動する時、必要な元素サイコロの数-3。\n使用可能回数：1",
+        "ko": "캐릭터에게 「특성」 사용 또는 캐릭터가 스킬 사용 시: 원소 주사위 소모 개수-3\n사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1029,
+      "name": {
+        "zh": "狂欢值",
+        "en": "Revelry",
+        "ja": "テンション",
+        "ko": "열광도"
+      },
+      "description": {
+        "zh": "我方造成的伤害+1。（包括角色引发的扩散伤害）\n可用次数：1（可叠加，没有上限）",
+        "en": "Your side deals +1 DMG. (Including Swirl DMG triggered by Characters)\nUsages: 1 (Can stack. No stack limit)",
+        "ja": "味方の与えるダメージ+1。（キャラが引き起こした拡散ダメージを含む）\n使用可能回数：1（上限なく重ねられる）",
+        "ko": "아군이 주는 피해+1pt (캐릭터가 일으킨 확산 피해 포함)\n사용 가능 횟수: 1 (중첩 가능, 상한 없음)"
+      }
+    },
+    {
+      "code": 1030,
+      "name": {
+        "zh": "万众瞩目",
+        "en": "Center of Attention",
+        "ja": "万民のまなざし",
+        "ko": "만인의 주목"
+      },
+      "description": {
+        "zh": "角色进行普通攻击时：使角色造成的物理伤害变为水元素伤害。如果角色处于「荒」形态，则治疗我方所有后台角色1点；如果角色处于「芒」形态，则此伤害+2，但是对一位受伤最少的我方角色造成1点穿透伤害。\n可用次数：1",
+        "en": "When the character uses a Normal Attack: Physical DMG dealt by the character is converted to Hydro DMG. If the character is in the Ousia state, heal all of your characters on standby for 1 HP. If the character is in the Pneuma state, deal +2 DMG for this instance, but deal 1 Piercing DMG to your character who has taken the least DMG.\nUsage(s): 1",
+        "ja": "キャラが通常攻撃を行う時、キャラの与える物理ダメージが水元素ダメージへと変わる。キャラが「ウーシア」状態の場合、味方の待機キャラ全員のHPを1回復する。キャラが「プネウマ」状態の場合、このダメージ+2、ただしHPを最も失っていない味方のキャラに貫通ダメージを1与える。\n使用可能回数：1",
+        "ko": "캐릭터가 일반 공격 시: 캐릭터가 주는 물리 피해가 물 원소 피해로 바뀐다. 캐릭터가 「우시아」 형태인 경우 모든 아군 대기 캐릭터의 HP를 1pt 치유한다. 캐릭터가 「프뉴마」 형태인 경우 이번 피해가 2pt 증가하지만, 피해를 가장 적게 받은 아군 캐릭터 1명에게 관통 피해를 1pt 준다.\n사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1031,
+      "name": {
+        "zh": "沙龙成员",
+        "en": "Salon Members",
+        "ja": "サロンメンバー",
+        "ko": "살롱 멤버"
+      },
+      "description": {
+        "zh": "结束阶段：造成1点水元素伤害。如果我方存在生命值至少为6的角色，则对一位受伤最少的我方角色造成1点穿透伤害，然后再造成1点水元素伤害。\n可用次数：2（可叠加，最多叠加到4次）",
+        "en": "End Phase: Deal 1 Hydro DMG. If your side has characters with at least 6 HP, deal 1 Piercing DMG to your character who has taken the least DMG, and deal another 1 Hydro DMG.\nUsages: 2 (Can stack. Max 4 stacks)",
+        "ja": "エンドフェーズ：水元素ダメージを1与える。味方にHPが6以上のキャラが存在する場合、HPを最も失っていない味方キャラ1人に貫通ダメージを1与え、さらに水元素ダメージを1与える。\n使用可能回数：2（最大4つまで重ねられる）",
+        "ko": "종료 단계: 물 원소 피해를 1pt 준다. 아군에 HP가 6pt 이상인 캐릭터가 존재할 경우 피해를 가장 적게 받은 아군 캐릭터 1명에게 관통 피해를 1pt 주고, 물 원소 피해를 1pt 추가로 준다.\n사용 가능 횟수: 2(중첩 가능, 최대 중첩수: 4회)"
+      }
+    },
+    {
+      "code": 1032,
+      "name": {
+        "zh": "众水的歌者",
+        "en": "Singer of Many Waters",
+        "ja": "衆の水の歌い手",
+        "ko": "물들의 가수"
+      },
+      "description": {
+        "zh": "结束阶段：治疗所有我方角色1点。如果我方存在生命值不多于5的角色，则再治疗一位受伤最多的角色1点。\n可用次数：2（可叠加，最多叠加到4次）",
+        "en": "End Phase: Heal all your characters for 1 HP. If your side has characters with no more than 5 HP, heal the most injured character for an additional 1 HP.\nUsages: 2 (Can stack. Max 4 stacks)",
+        "ja": "エンドフェーズ：味方のチーム全員のHPを1回復する。味方にHPが5以下のキャラが存在する場合、さらに、HPを最も失っているキャラのHPを1回復する。\n使用可能回数：2（最大4つまで重ねられる）",
+        "ko": "종료 단계: 모든 아군 캐릭터를 1pt 치유한다. 아군에 HP가 5 이하인 캐릭터가 존재할 경우 피해를 가장 많이 받은 캐릭터의 HP를 1pt 치유한다.\n사용 가능 횟수: 2(중첩 가능, 최대 중첩수: 4회)"
+      }
+    },
+    {
+      "code": 1033,
+      "name": {
+        "zh": "迸发扫描",
+        "en": "Burst Scan",
+        "ja": "炸裂スキャン",
+        "ko": "폭발 스캔"
+      },
+      "description": {
+        "zh": "双方选择行动前：如果我方场上存在草原核或丰穰之核，则使其可用次数-1，并舍弃我方牌库顶的1张卡牌。然后，造成所舍弃卡牌的元素骰费用的草元素伤害。\n可用次数：1（可叠加，最多叠加到3次）",
+        "en": "Before either side chooses their action: If your side has Dendro Cores or Bountiful Cores, their Usages are decreased by 1, and Discard 1 card from the top of your deck. After this, deal Dendro DMG equal to the Elemental Dice Cost of the discarded card.\nUsages: 1 (Can stack. Max 3 stacks)",
+        "ja": "双方がアクションをする前に、味方のフィールドに草原核または豊穣の核が存在した場合、その使用可能回数-1。そして、味方山札の一番上のカードを1枚破棄する。その後、破棄したカードの元素サイコロのコスト分の草元素ダメージを与える。\n使用可能回数：1（最大3つまで重ねられる）",
+        "ko": "양측이 행동을 선택하기 전: 아군 필드에 풀 원핵 또는 풍요의 핵이 존재하는 경우 사용 가능 횟수가 1회 감소하고 아군 카드 더미 맨 위에서 카드를 1장 포기한다. 그 후 포기한 카드의 원소 주사위 코스트의 풀 원소 피해를 준다.\n사용 가능 횟수: 1(최대 중첩수: 3회)"
+      }
+    },
+    {
+      "code": 1034,
+      "name": {
+        "zh": "啃咬目标",
+        "en": "Bite Target",
+        "ja": "噛みつき",
+        "ko": "물어뜯기 목표"
+      },
+      "description": {
+        "zh": "受到玛拉妮或鲨鲨飞弹伤害时：移除此效果，每层使此伤害+2。\n（层数可叠加，没有上限）",
+        "en": "When receiving damage dealt by Mualani or Shark Missile: Remove this effect. For each stack, increase the damage by 2.\n(Stacks are accumulative, with no limit.)",
+        "ja": "ムアラニまたはサメサメロケットからダメージを受けた時、この効果を解除する。1層ごとにダメージ+2。\n（層数は上限なく重ねられる）",
+        "ko": "말라니 또는 샤크 폭탄의 피해를 받을 시: 해당 효과가 제거되며, 스택당 이번 피해+2pt\n(스택 중첩 가능, 상한 없음)"
+      }
+    },
+    {
+      "code": 1035,
+      "name": {
+        "zh": "「希穆兰卡」召唤物",
+        "en": "Simulanka Summon",
+        "ja": "「シムランカ」召喚物",
+        "ko": "「시뮬랑카」 소환물"
+      },
+      "description": {
+        "zh": "可能出现的「希穆兰卡」召唤物共有4种：\n积木小人：结束阶段造成1点物理伤害，可用次数2。\n折纸飞鼠：结束阶段获得1层高效切换，可用次数2。\n跳跳纸蛙：结束阶段抓1张牌，可用次数2。\n折纸胖胖鼠：结束阶段治疗受伤最多的我方角色2点，可用次数1。",
+        "en": "There are 4 kinds of Simulanka Summons in total:\nToy Guard: At the End Phase, deal 1 Physical DMG. Usage(s): 2.\nOrigami Flying Squirrel: At the End Phase, gain 1 stack of Efficient Switch. Usage(s): 2.\nPop-Up Paper Frog: At the End Phase, draw 1 card. Usage(s): 2.\nOrigami Hamster: At the End Phase, heal your character that has taken the most DMG for 2 HP. Usage(s): 1.",
+        "ja": "出現可能な「シムランカ」召喚物は合計4種類あります。\n積み木の小人：エンドフェーズで物理ダメージを1与える。使用可能回数2回。\n折り紙のモモンガ：エンドフェーズで効率的キャラチェンジを1層獲得する。使用可能回数2回。\n折り紙のカエル：エンドフェーズで手札を1枚引く。使用可能回数2回。\n折り紙のふとっちょネズミ：HPを最も失っている味方キャラのHPをエンドフェーズで2回復する。使用可能回数1回。",
+        "ko": "출현할 수 있는 「시뮬랑카」 소환물 총 4종:\n블록 인형: 종료 단계에서 물리 피해를 1pt 준다. 사용 가능 횟수: 2\n종이 날다람쥐: 종료 단계에서 고효율 교체 1스택 획득. 사용 가능 횟수: 2\n뛰는 개구리: 종료 단계에서 카드를 1장 드로우한다. 사용 가능 횟수: 2\n종이 뚱뚱쥐: 종료 단계에서 피해를 가장 많이 받은 아군 캐릭터의 HP를 2pt 치유한다. 사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1036,
+      "name": {
+        "zh": "聚风真眼",
+        "en": "Windmuster Iris",
+        "ja": "廻風真眼",
+        "ko": "선풍진안"
+      },
+      "description": {
+        "zh": "所在阵营选择行动前：对所附属角色造成1点对应元素伤害，可用次数1。",
+        "en": "Before the side of the field that this card is on chooses their action: Deal 1 corresponding type of Elemental DMG to the attached character. Usage(s): 1.",
+        "ja": "付与されたキャラのいるチームがアクションをする前、付与されたキャラに対応する元素ダメージを1与える。使用可能回数1回。",
+        "ko": "소속 진영이 행동하기 전: 부착 캐릭터에게 상응하는 원소 피해를 1pt 준다. 사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1037,
+      "name": {
+        "zh": "「希穆兰卡」卡牌",
+        "en": "Simulanka Card",
+        "ja": "「シムランカ」カード",
+        "ko": "「시뮬랑카」 카드"
+      },
+      "description": {
+        "zh": "「希穆兰卡」卡牌包括：墨色酒馆、星轨王城、森林的祝福、预言女神的礼物、「邪龙」的苏醒、旁白的注脚、「魔女M的祝福」、（test）恶龙的地点。",
+        "en": "Simulanka cards include: Calligraphy Tavern, Constellation Metropole, Forest Blessing, Gift of the Goddess of Prophecy, Fell Dragon's Awakening, Narration Footnotes, and \"A Blessing From 'M'\".",
+        "ja": "「シムランカ」カードにはインク酒場、オルビット城、森の祝福、預言の女神の贈り物、「悪龍」の目覚め、ナレーションの補足、「魔女Mからの祝福」が含まれる。",
+        "ko": "「시뮬랑카」에 포함되는 카드: 잉크빛 주점, 별길 왕성, 숲의 축복, 예언의 여신의 선물, 깨어난 「악룡」, 내레이션의 주석, 「마녀M의 축복」"
+      }
+    },
+    {
+      "code": 1038,
+      "name": {
+        "zh": "镇静标记",
+        "en": "Sedation Mark",
+        "ja": "鎮静マーク",
+        "ko": "진정 표식"
+      },
+      "description": {
+        "zh": "所在阵营选择行动前：对所附属角色造成2点对应元素伤害，可用次数1。",
+        "en": "Before the side of the field that this card is on chooses their action: Deal 2 DMG of the corresponding element to the attached character. Usage(s): 1.",
+        "ja": "付与されたキャラのいるチームがアクションをする前、付与されたキャラに対応する元素ダメージを2与える。使用可能回数1回。",
+        "ko": "소속 진영이 행동하기 전: 부착 캐릭터에게 상응하는 원소 피해를 2pt 준다. 사용 가능 횟수: 1"
+      }
+    },
+    {
+      "code": 1039,
+      "name": {
+        "zh": "闪烈降临·大火山崩落",
+        "en": "Guardian Vent: Volcano Kablam",
+        "ja": "シャイニングヴェント・大火山おろし",
+        "ko": "벼락불 강림·대화산 떨구기"
+      },
+      "description": {
+        "zh": "元素爆发\n（需准备1个行动轮）\n造成3点雷元素伤害，此技能视为下落攻击。",
+        "en": "Elemental Burst\n(Prepare for 1 turn)\nDeal 3 Electro DMG. This Skill is considered a Plunging Attack.",
+        "ja": "元素爆発\n（1ターンの準備が必要）\n雷元素ダメージを3与える。このスキルは落下攻撃と見なされる。",
+        "ko": "원소폭발\n(1차례 행동 준비 필요)\n번개 원소 피해를 3pt 준다. 해당 스킬은 낙하 공격으로 간주한다."
+      }
+    },
+    {
+      "code": 1040,
+      "name": {
+        "zh": "沉玉茶露",
+        "en": "Chenyu Brew",
+        "ja": "沈玉茶",
+        "ko": "침옥 차 이슬"
+      },
+      "description": {
+        "zh": "选择1个我方角色，我方下2次冒险或结束阶段时，治疗目标角色1点。",
+        "en": "Choose one of your characters. The next 2 times you Adventure, or during the End Phase, heal the target character for 1 HP.",
+        "ja": "味方のキャラを1体選択する。味方の次の2回の冒険、またはエンドフェーズ時、目標キャラのHPを1回復する。",
+        "ko": "아군 캐릭터를 1명 선택한다. 아군이 모험 또는 종료 단계 2회 시 대상 캐릭터의 HP를 1pt 치유한다."
+      }
+    },
+    {
+      "code": 1041,
+      "name": {
+        "zh": "高效切换",
+        "en": "Efficient Switch",
+        "ja": "効率的キャラチェンジ",
+        "ko": "고효율 교체"
+      },
+      "description": {
+        "zh": "我方下次执行「切换角色」行动时：少花费1个元素骰。（可叠加，没有上限）",
+        "en": "The next time you perform Switch Character: Spend 1 fewer Elemental Die. (Can stack, no stack limit)",
+        "ja": "味方が次にキャラチェンジを行う時、必要な元素サイコロの数-1。（上限なく重ねられる）",
+        "ko": "아군이 다음번에 「캐릭터 교체」 행동 진행 시: 원소 주사위 소모 개수-1 (중첩 가능, 상한 없음)"
+      }
+    },
+    {
+      "code": 1042,
+      "name": {
+        "zh": "敏捷切换",
+        "en": "Agile Switch",
+        "ja": "高速キャラチェンジ",
+        "ko": "민첩한 교체"
+      },
+      "description": {
+        "zh": "我方下次执行「切换角色」行动时：将此次切换视为「快速行动」而非「战斗行动」。（可叠加，没有上限）",
+        "en": "The next time you perform Switch Character: This switch will be considered a Fast Action instead of a Combat Action. (Can stack, no stack limit)",
+        "ja": "味方が次にキャラチェンジを行う時、それが「戦闘アクション」ではなく、「クイックアクション」とみなされる。（上限なく重ねられる）",
+        "ko": "아군이 다음번에 「캐릭터 교체」 행동 진행 시: 이번 교체를 「전투 행동」이 아닌 「빠른 행동」으로 간주한다. (중첩 가능, 상한 없음)"
+      }
+    },
+    {
+      "code": 1043,
+      "name": {
+        "zh": "踏云献瑞",
+        "en": "Charmed Cloudstrider",
+        "ja": "踏雲献瑞",
+        "ko": "태평 기원"
+      },
+      "description": {
+        "zh": "普通攻击\n造成2点火元素伤害，此技能视为下落攻击。",
+        "en": "Normal Attack\nDeal 2 Pyro DMG. This Skill is considered a Plunging Attack.",
+        "ja": "通常攻撃\n炎元素ダメージを2与える。このスキルは落下攻撃と見なされる。",
+        "ko": "일반 공격\n불 원소 피해를 2pt 준다. 해당 스킬은 낙하 공격으로 간주한다."
+      }
+    },
+    {
+      "code": 1044,
+      "name": {
+        "zh": "极恶技·尽",
+        "en": "Havoc: Extinction",
+        "ja": "極悪技・尽",
+        "ko": "극악기·진"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 1045,
+      "name": {
+        "zh": "诸武相授",
+        "en": "Mutual Weapons Mentorship",
+        "ja": "武芸伝授",
+        "ko": "무예 전수"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 1046,
+      "name": {
+        "zh": "七相一闪",
+        "en": "Seven-Phase Flash",
+        "ja": "七相一閃",
+        "ko": "일곱빛 섬광"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 1047,
+      "name": {
+        "zh": "虚境裂隙",
+        "en": "Void Rift",
+        "ja": "虚境の裂け目",
+        "ko": "허계 균열"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 1048,
+      "name": {
+        "zh": "战斗计划",
+        "en": "Battle Plan",
+        "ja": "戦闘計画",
+        "ko": "전투 계획"
+      },
+      "description": {
+        "zh": "所附属角色下次使用技能少花费1个元素骰。",
+        "en": "The character to which this is attached uses 1 fewer Elemental Die when using their Skill next time.",
+        "ja": "付与されたキャラが次にスキルを発動する時、必要な元素サイコロの数-1。",
+        "ko": "부착 캐릭터가 다음번에 스킬 사용 시 원소 주사위 소모 개수-1"
+      }
+    },
+    {
+      "code": 1049,
+      "name": {
+        "zh": "回天的圣主",
+        "en": "Tide-Turning Sacred Lord",
+        "ja": "回天の聖主",
+        "ko": "흐름을 바꾼 신성한 주인"
+      },
+      "description": {
+        "zh": "结束阶段：造成2点穿透伤害。\n此卡牌被弃置时，对场上生命值最高的一名角色造成3点穿透伤害。\n可用次数：3",
+        "en": "End Phase: Deal 2 Piercing DMG.\nWhen this card is discarded, deal 3 Piercing DMG to the character with the highest HP on the field.\nUsage(s): 3",
+        "ja": "エンドフェーズ：貫通ダメージを2与える。\nこのカードが破棄された時、フィールド上でHPが最も高いキャラ1名に貫通ダメージを3与える。\n使用可能回数：3",
+        "ko": "종료 단계: 관통 피해를 2pt 준다.\n이 카드를 버릴 시, 필드 위 HP가 가장 높은 캐릭터에게 관통 피해를 3pt 준다.\n사용 가능 횟수: 3"
+      }
+    },
+    {
+      "code": 1050,
+      "name": {
+        "zh": "投资计划",
+        "en": "Investment Plan",
+        "ja": "投資計画",
+        "ko": "투자 계획"
+      },
+      "description": {
+        "zh": "投资计划包括：\n对我方出战角色造成1点穿透伤害，执行1个「治疗」效果相关的计划。\n丢弃1张随机手牌，执行1个「抓牌」效果相关的计划。\n移除我方1个元素骰，执行1个「元素骰」效果相关的计划。",
+        "en": "Investment Plan includes:\nDeal 1 Piercing DMG to your active character, execute 1 plan related to Healing effect.\nDiscard 1 random card from your Hand, execute 1 plan related to Draw effect.\nRemove 1 of your Elemental Dice, execute 1 plan related to Elemental Dice effect.",
+        "ja": "投資計画には下記の内容が含まれる。\n味方の出撃キャラに貫通ダメージを1与え、「治療」効果に関連する計画を1つ実行する。\n手札をランダムに1枚破棄し、「ドロー」効果に関連する計画を1つ実行する。\n味方の元素サイコロを1個取り除き、「元素サイコロ」効果に関連する計画を1つ実行する。",
+        "ko": "투자 계획에 포함된 계획:\n아군 출전 캐릭터에게 관통 피해를 1pt 주고 「치유」 효과 관련 계획을 1개 실행한다.\n랜덤한 핸드 카드 1장을 버리고 「카드 드로우」 효과 관련 계획을 1개 실행한다.\n아군의 원소 주사위 1개를 제거하고 「원소 주사위」 효과 관련 계획을 1개 실행한다."
+      }
+    },
+    {
+      "code": 1051,
+      "name": {
+        "zh": "雷霆交响",
+        "en": "Thunderous Symphony",
+        "ja": "雷霆のシンフォニー",
+        "ko": "낙뢰 교향곡"
+      },
+      "description": {
+        "zh": "元素爆发\n（需准备1个行动轮）\n造成2点雷元素伤害，如果我方场上存在雷暴云，则造成的伤害额外+2。",
+        "en": "Elemental Burst\n(Prepare for 1 turn)\nDeal 2 Electro DMG. If a Thundercloud is on your side of the field, deal +2 DMG.",
+        "ja": "元素爆発\n（1ターンの準備が必要）\n雷元素ダメージを2与える。味方のフィールドに雷雲が存在する場合、与えるダメージ+2。",
+        "ko": "원소폭발\n(1차례 행동 준비 필요)\n번개 원소 피해를 2pt 준다. 아군 필드에 번개구름이 있을 경우 주는 피해가 추가로 2pt 증가한다."
+      }
+    },
+    {
+      "code": 1052,
+      "name": {
+        "zh": "幻戏",
+        "en": "Phantasm Performance",
+        "ja": "幻の戯",
+        "ko": "환영극"
+      },
+      "description": {
+        "zh": "普通攻击\n造成4点草元素伤害。\n使用此技能不会获得充能。",
+        "en": "Normal Attack\nDeal 4 Dendro DMG.\nUsing this skill will not grant Energy.",
+        "ja": "通常攻撃\n草元素ダメージを4与える。\nこのスキルを使用してもチャージはできない。",
+        "ko": "일반 공격\n풀 원소 피해를 4pt 준다.\n해당 스킬 사용 시 원소 에너지를 획득하지 않는다."
+      }
+    },
+    {
+      "code": 1053,
+      "name": {
+        "zh": "诳言之核",
+        "en": "Seeds of Deceit",
+        "ja": "虚言の核",
+        "ko": "기만의 핵"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 2001,
+      "name": {
+        "zh": "太郎丸的存款",
+        "en": "Taroumaru's Savings",
+        "ja": "太郎丸の貯金",
+        "ko": "타로마루의 저금"
+      },
+      "description": {
+        "zh": "费用：0\n生成1个万能元素。",
+        "en": "Cost: 0\nCreate 1 Omni Die.",
+        "ja": "コスト：0\n万能元素を1個生成する。",
+        "ko": "코스트: 0\n만능 원소를 1개 생성한다."
+      }
+    },
+    {
+      "code": 2002,
+      "name": {
+        "zh": "「清洁工作」",
+        "en": "\"Called In For Cleanup\"",
+        "ja": "「清掃作業」",
+        "ko": "「청소 작업」"
+      },
+      "description": {
+        "zh": "费用：0\n我方出战角色下次造成的伤害+1。（可叠加，最多叠加到+2）",
+        "en": "Cost: 0\nYour active character will deal +1 DMG the next time they deal DMG. (Can stack. Max +2)",
+        "ja": "コスト：0\n味方の出撃キャラが次に与えるダメージ+1。（最大+2まで重ねられる）",
+        "ko": "코스트: 0\n아군 출전 캐릭터가 다음번에 주는 피해+1pt (중첩 가능, 최대 중첩수: +2)"
+      }
+    },
+    {
+      "code": 2003,
+      "name": {
+        "zh": "海底宝藏",
+        "en": "Undersea Treasure",
+        "ja": "海底の宝物",
+        "ko": "해저 보물"
+      },
+      "description": {
+        "zh": "费用：0\n生成1个随机基础元素骰，治疗我方出战角色1点。（每个角色每回合最多受到1次来自本效果的治疗）",
+        "en": "Cost: 0\nCreate 1 random Basic Elemental Die and heal your active character for 1 HP. (Each character can receive healing from this effect once per Round)",
+        "ja": "コスト：0\nランダムで基本元素サイコロを1個生成し、味方の出撃キャラのHPを1回復する。（各キャラは各ラウンドでこの効果による治療を1回のみ受けられる）",
+        "ko": "코스트: 0\n랜덤으로 일반 원소 주사위 1개를 생성해 아군 출전 캐릭터의 HP를 1pt 치유한다. (캐릭터마다 해당 치유 효과를 턴당 최대 1회 받을 수 있다)"
+      }
+    },
+    {
+      "code": 2004,
+      "name": {
+        "zh": "禁忌知识",
+        "en": "Forbidden Knowledge",
+        "ja": "禁忌の知識",
+        "ko": "금단의 지식"
+      },
+      "description": {
+        "zh": "费用：0\n无法使用此牌进行元素调和，且每回合最多只能打出1张「禁忌知识」。\n对我方出战角色造成1点穿透伤害，抓1张牌。",
+        "en": "Cost: 0\nCannot use this card in Elemental Tuning, and only one copy of \"Forbidden Knowledge\" can be played each round.\nDeal 1 Piercing DMG to your active character and draw 1 card.",
+        "ja": "コスト：0\nこのカードは元素調和に使用できない。「禁忌の知識」は各ラウンドで1枚のみ使用可能。\n味方の出撃キャラに貫通ダメージを1与え、手札を1枚引く。",
+        "ko": "코스트: 0\n이 카드는 원소 조정에 사용할 수 없으며, 턴당 「금단의 지식」은 최대 1장만 사용할 수 있다.\n아군 출전 캐릭터에게 관통 피해를 1pt 주고 카드를 1장 드로우한다."
+      }
+    },
+    {
+      "code": 3001,
+      "name": {
+        "zh": "月感电",
+        "en": "Lunar-Charged",
+        "ja": "月感電",
+        "ko": "달 감전"
+      },
+      "description": {
+        "zh": "生成回合结束时造成2点雷元素伤害的[雷暴云]。（可用次数1，可叠加，没有上限）\n[雷暴云]入场或可用次数增加时，赋予敌方随机1张手牌[电击]。",
+        "en": "Creates a [Thundercloud] that deals 2 Electro DMG at the end of the Round. (Usage: 1. Can stack, no stack limit.)\nWhen the [Thundercloud] is created or when its usages increase, apply [Electric Shock] to a random card in your opponent's Hand.",
+        "ja": "ラウンド終了時、雷元素ダメージを2与える「雷雲」を生成する。（使用可能回数1回、上限なく重ねられる）\n「雷雲」の登場時または使用可能回数が増えた時、相手のランダムな手札1枚に「電撃」を付与する。",
+        "ko": "턴 종료 시 번개 원소 피해를 2pt 주는 [번개구름]을 생성한다. (사용 가능 횟수: 1, 중첩 가능, 상한 없음)\n[번개구름]이 필드 입장 또는 사용 가능 횟수 증가 시, 상대의 랜덤한 핸드 카드 1장에 [전기 충격]을 부여한다."
+      }
+    },
+    {
+      "code": 3002,
+      "name": {
+        "zh": "当前元素骰费用",
+        "en": "Current Elemental Dice Cost",
+        "ja": "現在の元素サイコロのコスト",
+        "ko": "현재 원소 주사위 코스트"
+      },
+      "description": {
+        "zh": "行动牌被赋予费用增加和费用降低时，当前元素骰费用会对应变化。\n（打出时少花费元素骰的效果不会影响此费用）",
+        "en": "If a Cost Increase or Cost Reduction is attached to an Action Card, its current Elemental Dice cost will be adjusted accordingly.\n(Effects that reduce the Elemental Dice cost when playing the card do not affect this cost.)",
+        "ja": "アクションカードにコストアップまたはコストダウンが付与された時、現在の元素サイコロのコストもそれに応じて変化します。\n（使用時、元素サイコロの使用数減少効果がある場合、このコストとは独立して計算されます）",
+        "ko": "행동 카드에 코스트 증가와 코스트 감소가 부여된 경우, 현재 원소 주사위 코스트가 변경된다.\n(사용 시 소모하는 원소 주사위가 감소하는 효과는 해당 코스트에 영향을 주지 않는다)"
+      }
+    },
+    {
+      "code": 3003,
+      "name": {
+        "zh": "电击",
+        "en": "Electric Shock",
+        "ja": "電撃",
+        "ko": "전기 충격"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3004,
+      "name": {
+        "zh": "费用增加",
+        "en": "Cost Increase",
+        "ja": "コストアップ",
+        "ko": "코스트 증가"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3005,
+      "name": {
+        "zh": "费用降低",
+        "en": "Cost Reduction",
+        "ja": "コストダウン",
+        "ko": "코스트 감소"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3006,
+      "name": {
+        "zh": "赋能",
+        "en": "Empowerment",
+        "ja": "エンパワー",
+        "ko": "힘 주입"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3007,
+      "name": {
+        "zh": "不可调和",
+        "en": "Untunable",
+        "ja": "調和不可",
+        "ko": "조정 불가"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3008,
+      "name": {
+        "zh": "无效化",
+        "en": "Invalidation",
+        "ja": "無効化",
+        "ko": "무효화"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3009,
+      "name": {
+        "zh": "月绽放",
+        "en": "Lunar-Bloom",
+        "ja": "月開花",
+        "ko": "달 개화"
+      },
+      "description": {
+        "zh": "本伤害+1，并赋予我方随机1张手牌[费用降低]。",
+        "en": "Deal +1 DMG for this instance, and apply [Cost Reduction] to a random card in your Hand.",
+        "ja": "ダメージ+1。さらに味方のランダムな手札1枚に[コストダウン]を付与する。",
+        "ko": "이번 피해 +1pt, 랜덤한 아군 핸드 카드 1장에 [코스트 감소]를 부여한다"
+      }
+    },
+    {
+      "code": 3010,
+      "name": {
+        "zh": "月结晶",
+        "en": "Lunar-Crystallize",
+        "ja": "月結晶",
+        "ko": "달 결정"
+      },
+      "description": {
+        "zh": "本伤害+1，并生成1张可以召唤并强化月笼的[月笼协奏]加入手牌。",
+        "en": "This DMG +1, and create 1 Moondrift Harmony that can summon and enhance Moondrift and add it to your Hand.",
+        "ja": "ダメージ+1。さらに、月籠を召喚して強化できる「月籠の共鳴」を1枚生成し、手札に加える。",
+        "ko": "이번 피해 +1, 달빛 조각을 소환 및 강화할 수 있는 [달빛 조각 화음] 1장을 생성하여 핸드 카드에 추가한다."
+      }
+    },
+    {
+      "code": 3011,
+      "name": {
+        "zh": "月笼协奏",
+        "en": "Moondrift Harmony",
+        "ja": "月籠の共鳴",
+        "ko": "달빛 조각 화음"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    },
+    {
+      "code": 3012,
+      "name": {
+        "zh": "月笼",
+        "en": "Moondrift",
+        "ja": "月籠",
+        "ko": "달빛 조각"
+      },
+      "description": {
+        "zh": null,
+        "en": null,
+        "ja": null,
+        "ko": null
+      }
+    }
+  ]
+}

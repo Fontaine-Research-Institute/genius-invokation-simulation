@@ -1,0 +1,5 @@
+{
+  "compute": "ftk_state_count",
+  "samples": 1000000,
+  "states": 250000
+}

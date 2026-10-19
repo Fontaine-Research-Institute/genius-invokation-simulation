@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 先读 README 的「核心设计」
+    url: https://github.com/genius-invokation-lover/gi-genius-invokation-simulator/blob/main/README.zh-CN.md#核心设计
+    about: 引擎边界、实体与区、随机/选择入口、敌我两个根区等前提都在这里；不少问题读完后就没必要开 Issue 了。
+  - name: 安全问题请走私密渠道
+    url: https://github.com/genius-invokation-lover/gi-genius-invokation-simulator/blob/main/SECURITY.md
+    about: 漏洞不要公开提 Issue；请先读 SECURITY.md，按要求通过 GitHub Security Advisories 私密上报。
