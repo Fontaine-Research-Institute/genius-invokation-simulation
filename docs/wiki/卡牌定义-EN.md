@@ -54,9 +54,26 @@
 
 Evidence order: rulebook > card text / authoritative keywords > reference implementation (technique only; `RULES.md` section 3, items 2 and 3).
 
-## 3. Page Template
+## 3. Templates by Card Type
 
-Copy [[卡牌定义-模板-EN]] for a new card; add a row to section 4 of this page.
+Decide the card type first, copy the matching template page, then fill in the card name / metadata / definition code / description / implementation code. Concrete card pages still use `卡牌定义-<name>.md` and `卡牌定义-<name>-EN.md`.
+
+| Card type | Template |
+|---|---|
+| Character card | [[卡牌定义-模板]] (Chinese reference; English character template pending) |
+| Action card · Equipment | [[卡牌定义-模板-行动牌-装备-EN]] |
+| Action card · Support | [[卡牌定义-模板-行动牌-支援-EN]] |
+| Action card · Event | [[卡牌定义-模板-行动牌-事件-EN]] |
+| Summon | [[卡牌定义-模板-召唤物-EN]] |
+| Status | [[卡牌定义-模板-状态-EN]] |
+| Enemy | [[卡牌定义-模板-敌人-EN]] |
+
+> [!NOTE]
+> Status pages use no card image and are not registered in the image sources list; skill icons are never used.
+>
+> Card images go to `assets/<family>/<id>.jpg` with the two fixed credit lines below them, and each new image is registered in `new/assets/SOURCES.md`.
+
+Chinese template pages are the corresponding `卡牌定义-模板-*.md`; the structure matches.
 
 ## 4. Studied Entries
 

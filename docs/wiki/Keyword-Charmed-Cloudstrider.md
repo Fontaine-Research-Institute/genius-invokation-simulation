@@ -1,0 +1,27 @@
+# Keyword: Charmed Cloudstrider
+
+> [[关键字-踏云献瑞|中文]] · English
+
+*Scope: the keyword "Charmed Cloudstrider" and the cards that use it.*
+
+---
+
+## Keyword Data
+
+| Item | Value |
+|---|---|
+| Keyword | Charmed Cloudstrider |
+| K code | K1043 |
+
+## Effect
+
+> Normal Attack
+> Deal 2 Pyro DMG. This Skill is considered a Plunging Attack.
+
+## Related Rulebook Entries
+
+> To be added: no rulebook data source in this repository.
+
+## Cards Using It
+
+To be added.
