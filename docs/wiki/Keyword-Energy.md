@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Energy |
-| K code | K310 |
+> Keyword: Energy
+>
+> K code: K310
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 - [[卡牌定义-爱诺-EN|Aino]]
+
+## Summary
+
+Energy is the keyword K310.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+The implemented cards that use it are listed above, 1 in total.

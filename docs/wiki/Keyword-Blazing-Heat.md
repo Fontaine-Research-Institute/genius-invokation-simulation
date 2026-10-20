@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Blazing Heat |
-| K code | K1017 |
+> Keyword: Blazing Heat
+>
+> K code: K1017
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Blazing Heat is the keyword K1017.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

@@ -8,6 +8,8 @@
 
 ## 1. Crates and Dependency Direction
 
+The dependency direction is:
+
 ```text
 richtext (zero-dependency: parsing only)
      ^
@@ -20,20 +22,40 @@ simulation (facade) --> engine / definitions / richtext (+ optional cards)
 compute (compute bins) --> no deps by default; a task adds its own
 ```
 
-| Crate (package name) | Directory | Depends on | Responsibility |
-|---|---|---|---|
-| `gi-genius-invokation-engine` | `new/crates/engine` | none (`libloading` only under feature `dll`) | Mechanism primitives: numbers, ids, entities, areas, randomness and choice, exact fractions, statistics |
-| `gi-genius-invokation-richtext` | `new/crates/richtext` | none | Rich-text parsing: raw markup -> neutral segment sequence |
-| `gi-genius-invokation-definitions` | `new/crates/definitions` | engine, richtext | Game definition layer (families, types, tags, resources, rules, state, flow, keywords, dispatch, records) |
-| `gi-genius-invokation-cards` | `new/crates/cards` | definitions, engine | Concrete cards: each card's data plus effect logic |
-| `gi-genius-invokation-simulation` | `new/crates/simulation` | the four above (cards optional) | The single public facade: re-exports only, no logic |
-| `gi-genius-invokation-compute` | `new/crates/compute` | none by default | Compute toolchain: one computation = one bin folder |
+The diagram above shows the crate dependency direction; the actual declarations are in each crate's Cargo.toml.
+
+- `gi-genius-invokation-engine`
+  - Directory: `new/crates/engine`
+  - Depends on: none (`libloading` only under feature `dll`)
+  - Responsibility: Mechanism primitives: numbers, ids, entities, areas, randomness and choice, exact fractions, statistics
+- `gi-genius-invokation-richtext`
+  - Directory: `new/crates/richtext`
+  - Depends on: none
+  - Responsibility: Rich-text parsing: raw markup -> neutral segment sequence
+- `gi-genius-invokation-definitions`
+  - Directory: `new/crates/definitions`
+  - Depends on: engine, richtext
+  - Responsibility: Game definition layer (families, types, tags, resources, rules, state, flow, keywords, dispatch, records)
+- `gi-genius-invokation-cards`
+  - Directory: `new/crates/cards`
+  - Depends on: definitions, engine
+  - Responsibility: Concrete cards: each card's data plus effect logic
+- `gi-genius-invokation-simulation`
+  - Directory: `new/crates/simulation`
+  - Depends on: the four above (cards optional)
+  - Responsibility: The single public facade: re-exports only, no logic
+- `gi-genius-invokation-compute`
+  - Directory: `new/crates/compute`
+  - Depends on: none by default
+  - Responsibility: Compute toolchain: one computation = one bin folder
 
 > [!IMPORTANT]
 > Dependency direction is enforced by Cargo: `definitions` never depends on `cards` (a guard test checks it); `richtext` depends on no business crate; `engine` has no upper-layer semantics.
 > External users depend on the `simulation` facade only; cross-crate imports go through `gi_genius_invokation_simulation::{engine, definitions, richtext}`.
 
 ## 2. Repository Layout
+
+The repository layout is:
 
 ```text
 new/
@@ -49,15 +71,27 @@ Inside `definitions`: `base/` (L1 families + ids + elements + perspective), `fam
 
 ## 3. Data Flow of a Match
 
-| Layer | Location | Role |
-|---|---|---|
-| State | `definitions/src/state/` | `DefState`: two named instances `me` / `opp` + `round` + `first_player`; every area owns its state (D42 / D182 / D183) |
-| Flow | `definitions/src/flow/` | Action entry points over `&DefState`: skill use, card play, switching, tuning, techniques, round skeleton; return a new state plus pending work, or `Err` |
-| Effect composition | `definitions/src/keywords/` | Keyword functions + a Step (D204): in-step order as written, no insertion |
-| Dispatch | `definitions/src/timeline/` | Registry + ordered dispatch (sorting only, never executing, D186) + settlement frames (insertion-based, D196) |
-| Base operations | `definitions/src/rules/` | Pure functions for unified three-level base operations (slots, caps, opening, queries, order, ...) |
-| Reactions | `definitions/src/reactions/` | Reaction identity -> effect function pointer; the damage modifier chain lives in `families/character/damage_chain/` |
-| Records | `definitions/src/records/` | `Recorder<T>`: step number + arbitrary content (D223 / D224) |
+- State
+  - Location: `definitions/src/state/`
+  - Role: `DefState`: two named instances `me` / `opp` + `round` + `first_player`; every area owns its state (D42 / D182 / D183)
+- Flow
+  - Location: `definitions/src/flow/`
+  - Role: Action entry points over `&DefState`: skill use, card play, switching, tuning, techniques, round skeleton; return a new state plus pending work, or `Err`
+- Effect composition
+  - Location: `definitions/src/keywords/`
+  - Role: Keyword functions + a Step (D204): in-step order as written, no insertion
+- Dispatch
+  - Location: `definitions/src/timeline/`
+  - Role: Registry + ordered dispatch (sorting only, never executing, D186) + settlement frames (insertion-based, D196)
+- Base operations
+  - Location: `definitions/src/rules/`
+  - Role: Pure functions for unified three-level base operations (slots, caps, opening, queries, order, ...)
+- Reactions
+  - Location: `definitions/src/reactions/`
+  - Role: Reaction identity -> effect function pointer; the damage modifier chain lives in `families/character/damage_chain/`
+- Records
+  - Location: `definitions/src/records/`
+  - Role: `Recorder<T>`: step number + arbitrary content (D223 / D224)
 
 **Example: using a skill** (`definitions/src/flow/skill_use.rs`):
 
@@ -68,12 +102,13 @@ Inside `definitions`: `base/` (L1 families + ids + elements + perspective), `fam
 5. Dispatch "after skill use" and use `timeline::Resolution::insert` at the current settlement position (D196).
 6. Per-branch game-over check (`state/terminal.rs`; mutual defeat is `BothLose`, D267).
 
-**Text data flow**: `generated/data/*.json` -> `build.rs` (generates static tables into `OUT_DIR` at compile time) -> `generated` accessors -> `richtext::parse` (strict) -> `generated::text::render` (sources -> final string).
+**Text data flow**: generated data becomes static tables at compile time via `build.rs`, then flows through `generated` accessors into `richtext::parse` (strict) and finally `generated::text::render` (sources -> final string).
 
 ### 3.1 Interface Source Excerpts
-**Root state `DefState`**
 
-`new/crates/definitions/src/state/def_state.rs:58-82`
+The implementation of Root state `DefState` follows:
+
+File: crates/definitions/src/state/def_state.rs:58-82
 
 ```rust
 /// **一局对局的完整状态**：我方全部区 + 敌方全部区（两个具名实例，D34）+ 回合数。
@@ -103,9 +138,12 @@ pub struct DefState {
 }
 ```
 
-**Action entry `use_skill_me`**
+The code above defines Root state `DefState`; see the file for the full implementation.
 
-`new/crates/definitions/src/flow/skill_use.rs:430-446`
+
+The implementation of Action entry `use_skill_me` follows:
+
+File: crates/definitions/src/flow/skill_use.rs:430-446
 
 ```rust
 /// **使用技能**（我方使用；下落标记读根状态）。
@@ -127,9 +165,12 @@ pub fn use_skill_me(
 }
 ```
 
-**Step `Step`**
+The code above defines Action entry `use_skill_me`; see the file for the full implementation.
 
-`new/crates/definitions/src/keywords/step.rs:44-48`
+
+The implementation of Step `Step` follows:
+
+File: crates/definitions/src/keywords/step.rs:44-48
 
 ```rust
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
@@ -139,9 +180,12 @@ pub struct Step {
 }
 ```
 
-**Dispatch `dispatch`**
+The code above defines Step `Step`; see the file for the full implementation.
 
-`new/crates/definitions/src/timeline/dispatch.rs:60-96`
+
+The implementation of Dispatch `dispatch` follows:
+
+File: crates/definitions/src/timeline/dispatch.rs:60-96
 
 ```rust
 /// **单侧派发**：从一个牌手的注册表里取出「这个时机、条件成立」的登记项，按结算顺序排好。
@@ -183,9 +227,12 @@ where
 }
 ```
 
-**Insert sub-settlement `Resolution::insert`**
+The code above defines Dispatch `dispatch`; see the file for the full implementation.
 
-`new/crates/definitions/src/timeline/suspend.rs:168-178`
+
+The implementation of Insert sub-settlement `Resolution::insert` follows:
+
+File: crates/definitions/src/timeline/suspend.rs:168-178
 
 ```rust
     /// **插入子结算**：在当前帧当前位置压入新帧（父帧的 `cursor` 不动）。
@@ -201,9 +248,12 @@ where
     }
 ```
 
-**Settlement snapshot `Resolution::snapshot`**
+The code above defines Insert sub-settlement `Resolution::insert`; see the file for the full implementation.
 
-`new/crates/definitions/src/timeline/suspend.rs:202-217`
+
+The implementation of Settlement snapshot `Resolution::snapshot` follows:
+
+File: crates/definitions/src/timeline/suspend.rs:202-217
 
 ```rust
     /// **只读快照**：当前结算嵌套状态（当前帧 / 剩余步骤 / 插入点）。
@@ -224,9 +274,12 @@ where
     }
 ```
 
-**Record entry `Recorder::push`**
+The code above defines Settlement snapshot `Resolution::snapshot`; see the file for the full implementation.
 
-`new/crates/definitions/src/records/mod.rs:88-91`
+
+The implementation of Record entry `Recorder::push` follows:
+
+File: crates/definitions/src/records/mod.rs:88-91
 
 ```rust
     /// **唯一写入入口**：把一条内容记到某一步。
@@ -235,9 +288,12 @@ where
     }
 ```
 
-**Fold back `fold_states`**
+The code above defines Record entry `Recorder::push`; see the file for the full implementation.
 
-`new/crates/definitions/src/flow/mod.rs:130-147`
+
+The implementation of Fold back `fold_states` follows:
+
+File: crates/definitions/src/flow/mod.rs:130-147
 
 ```rust
 /// **折叠回**（D191）：把局面完全相同的分支合并，概率**精确相加**。
@@ -260,10 +316,13 @@ pub fn fold_states(branches: Vec<(DefState, Fraction)>) -> Vec<(DefState, Fracti
 }
 ```
 
+The code above defines Fold back `fold_states`; see the file for the full implementation.
 
-**Keyword function: damage**
 
-`new/crates/definitions/src/keywords/keyword.rs:241-292`
+
+The implementation of Keyword function: damage follows:
+
+File: crates/definitions/src/keywords/keyword.rs:241-292
 
 ```rust
 /// **造成伤害**：对选择器解析出的每个角色走伤修链（加伤 -> 护盾 -> 减伤 -> 扣血 / 附着 / 反应）。
@@ -320,9 +379,12 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**Rules ops: settlement order predicate**
+The code above defines Keyword function: damage; see the file for the full implementation.
 
-`new/crates/definitions/src/rules/ops/order.rs:38-59`
+
+The implementation of Rules ops: settlement order predicate follows:
+
+File: crates/definitions/src/rules/ops/order.rs:38-59
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -349,57 +411,84 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 }
 ```
 
+The code above defines Rules ops: settlement order predicate; see the file for the full implementation.
+
+
 
 ## 4. How "The Framework Only Provides Interfaces" Lands
 
 > [!NOTE]
 > This is the highest principle (D20; `new/README.md` "project philosophy"; `分工计划.md` section 8.5) and overrides concrete designs.
 
-| Feature | What the framework provides (mechanism) | Who implements the business |
-|---|---|---|
-| Randomness / choice | `enumerate_random` / `enumerate_random_weighted` / `enumerate_select` + exact fractions | Each block's own `parse.rs` for the select list and dedup function (D25 / D26) |
-| Trigger dispatch | `timeline::TriggerRegistry` + `dispatch` (sorting only) | Families/types define timing keys and dispatch proactively; cards register effect function pointers (D185 / D186) |
-| Settlement insertion | `timeline::Resolution` frames + `cursor` | The effect layer decides what to insert and where (D196) |
-| Areas / state | Areas own their state + `with_*` pure functions; `state` only composes | Each area itself (D42 / D182 / D183) |
-| Three-level base ops | `rules/` static rule table + `rules::ops` pure functions | Cards call them as needed; no central tables (D176-D179) |
-| Payment | Dice pool / energy / arcane edict provide `can_afford` / `pay` | Cards only declare cost data (D121 / D133 / D144) |
-| Text | `generated` accessors + `richtext` parser + `render` | Cards write `Localized` or reference generated data (D56 / D62 / D75) |
-| Records | `records::Recorder`, a thin generic container | Each module defines its record content type and calls `push` (D222-D225) |
+- Randomness / choice
+  - What the framework provides (mechanism): `enumerate_random` / `enumerate_random_weighted` / `enumerate_select` + exact fractions
+  - Who implements the business: Each block's own `parse.rs` for the select list and dedup function (D25 / D26)
+- Trigger dispatch
+  - What the framework provides (mechanism): `timeline::TriggerRegistry` + `dispatch` (sorting only)
+  - Who implements the business: Families/types define timing keys and dispatch proactively; cards register effect function pointers (D185 / D186)
+- Settlement insertion
+  - What the framework provides (mechanism): `timeline::Resolution` frames + `cursor`
+  - Who implements the business: The effect layer decides what to insert and where (D196)
+- Areas / state
+  - What the framework provides (mechanism): Areas own their state + `with_*` pure functions; `state` only composes
+  - Who implements the business: Each area itself (D42 / D182 / D183)
+- Three-level base ops
+  - What the framework provides (mechanism): `rules/` static rule table + `rules::ops` pure functions
+  - Who implements the business: Cards call them as needed; no central tables (D176-D179)
+- Payment
+  - What the framework provides (mechanism): Dice pool / energy / arcane edict provide `can_afford` / `pay`
+  - Who implements the business: Cards only declare cost data (D121 / D133 / D144)
+- Text
+  - What the framework provides (mechanism): `generated` accessors + `richtext` parser + `render`
+  - Who implements the business: Cards write `Localized` or reference generated data (D56 / D62 / D75)
+- Records
+  - What the framework provides (mechanism): `records::Recorder`, a thin generic container
+  - Who implements the business: Each module defines its record content type and calls `push` (D222-D225)
 
 > [!WARNING]
 > Forbidden (no exceptions): central statistics, central collection, built-in behavior tables, a unified cost-reduction calculator, attribute statistics tables, behavior switch tables, built-in buff tables.
 
 ## 5. Time and Uncertainty
 
-| Topic | Rule | Basis |
-|---|---|---|
-| Settlement order | Within one timing, the workspace-root `结算顺序.md` is the single authority; order constants exist only in `rules::ops::order` | D197; `结算顺序.md` |
-| Insertion-based settlement | Frames + `cursor`; a sub-settlement returns to the insertion point; it is not a LIFO stack | D196 |
-| Step atomicity | In-step order as written, no insertion inside; insertion only between steps | D204 |
-| Uncertainty | Do not materialize what is undetermined; on observation expand into concrete branches with exact probabilities, then fold back | D190 / D191 |
-| Zero floating point | Probabilities, weights, and randomness are all integers (`Fraction` = `ExactNat128` numerator/denominator; `Rng` exposes only `u128`) | D158-D160 |
+- Settlement order
+  - Rule: Within one timing, the workspace-root `结算顺序.md` is the single authority; order constants exist only in `rules::ops::order`
+  - Basis: D197; `结算顺序.md`
+- Insertion-based settlement
+  - Rule: Frames + `cursor`; a sub-settlement returns to the insertion point; it is not a LIFO stack
+  - Basis: D196
+- Step atomicity
+  - Rule: In-step order as written, no insertion inside; insertion only between steps
+  - Basis: D204
+- Uncertainty
+  - Rule: Do not materialize what is undetermined; on observation expand into concrete branches with exact probabilities, then fold back
+  - Basis: D190 / D191
+- Zero floating point
+  - Rule: Probabilities, weights, and randomness are all integers (`Fraction` = `ExactNat128` numerator/denominator; `Rng` exposes only `u128`)
+  - Basis: D158-D160
 
 ## 6. Known Documentation Deviations
 
 > [!WARNING]
 > The following older documents disagree with the current code or decisions. This wiki documents the code; the old documents are for the maintainers to update.
 
-| Old document | Deviation |
-|---|---|
-| `new/README.md` / `README.en.md` | "Each die is an entity", "compile-time settlement order", type-tree inheritance, dll / two-phase loading, "core / engine / definitions, three crates", `Rc` structural sharing |
-| `结构.md` / `分工计划.md` | Old layout and signatures: f64 probabilities, old `DefState` fields, `CardType` / `CardTag` in base, "card code stores no text" |
-| `definitions/src/lib.rs` | Module docs still say resources / timeline / loader come later; they already exist |
-| `definitions/src/families/mod.rs` | Still says families "only hold type enums"; they also hold definition carriers, areas, and operations |
-| `definitions/src/records/mod.rs` | Still says damage_chain / area records are "pending"; several `record.rs` files already use `Recorder` |
-| `definitions/build.rs` | Hand-written JSON parser (offline zero-dependency), which conflicts with D74 ("switch to a JSON crate") |
+- `new/README.md` / `README.en.md`: "Each die is an entity", "compile-time settlement order", type-tree inheritance, dll / two-phase loading, "core / engine / definitions, three crates", `Rc` structural sharing
+- `结构.md` / `分工计划.md`: Old layout and signatures: f64 probabilities, old `DefState` fields, `CardType` / `CardTag` in base, "card code stores no text"
+- `definitions/src/lib.rs`: Module docs still say resources / timeline / loader come later; they already exist
+- `definitions/src/families/mod.rs`: Still says families "only hold type enums"; they also hold definition carriers, areas, and operations
+- `definitions/src/records/mod.rs`: Still says damage_chain / area records are "pending"; several `record.rs` files already use `Recorder`
+- `definitions/build.rs`: Hand-written JSON parser (offline zero-dependency), which conflicts with D74 ("switch to a JSON crate")
 
 ## 7. Related Pages
 
-| Page | Content |
-|---|---|
-| [[Conventions-EN]] | design conventions quick reference |
-| [[Crate-Engine-EN]] / [[Crate-Richtext-EN]] / [[Crate-Definitions-EN]] / [[Crate-Cards-EN]] / [[Crate-Simulation-EN]] / [[Crate-Compute-EN]] | crate details |
-| [[定义层-State-EN]] / [[定义层-Flow-EN]] / [[定义层-Keywords-EN]] / [[定义层-Timeline-EN]] | runtime layers |
+- [[Conventions-EN]]: design conventions quick reference
+- [[Crate-Engine-EN]] / [[Crate-Richtext-EN]] / [[Crate-Definitions-EN]] / [[Crate-Cards-EN]] / [[Crate-Simulation-EN]] / [[Crate-Compute-EN]]: crate details
+- [[定义层-State-EN]] / [[定义层-Flow-EN]] / [[定义层-Keywords-EN]] / [[定义层-Timeline-EN]]: runtime layers
+
+---
+
+## Summary
+
+The six crates depend in one direction, and a match flows from state through flow and keywords/timeline to records. Before changing something, decide which layer owns it.
 
 ---
 

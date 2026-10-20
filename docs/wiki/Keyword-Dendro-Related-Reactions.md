@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Dendro-Related Reactions |
-| K code | K217 |
+> Keyword: Dendro-Related Reactions
+>
+> K code: K217
 
 ## Effect
 
@@ -27,3 +26,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Dendro-Related Reactions is the keyword K217.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

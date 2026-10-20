@@ -10,10 +10,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Arcane Edict |
-| K code | K311 |
+> Keyword: Arcane Edict
+>
+> K code: K311
 
 ## Effect
 
@@ -27,3 +26,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Arcane Edict is the keyword K311.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

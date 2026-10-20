@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Adventure |
-| K code | K66 |
+> Keyword: Adventure
+>
+> K code: K66
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Adventure is the keyword K66.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

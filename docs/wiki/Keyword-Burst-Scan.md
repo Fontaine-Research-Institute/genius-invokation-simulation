@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Burst Scan |
-| K code | K1033 |
+> Keyword: Burst Scan
+>
+> K code: K1033
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Burst Scan is the keyword K1033.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

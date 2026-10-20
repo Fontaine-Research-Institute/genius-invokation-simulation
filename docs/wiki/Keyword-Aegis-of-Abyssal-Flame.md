@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Aegis of Abyssal Flame |
-| K code | K1006 |
+> Keyword: Aegis of Abyssal Flame
+>
+> K code: K1006
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Aegis of Abyssal Flame is the keyword K1006.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Center of Attention |
-| K code | K1030 |
+> Keyword: Center of Attention
+>
+> K code: K1030
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Center of Attention is the keyword K1030.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

@@ -2,85 +2,36 @@
 
 > [[定义层-Flow|中文]] · English
 
-*Scope: the `flow/*` end-to-end flows (skill use / card play / turns / terminal / injection points / revive / technique / transmutation), including ordering, branches and pending semantics.*
+*Scope: end-to-end flows under `flow/*`: skill use, card play, the turn, terminal checks, injection points, revive, technique, and transmutation.*
 
 ---
 
 ## 1. Responsibility
 
-`flow/*` is the **end-to-end flow layer**: it runs an entry request (use a skill / play a card / a turn phase / revive / technique, …) on a `&DefState` through "validate -> pay -> dispatch / execute -> one-step effect -> step-end flush -> step-boundary insertion -> defeat cleanup -> terminal judgement", returning **branches + exact probabilities + pending items + terminal outcome**. This layer neither owns a persistent recorder nor advances the right to act on behalf of the caller.
+A flow entry runs one action end to end: validate, pay, dispatch, execute one step, flush at the step end, insert at the step boundary, clean up defeats, then judge the terminal state.
+
+The result is a list of branches with exact probabilities, pending items the caller still owns, and a terminal outcome.
 
 ## 2. Key concepts and types
 
-| File | Responsibility |
-|---|---|
-| `crates/definitions/src/flow/skill_use.rs` | Skill use (`use_skill_me/opp`; legacy `SkillEffectPlan` / new `Step` effect-body paths) |
-| `flow/play_card.rs` | Action-card play (normal / with timing / Food / Arcane) |
-| `flow/turn.rs` | Turn flow: round start, roll / reroll, phase broadcasts, declare end, End Phase, next round |
-| `flow/game_end.rs` | Thin terminal entry (`settlement_outcome` / `is_terminal`) |
-| `flow/hooks.rs` | Injection points: `DefeatCleanup` (D255) and `DrawHooks` (F10 / D188) |
-| `flow/revive.rs` | L2 revive end-to-end (count check + revive + counter update) |
-| `flow/technique.rs` | L4 technique end-to-end (check / pay card-face cost / Combat Action / always-empty SkillUsed) |
-| `flow/elemental_transmutation.rs` | L9 Elemental Transmutation: roll-phase 2+2 conversion, opening conversion |
-| `flow/pending.rs` | Unified pending items `FlowPending` / `PendingSet` + dispatch executor |
-| `flow/recorded.rs` / `record.rs` | Recorder paths (`use_skill_*_recorded`, `play_card_*_recorded`; `FlowRecord`) |
-| `flow/switch_character.rs` / `tuning.rs` | Switch character / Elemental Tuning (payment in flow; zone operations in state/flows) |
+Every entry returns branches rather than a single state, because random effects expand into exact probabilities.
 
-### 2.1 Branches and pending items
+Dispatch only orders effects; execution is separate. `FlowPending` and `PendingSet` normalize the per-zone pending lists.
 
-| Concept | Convention |
-|---|---|
-| Branches (D190) | Every entry returns `Vec<Branch>`; each branch carries `state` + `probability: Fraction` (exact fraction, no sampling); deterministic entries expose `single()` |
-| Pending (D186) | Dispatch only orders; each zone's `*Pending` is normalized into `FlowPending` / `PendingSet` (`me` / `opp`) |
-| Executor | `execute_pending(&DefState, &PendingSet) -> DefState` / `execute_pending_mut`; only routes by type to the matching `execute_*` |
-| Who executes | What an entry already executed is labelled "executed, kept for observation"; only the returned `pending` must be executed / inserted by the caller at step boundaries (D196 / D204) |
+Two injection points keep the layer independent of card data: cleanup for defeat, and a cost callback for drawing.
 
-### 2.2 Injection points `flow/hooks.rs`
-
-| Type / function | File | Notes |
-|---|---|---|
-| `DefeatCleanup = fn(&DefState, Perspective) -> (DefState, PendingSet)` | `flow/hooks.rs` | Cleanup callback for the D255 order "settle -> clean up -> terminal"; the upper layer injects the real implementation, and the default `NO_DEFEAT_CLEANUP` changes nothing |
-| `apply_defeat_cleanup(state, cleanup, &mut pending)` | `flow/hooks.rs` | Runs me first, then opp; merges cleanup-dispatched pending into `pending` |
-| `DrawHooks { base_cost: Option<&dyn Fn(CardId) -> Vec<CostComponent>> }` | `flow/hooks.rs` | F10 hand-cost table + D188 `drawn_marks` materialization |
-| `apply_draw_branch(player, &DrawBranch, hooks)` | `flow/hooks.rs` | Land hand / pile -> sync costs (when `base_cost` present) -> materialize `drawn_marks` into the hand-card state table (empty registry; no state triggers dispatched) |
-
-### 2.3 Main env structs (borrowed, not owned)
-
-| Env | File | Key fields |
-|---|---|---|
-| `SkillFlowEnv` | `flow/skill_use.rs` | `triggers: SkillTriggerBook`, `keyword_triggers: TriggerBook`, `defeat_cleanup`, `allow`, `rules`, `reaction_registry`, `reaction_triggers`, `mastery`, `increases`, `effect_context`, `alloc`, `policy`, `energy_gain_bonus`, `same_color` |
-| `PlayCardEnv` | `flow/play_card.rs` | `triggers: PlayTriggerBook`, `support_triggers`, `equipment_triggers`, `keywords: Option<KeywordEnv>`, `defeat_cleanup` |
-| `TurnEnv` | `flow/turn.rs` | `triggers` (single phase-broadcast table), `combat_status`, `summons`, `supports`, `draw: DrawHooks` |
+不同入口对待执行的归属要看字段说明. 一般规律是: 入口内已执行的标成已执行, 返回给调用方的才需要再执行.
 
 ## 3. Public entry points
 
-### Index
+### 3.1 Injection points
 
-The source blocks below are the implementation source from the current repository (`use` / `derive` / `impl` lines included; file paths in the subsection headings). Long functions list the doc comment, signature, and the first few body lines only; `// ...` marks omitted body.
+Cleanup is a function pointer so the card layer can inject the real defeat implementation. The default is a no-op.
 
-| Module | Notes |
-|---|---|
-| Injection points | `flow/hooks.rs`: `DefeatCleanup` / `NO_DEFEAT_CLEANUP` / `DrawHooks` / `apply_draw_branch` / `apply_defeat_cleanup` |
-| Terminal | `flow/game_end.rs`: `settlement_outcome` / `is_terminal` |
-| Skill use | `flow/skill_use.rs`: `SkillTriggerBook` / `SkillFlowEnv` / `SkillUseRequest` / `SkillEffectBody` / `SkillEffectPlan` / `use_skill_*` (incl. `_with_plunging`) |
-| Card play | `flow/play_card.rs`: `PlayTriggerBook` / `KeywordEnv` / `PlayCardEnv` / `CardPlacement` / `PlayCardRequest` / `PlayBranch` / `PlayCardOutcome` / `FoodReviveEnv` / `FoodPlayOutcome` / `ArcanePlayOutcome` / `PlayCardError` / `play_card_*` |
-| Turn | `flow/turn.rs`: `TurnTiming` / `TurnEnv` / `TurnEndOutcome` / `TurnEndBranch` / `RoundBeginOutcome` / `RollTransmutation` / `RoundEndState` / `DeclareRoundEnd*` / `EndPhaseError` / `EndPhaseStep` / `round_begin` … `round_end` |
-| Revive | `flow/revive.rs`: `ReviveEnv` / `ReviveError` / `ReviveOutcome` / `revive_me` / `revive_opp` |
-| Technique | `flow/technique.rs`: `TechniqueEnv` / `TechniqueRequest` / `TechniqueError` / `TechniqueOutcome` / `use_technique_me/opp` |
-| Transmutation | `flow/elemental_transmutation.rs`: `transmute_roll_phase_me/opp` / `transmute_opening_me/opp` |
-| Rule ops (referenced) | `rules/ops/stage.rs`: `timing_of_card_play` (action timing for `play_card_*`) |
 
-### Source: `flow/hooks.rs`
+文件: crates/definitions/src/flow/hooks.rs
 
 ```rust
-use crate::base::CardId;
-use crate::families::action_card::areas::hand_state::HandCardStateTriggers;
-use crate::families::action_card::zones::pile::DrawBranch;
-use crate::flow::pending::PendingSet;
-use crate::keywords::target::Perspective;
-use crate::resources::dice::CostComponent;
-use crate::state::{DefState, PlayerDefs};
-
 /// **击倒清理回调**（D255：结算 -> 清理 -> 判终局）。
 ///
 /// 入参 = 当前一局 + 要清理哪一方（Perspective::Me / Opp）；返回 = 清理后的局面 +
@@ -97,7 +48,14 @@ pub fn no_defeat_cleanup(state: &DefState, _side: Perspective) -> (DefState, Pen
 
 /// 默认的击倒清理回调（= [no_defeat_cleanup]；常量方便 env 默认值使用）。
 pub const NO_DEFEAT_CLEANUP: DefeatCleanup = no_defeat_cleanup;
+```
 
+Drawing hooks receive the base cost of a card and materialize marks attached to drawn cards.
+
+
+文件: crates/definitions/src/flow/hooks.rs
+
+```rust
 /// 抓牌路径的**注入点**（F10 手牌费用表 + D188 drawn_marks 物化）。
 #[derive(Clone, Copy)]
 pub struct DrawHooks<'a> {
@@ -140,7 +98,14 @@ pub fn apply_draw_branch(
         .clone()
         .with_hand(branch.hand.clone())
         .with_pile(branch.pile.clone());
+```
 
+Applying a draw branch and applying cleanup are the two helpers the flows call.
+
+
+文件: crates/definitions/src/flow/hooks.rs
+
+```rust
 /// **把一条抽牌分支落到一方**（F10 / D188）：
 ///
 /// 1. 手牌 / 牌库换成抽牌后的区；
@@ -156,8 +121,6 @@ pub fn apply_draw_branch(
 ) -> PlayerDefs {
     let mut next = player
         .clone()
-        .with_hand(branch.hand.clone())
-        .with_pile(branch.pile.clone());
     // ...
 
 /// **执行一次击倒清理**（D255 顺序：结算 -> 清理 -> 判终局）。
@@ -177,12 +140,14 @@ pub fn apply_defeat_cleanup(
 }
 ```
 
-### Source: `flow/game_end.rs`
+### 3.2 Terminal
+
+Terminal checks stay a thin read-only entry over `state/terminal`.
+
+
+文件: crates/definitions/src/flow/game_end.rs
 
 ```rust
-use crate::state::terminal::terminal;
-use crate::state::DefState;
-
 /// **每步结算 + 击倒清理之后**的终局判定（规则书 S1.4 / S7.7）。
 ///
 /// 纯读取：只借 `&DefState`、不改任何区。调用时点见模块文档（必须先完成结算与
@@ -198,35 +163,14 @@ pub fn is_terminal(state: &DefState) -> bool {
 }
 ```
 
-### Source: `flow/skill_use.rs`
+### 3.3 Skill use
 
-*Keyword codes in comments have been replaced with names; code lines unchanged.*
+A skill flow borrows two trigger registries, one per side, plus the keyword-layer trigger book.
+
+
+文件: crates/definitions/src/flow/skill_use.rs
 
 ```rust
-use crate::families::character::attachment::{AttachmentAllowSet, ReactionRegistry};
-use crate::families::character::damage::{
-use crate::families::character::damage_chain::bonus::{DamageBonus, ReactionHit};
-use crate::families::character::damage_chain::chain::DamageChainEnv;
-use crate::families::character::damage_chain::executor::{
-use crate::families::character::skill::SkillDef;
-use crate::families::character::skill_flow::{
-use crate::families::character::trigger::{execute_character, CharacterPending};
-use crate::families::character::types::{DamageType, SkillKind};
-use crate::flow::game_end::{settlement_outcome, Outcome};
-use crate::flow::hooks::{apply_defeat_cleanup, DefeatCleanup};
-use crate::flow::pending::{execute_pending, FlowPending, PendingSet};
-use crate::flow::record::FlowRecord;
-use crate::keywords::effect::{EffectEnv, TriggerBook};
-use crate::keywords::step::{execute_step_me, execute_step_opp, Step};
-use crate::reactions::effect::EffectContext;
-use crate::rules::ops::order::resolves_before;
-use crate::state::flows::plunging::{battle_action_end_me, battle_action_end_opp};
-use crate::state::{DefState, PlayerDefs};
-use crate::timeline::{dispatch, resolve, Event, Pending};
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::{nadd, EntityId, Nat};
-use std::cmp::Ordering;
-
 /// **两位牌手的角色族注册表**（S7.5 第 1 条：当前牌手优先需要两张表，而不是一张）。
 ///
 /// 两张表是**两个具名实例**（D34：不传敌我编号 / 下标）；谁是「当前牌手」由成对入口
@@ -305,7 +249,7 @@ pub struct SkillFlowEnv<'a> {
 pub struct SkillUseRequest<'a> {
     /// 技能定义。
     pub skill: &'a SkillDef,
-    /// 使用方出战角色身上的准备技能槽（准备技能）。
+    /// 使用方出战角色身上的准备技能槽（准备技能槽）。
     pub prepared: &'a PreparedSkills,
     /// 效果体（默认走关键字一步；旧的效果体计划保留为兼容）。
     pub effect: SkillEffectBody<'a>,
@@ -469,12 +413,19 @@ pub struct SkillFlowEnv<'a> {
     /// 同色费用支付时选的颜色（SameColor 费用需要）。
     pub same_color: Option<crate::base::Element>,
 }
+```
 
+The request names the skill, the prepared-skill slot, and the effect body.
+
+
+文件: crates/definitions/src/flow/skill_use.rs
+
+```rust
 /// 一次技能使用的**请求**（本层不替你选技能 / 目标范围）。
 pub struct SkillUseRequest<'a> {
     /// 技能定义。
     pub skill: &'a SkillDef,
-    /// 使用方出战角色身上的准备技能槽（准备技能）。
+    /// 使用方出战角色身上的准备技能槽（准备技能槽）。
     pub prepared: &'a PreparedSkills,
     /// 效果体（默认走关键字一步；旧的效果体计划保留为兼容）。
     pub effect: SkillEffectBody<'a>,
@@ -505,7 +456,14 @@ pub enum SkillEffectPlan {
         ty: DamageType,
     },
 }
+```
 
+The paired entries read the plunging mark from state; the `_with_plunging` variants take it explicitly.
+
+
+文件: crates/definitions/src/flow/skill_use.rs
+
+```rust
 /// **使用技能**（我方使用；下落标记读根状态）。
 ///
 /// - 成功 -> 结算分支（确定性技能恰好一支）；settlement 会被**插入**「使用技能后」的子结算
@@ -524,6 +482,22 @@ pub fn use_skill_me(
     use_skill_me_with_plunging(state, env, request, settlement, state.me().plunging())
 }
 
+/// **使用技能**（敌方使用；与 use_skill_me 共用一份实现，D35）。
+pub fn use_skill_opp(
+    state: &DefState,
+    env: &SkillFlowEnv<'_>,
+    request: &SkillUseRequest<'_>,
+    settlement: &mut SkillFrames,
+) -> Result<SkillOutcome, SkillUseError> {
+    // 标记的持有区在根状态（PlayerDefs::plunging）：旧入口读使用方当前标记。
+    use_skill_opp_with_plunging(state, env, request, settlement, state.opp().plunging())
+}
+```
+
+
+文件: crates/definitions/src/flow/skill_use.rs
+
+```rust
 /// **使用技能（我方；带下落攻击标记）**（S8.10）。
 ///
 /// 与 [use_skill_me] 相同，只是**显式**传入 [PlungingMark]（参数应与根状态里的标记一致）：
@@ -540,29 +514,7 @@ pub fn use_skill_me_with_plunging(
 ) -> Result<SkillOutcome, SkillUseError> {
     let output = run(
         state,
-        RunSide {
-            user: state.me(),
-            target: state.opp(),
-            me_is_user: true,
-            plunging,
-        },
-        env,
-        request,
-        settlement,
-    )?;
-    Ok(output.assemble(state, true, plunging, env.defeat_cleanup))
-}
-
-/// **使用技能**（敌方使用；与 use_skill_me 共用一份实现，D35）。
-pub fn use_skill_opp(
-    state: &DefState,
-    env: &SkillFlowEnv<'_>,
-    request: &SkillUseRequest<'_>,
-    settlement: &mut SkillFrames,
-) -> Result<SkillOutcome, SkillUseError> {
-    // 标记的持有区在根状态（PlayerDefs::plunging）：旧入口读使用方当前标记。
-    use_skill_opp_with_plunging(state, env, request, settlement, state.opp().plunging())
-}
+    // ...
 
 /// **使用技能（敌方；带下落攻击标记）**（与 [use_skill_me_with_plunging] 共用一份实现，D35）。
 pub fn use_skill_opp_with_plunging(
@@ -574,50 +526,17 @@ pub fn use_skill_opp_with_plunging(
 ) -> Result<SkillOutcome, SkillUseError> {
     let output = run(
         state,
-        RunSide {
-            user: state.opp(),
-            target: state.me(),
-            me_is_user: false,
-            plunging,
-        },
-        env,
-        request,
-        settlement,
-    )?;
-    Ok(output.assemble(state, false, plunging, env.defeat_cleanup))
-}
+    // ...
 ```
 
-### Source: `flow/play_card.rs`
+### 3.4 Card play
 
-*Keyword codes in comments have been replaced with names; code lines unchanged.*
+Card play borrows two trigger registries for before and after play.
+
+
+文件: crates/definitions/src/flow/play_card.rs
 
 ```rust
-use crate::base::CardId;
-use crate::families::action_card::areas::support::{
-use crate::families::action_card::def::{PlayCondition, PlayConditionFn, ViewSide};
-use crate::families::action_card::ActionCardType;
-use crate::families::character::satiated::{can_apply_food_effect, can_choose_as_food_target};
-use crate::families::character::zones::equipment::{
-use crate::families::character::zones::field::CharacterZoneTriggers;
-use crate::families::status::arcane_edict::ArcaneEdict;
-use crate::flow::game_end::{settlement_outcome, Outcome};
-use crate::flow::hooks::{apply_defeat_cleanup, DefeatCleanup};
-use crate::flow::pending::{execute_pending, FlowPending, PendingSet};
-use crate::flow::record::FlowRecord;
-use crate::flow::revive::{revive_me, revive_opp, ReviveEnv, ReviveError};
-use crate::keywords::effect::{EffectEnv, TriggerBook};
-use crate::keywords::step::{execute_step_me, execute_step_opp, Step};
-use crate::resources::dice::CostComponent;
-use crate::rules::ops::arcane::ArcanePlay;
-use crate::rules::ops::equip::{CharacterEquip, EquipReject, SlotKind, WeaponType};
-use crate::rules::ops::food::can_revive;
-use crate::rules::ops::stage::{timing_of_card_play, Timing};
-use crate::state::{DefState, PlayerDefs};
-use crate::timeline::{resolve, Event, Pending, Queued, Trigger, TriggerRegistry};
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::{nadd, EntityId, Nat};
-
 /// **两位牌手的行动牌打出注册表**（S7.5 第 1 条：当前牌手优先需要两张表）。
 ///
 /// 两张表是两个具名实例（D34）；谁是当前牌手由 play_card_me / play_card_opp 绑定。
@@ -663,7 +582,14 @@ pub struct PlayCardEnv<'a> {
     /// 不注入时传 crate::flow::hooks::NO_DEFEAT_CLEANUP（行为与旧版完全一致）。
     pub defeat_cleanup: DefeatCleanup,
 }
+```
 
+A card may land as support, equipment, or event. Support carries a duration, equipment carries its slot and weapon gate.
+
+
+文件: crates/definitions/src/flow/play_card.rs
+
+```rust
 /// 行动牌的**落位**（三个变体 = ActionCardType 的三个值；落位数据由调用方按卡牌定义给）。
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CardPlacement<'a> {
@@ -692,7 +618,14 @@ pub enum CardPlacement<'a> {
         effect: Option<&'a Step>,
     },
 }
+```
 
+The request holds the hand entity, current cost, chosen element for same-color costs, placement, and an optional play condition.
+
+
+文件: crates/definitions/src/flow/play_card.rs
+
+```rust
 /// 一次打牌的**请求**（本层不替你选牌 / 目标）。
 pub struct PlayCardRequest<'a> {
     /// 手牌实体号（必须真在手牌里）。
@@ -744,7 +677,14 @@ pub struct PlayCardOutcome {
     /// 本层只产出内容（不持有记录器）：由 flow/recorded.rs 的入口写进调用方给的 Recorder。
     pub events: Vec<FlowRecord>,
 }
+```
 
+The three specialized result types add food revive state and the Arcane edict.
+
+
+文件: crates/definitions/src/flow/play_card.rs
+
+```rust
 /// 料理结算的**复苏参数**（L2 + S8.1 第 4 条；目标在击破区时才需要）。
 #[derive(Clone, Copy)]
 pub struct FoodReviveEnv<'a> {
@@ -773,10 +713,17 @@ pub struct FoodPlayOutcome {
 pub struct ArcanePlayOutcome {
     /// 普通打牌流程的完整结果（分支 / 前后派发 / 时机 / 记录）。
     pub play: PlayCardOutcome,
-    /// 打出后的秘传揭令容器（已 record_play：本局张数 +1、按秘传规则消耗揭令）。
+    /// 打出后的秘传揭令容器（已 record_play：本局张数 +1、按 秘传 消耗揭令）。
     pub edict: ArcaneEdict,
 }
+```
 
+All failures share one error enum, so the caller can match without guessing.
+
+
+文件: crates/definitions/src/flow/play_card.rs
+
+```rust
 /// 打牌失败的原因（所有失败都保证入参不变）。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum PlayCardError {
@@ -803,7 +750,14 @@ pub enum PlayCardError {
     /// 复苏料理不可用（L2 / S8.1 第 4 条）：次数已用完 / 目标不在击破区 / 角色区已满。
     FoodReviveNotAllowed(ReviveError),
 }
+```
 
+The twelve play entries differ by side and by special card type. Read them as pairs.
+
+
+文件: crates/definitions/src/flow/play_card.rs
+
+```rust
 /// **打出行动牌**（我方打出；无「战斗行动」规则 = 快速行动）。
 ///
 /// 带「战斗行动（行动牌）」规则的牌用 [play_card_me_with_timing]（S8.8），否则时机会被
@@ -974,30 +928,14 @@ pub fn play_card_opp_arcane_with_timing(
 }
 ```
 
-### Source: `flow/turn.rs`
+### 3.5 Turn
 
-*Keyword codes in comments have been replaced with names; code lines unchanged.*
+The turn entry borrows phase triggers plus the three zone registries, and exposes a draw hook.
+
+
+文件: crates/definitions/src/flow/turn.rs
 
 ```rust
-use crate::families::action_card::areas::support::{SupportPending, SupportTriggers};
-use crate::families::character::zones::combat_status::{
-use crate::families::summon::zones::{execute_summon, SummonPending, SummonTriggers};
-use crate::flow::fold_states;
-use crate::flow::game_end::{settlement_outcome, Outcome};
-use crate::flow::hooks::{apply_draw_branch, DrawHooks};
-use crate::flow::pending::FlowPending;
-use crate::keywords::target::Perspective;
-use crate::resources::dice::{DicePool, DieFace};
-use crate::rules::ops::opening::{is_opening_round, ElementalTransmutation};
-use crate::rules::ops::order::{EffectSource, SOURCE_ORDER};
-use crate::rules::ops::stage::END_PHASE_DRAW;
-use crate::state::flows::end_phase::{self, EndPhasePending};
-use crate::state::flows::round_begin::begin_round;
-use crate::state::{DefState, PlayerDefs};
-use crate::timeline::{dispatch, Event, Queued, Trigger, TriggerRegistry};
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::{nadd, nsub, EntityId, Nat};
-
 /// 回合里**需要广播的阶段时机键**（D185：由需要广播的块自己定义）。
 ///
 /// 这是**阶段广播**（「现在到哪个阶段了」），不是具体卡牌时机；具体卡的「结束阶段」
@@ -1017,18 +955,6 @@ pub enum TurnTiming {
     /// 回合结束（进入下一个回合之前）。
     RoundEnd,
 }
-
-/// 回合同步的阶段效果函数指针：fn(&mut 对局, &Event, owner)。
-pub type TurnEffect = fn(&mut DefState, &Event, EntityId);
-
-/// 回合同步的阶段触发登记项。
-pub type TurnTrigger = Trigger<TurnTiming, TurnEffect>;
-
-/// 回合同步的阶段触发注册表（每个牌手一个具名实例，D34；本层只接收打出方 / 当前方的那一张）。
-pub type TurnTriggers = TriggerRegistry<TurnTiming, TurnEffect>;
-
-/// 一条待执行（owned；事件按值带走）。
-pub type TurnPending = Queued<TurnEffect>;
 
 /// 回合流程的**外部依赖**（只借不拥有）。
 pub struct TurnEnv<'a> {
@@ -1107,8 +1033,15 @@ pub struct RoundBeginOutcome {
     /// 回合开始后的终局判定（S7.7：第 15 回合开始仍未分胜负 -> 双方都输）。
     pub outcome: Outcome,
 }
+```
 
-/// **元素幻变对投掷阶段的接入开关**（卡面 331004–331012「投掷阶段：总是投出 2 个 X
+Transmutation is an explicit switch: `None` keeps the old roll, `Some` fixes two plus two among eight dice.
+
+
+文件: crates/definitions/src/flow/turn.rs
+
+```rust
+/// **元素幻变（元素幻变）对投掷阶段的接入开关**（卡面 331004–331012「投掷阶段：总是投出 2 个 X
 /// 和 2 个 Y」）。
 ///
 /// **显式开关 / 条件**：调用方只在「对应的元素幻变卡在场 + 队伍元素集合恰等于 {X,Y}（队伍元素集合）」时
@@ -1235,7 +1168,14 @@ impl RoundEndState {
         }
     }
 }
+```
 
+Declaration results and phase errors are small plain enums.
+
+
+文件: crates/definitions/src/flow/turn.rs
+
+```rust
 /// 一次「宣布回合结束」的结果。
 #[derive(Clone, Debug)]
 pub struct DeclareRoundEndOutcome {
@@ -1275,7 +1215,14 @@ pub struct EndPhaseStep {
     /// 待执行本身（出战状态 / 召唤物，统一成 [FlowPending]）。
     pub pending: FlowPending,
 }
+```
 
+The phase functions only dispatch broadcasts or delegate to the state layer.
+
+
+文件: crates/definitions/src/flow/turn.rs
+
+```rust
 /// **回合开始**：双方每回合计数清零 + 回合数 +1（state::flows::round_begin）+ 派发 RoundBegin
 /// + 终局判定（回合上限，S7.7）。
 ///
@@ -1301,67 +1248,11 @@ pub fn begin_next_round(
 ) -> (RoundBeginOutcome, RoundEndState) {
     let next_round = round.start_next_round();
     let RoundBeginOutcome {
-        state: begun,
-        pending,
     // ...
 
 /// **投掷阶段开始**：只派发阶段广播（掷骰结果由下面的 roll_me / roll_opp 给）。
 pub fn roll_phase(state: &DefState, env: &TurnEnv<'_>) -> (DefState, Vec<TurnPending>) {
     (state.clone(), broadcast(env, TurnTiming::RollPhase))
-}
-
-/// **我方投掷 8 颗骰**（投掷阶段；D190：返回骰池分支 + 精确概率，不采样）。
-///
-/// 骰池先清空再投（规则书：每回合的投掷阶段会投掷 8 个元素骰；元素骰不跨回合保留）。
-/// 返回空 Vec 只可能出现在骰池已满（理论不可达：先清空了）。
-/// **不带元素幻变**；有对应卡时用 [roll_me_with_transmutation]（L9）。
-pub fn roll_me(state: &DefState) -> Vec<(DefState, Fraction)> {
-    roll_side(state, true)
-}
-
-/// **敌方投掷 8 颗骰**（与 roll_me 共用一份实现，D35；不带元素幻变）。
-///
-/// 带元素幻变开关时用 [roll_opp_with_transmutation]。
-pub fn roll_opp(state: &DefState) -> Vec<(DefState, Fraction)> {
-    roll_side(state, false)
-}
-
-/// **我方投掷 8 颗骰（带元素幻变开关；L9）**。
-///
-/// `Some` 时按「8 颗里固定 2 个 X + 2 个 Y」生成：等价于「先投 8 颗、再把其中 4 颗转成 2+2」
-/// 的分布（骰子独立同分布；折叠组不能直接 `convert`，所以实现取等价构造 = 4 颗随机 + 2+2 固定）。
-/// `None` -> 与 [roll_me] 完全一致。
-///
-/// TODO（规则书 / 卡面没写清，待实测）：
-/// - 「投掷 2+2」的时序（重投之前 / 之后）与「首次生成」的时序，见留空 #15 / #64；
-/// - 若实测「2+2 是额外追加在 8 颗之外」或「替换的不是 4 颗」，需调整本函数。
-pub fn roll_me_with_transmutation(
-    state: &DefState,
-    transmutation: Option<RollTransmutation>,
-) -> Vec<(DefState, Fraction)> {
-    roll_side_with_transmutation(state, true, transmutation)
-}
-
-/// **敌方投掷 8 颗骰（带元素幻变开关）**（与 [roll_me_with_transmutation] 共用实现，D35）。
-pub fn roll_opp_with_transmutation(
-    state: &DefState,
-    transmutation: Option<RollTransmutation>,
-) -> Vec<(DefState, Fraction)> {
-    roll_side_with_transmutation(state, false, transmutation)
-}
-
-/// **我方重投**：把 rerolled 里列出的骰面各重投几颗（投掷阶段 1 次机会）。
-///
-/// - rerolled = (骰面, 颗数) 列表，必须都在当前骰池里（否则返回空分支：非法选择）；
-/// - 重投的颗数按同样数量重新随机（不限定基础色）；
-/// - 保留的骰子不动（观测已落地为具体骰面，D190：观测后展开成确定值）。
-pub fn reroll_me(state: &DefState, rerolled: &[(DieFace, Nat)]) -> Vec<(DefState, Fraction)> {
-    reroll_side(state, rerolled, true)
-}
-
-/// **敌方重投**（与 reroll_me 共用一份实现）。
-pub fn reroll_opp(state: &DefState, rerolled: &[(DieFace, Nat)]) -> Vec<(DefState, Fraction)> {
-    reroll_side(state, rerolled, false)
 }
 
 /// **行动阶段开始**：派发广播（行动权 / 行动决策由调用方驱动）。
@@ -1427,17 +1318,7 @@ pub fn end_phase_by_first_player(
 ) -> Result<TurnEndOutcome, EndPhaseError> {
     if !round.both_ended() {
         return Err(EndPhaseError::ActionPhaseNotOver);
-    }
-    let Some(first) = round.first_player() else {
-        return Err(EndPhaseError::FirstPlayerUnknown);
-    };
-    // 结束阶段分支里的 DefState 也带上先手牌手（调用方拿到即一致）。
-    let state = state.clone().with_first_player(round.first_player());
-    Ok(match first {
-        Perspective::Me => end_phase_me_first(&state, env),
-        Perspective::Opp => end_phase_opp_first(&state, env),
-    })
-}
+    // ...
 
 /// **回合结束**：派发 RoundEnd（进入下一个回合之前的收尾；抓 2 张牌是牌库块的事）。
 pub fn round_end(state: &DefState, env: &TurnEnv<'_>) -> (DefState, Vec<TurnPending>) {
@@ -1445,16 +1326,83 @@ pub fn round_end(state: &DefState, env: &TurnEnv<'_>) -> (DefState, Vec<TurnPend
 }
 ```
 
-### Source: `flow/revive.rs`
+Roll and reroll helpers expand the dice pool into branches.
+
+
+文件: crates/definitions/src/flow/turn.rs
 
 ```rust
-use crate::base::CardId;
-use crate::families::character::zones::field::{CharacterZonePending, CharacterZoneTriggers};
-use crate::rules::ops::food::can_revive;
-use crate::state::flows::revive::{
-use crate::state::DefState;
-use gi_genius_invokation_engine::{nadd, EntityId, Nat};
+/// **我方投掷 8 颗骰（带元素幻变开关；L9）**。
+///
+/// `Some` 时按「8 颗里固定 2 个 X + 2 个 Y」生成：等价于「先投 8 颗、再把其中 4 颗转成 2+2」
+/// 的分布（骰子独立同分布；折叠组不能直接 `convert`，所以实现取等价构造 = 4 颗随机 + 2+2 固定）。
+/// `None` -> 与 [roll_me] 完全一致。
+///
+/// TODO（规则书 / 卡面没写清，待实测）：
+/// - 「投掷 2+2」的时序（重投之前 / 之后）与「首次生成」的时序，见留空 #15 / #64；
+/// - 若实测「2+2 是额外追加在 8 颗之外」或「替换的不是 4 颗」，需调整本函数。
+pub fn roll_me_with_transmutation(
+    state: &DefState,
+    transmutation: Option<RollTransmutation>,
+) -> Vec<(DefState, Fraction)> {
+    roll_side_with_transmutation(state, true, transmutation)
+}
 
+/// **敌方投掷 8 颗骰（带元素幻变开关）**（与 [roll_me_with_transmutation] 共用实现，D35）。
+pub fn roll_opp_with_transmutation(
+    state: &DefState,
+    transmutation: Option<RollTransmutation>,
+) -> Vec<(DefState, Fraction)> {
+    roll_side_with_transmutation(state, false, transmutation)
+}
+
+/// **我方投掷 8 颗骰（带元素幻变开关；L9）**。
+///
+/// `Some` 时按「8 颗里固定 2 个 X + 2 个 Y」生成：等价于「先投 8 颗、再把其中 4 颗转成 2+2」
+/// 的分布（骰子独立同分布；折叠组不能直接 `convert`，所以实现取等价构造 = 4 颗随机 + 2+2 固定）。
+/// `None` -> 与 [roll_me] 完全一致。
+///
+/// TODO（规则书 / 卡面没写清，待实测）：
+/// - 「投掷 2+2」的时序（重投之前 / 之后）与「首次生成」的时序，见留空 #15 / #64；
+/// - 若实测「2+2 是额外追加在 8 颗之外」或「替换的不是 4 颗」，需调整本函数。
+pub fn roll_me_with_transmutation(
+    state: &DefState,
+    transmutation: Option<RollTransmutation>,
+) -> Vec<(DefState, Fraction)> {
+    roll_side_with_transmutation(state, true, transmutation)
+}
+
+/// **敌方投掷 8 颗骰（带元素幻变开关）**（与 [roll_me_with_transmutation] 共用实现，D35）。
+pub fn roll_opp_with_transmutation(
+    state: &DefState,
+    transmutation: Option<RollTransmutation>,
+) -> Vec<(DefState, Fraction)> {
+    roll_side_with_transmutation(state, false, transmutation)
+}
+
+/// **我方重投**：把 rerolled 里列出的骰面各重投几颗（投掷阶段 1 次机会）。
+///
+/// - rerolled = (骰面, 颗数) 列表，必须都在当前骰池里（否则返回空分支：非法选择）；
+/// - 重投的颗数按同样数量重新随机（不限定基础色）；
+/// - 保留的骰子不动（观测已落地为具体骰面，D190：观测后展开成确定值）。
+pub fn reroll_me(state: &DefState, rerolled: &[(DieFace, Nat)]) -> Vec<(DefState, Fraction)> {
+    reroll_side(state, rerolled, true)
+}
+
+/// **敌方重投**（与 reroll_me 共用一份实现）。
+pub fn reroll_opp(state: &DefState, rerolled: &[(DieFace, Nat)]) -> Vec<(DefState, Fraction)> {
+    reroll_side(state, rerolled, false)
+}
+```
+
+### 3.6 Revive and technique
+
+Revive adds the per-round count and consumes the card id, delegating the zone work to the state layer.
+
+
+文件: crates/definitions/src/flow/revive.rs
+
+```rust
 /// 一次复苏的**外部依赖**（只借不拥有）。
 pub struct ReviveEnv<'a> {
     /// 角色区触发注册表（复苏会派发「进入角色区」时机）。
@@ -1592,19 +1540,12 @@ pub fn revive_opp(
 }
 ```
 
-### Source: `flow/technique.rs`
+A technique is a combat action, pays an optional card-face cost, and dispatches no skill-used trigger.
 
-*Keyword codes in comments have been replaced with names; code lines unchanged.*
+
+文件: crates/definitions/src/flow/technique.rs
 
 ```rust
-use crate::families::character::skill_flow::technique::{
-use crate::families::character::skill_flow::{SkillPending, SkillTriggers};
-use crate::families::character::zones::equipment::EquipmentZone;
-use crate::resources::dice::CostComponent;
-use crate::rules::ops::stage::Timing;
-use crate::state::DefState;
-use gi_genius_invokation_engine::EntityId;
-
 /// 特技流程的**外部依赖**（只借不拥有）。
 pub struct TechniqueEnv<'a> {
     /// 「使用技能时 / 后」的注册表 —— 只用来调用 dispatch_technique 证明**恒空**（特技）。
@@ -1651,7 +1592,7 @@ pub struct TechniqueOutcome {
     pub used: TechniqueUse,
     /// 行动权：战斗行动（S8.4 第 2 条；= used.timing，方便直接读）。
     pub timing: Timing,
-    /// 特技第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
+    /// 特技 第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
     pub skill_used: Vec<SkillPending>,
     /// 是否真的从骰池收了卡面费用（cost 为 None -> false）。
     pub paid_cost: bool,
@@ -1724,7 +1665,7 @@ pub struct TechniqueOutcome {
     pub used: TechniqueUse,
     /// 行动权：战斗行动（S8.4 第 2 条；= used.timing，方便直接读）。
     pub timing: Timing,
-    /// 特技第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
+    /// 特技 第 4 条：特技不派发「使用技能时 / 后」-> **恒空**（可观测 / 可测试）。
     pub skill_used: Vec<SkillPending>,
     /// 是否真的从骰池收了卡面费用（cost 为 None -> false）。
     pub paid_cost: bool,
@@ -1756,14 +1697,14 @@ pub fn use_technique_opp(
 }
 ```
 
-### Source: `flow/elemental_transmutation.rs`
+### 3.7 Transmutation and action timing
 
-*Keyword codes in comments have been replaced with names; code lines unchanged.*
+Transmutation helpers convert dice after a roll or during the opening; they return `None` when nothing applies.
+
+
+文件: crates/definitions/src/flow/elemental_transmutation.rs
 
 ```rust
-use crate::rules::ops::opening::{is_opening_round, ElementalTransmutation};
-use crate::state::DefState;
-
 /// **投掷阶段 2+2 转换（我方）**：把 4 颗骰转成该卡两元素各 2 颗（总数不变）。
 ///
 /// 调用时点：`flow::turn::roll_me` 的某一支骰池观测完成之后（本钩子不改 roll 流程）。
@@ -1782,7 +1723,7 @@ pub fn transmute_roll_phase_opp(
     Some(with_dice(state, false, converted))
 }
 
-/// **「首次生成」4 骰 -> 2+2（我方）**：只在**第 1 轮**生效（留空 #64 的判据）。
+/// **「首次生成」4 骰 -> 2+2（我方）**：只在**第 1 轮**生效（元素幻变 / 留空 #64 的判据）。
 ///
 /// 调用时点：第 1 轮行动阶段开始时（具体在抓牌 / 弃牌 / 上场前后的哪一步待实测，见模块 TODO）。
 /// 非第 1 轮 / 骰子不足 4 -> None（不改入参）。
@@ -1804,11 +1745,12 @@ pub fn transmute_opening_opp(state: &DefState, rule: ElementalTransmutation) -> 
 }
 ```
 
-### Source: `rules/ops/stage.rs` (action-timing helper used by `play_card_*`)
+Card play timing comes from one rule helper, so the flow does not guess the action type.
+
+
+文件: crates/definitions/src/rules/ops/stage.rs
 
 ```rust
-use gi_genius_invokation_engine::Nat;
-
 /// 打出一张**行动牌**的行动权：默认快速行动；带「战斗行动」标签时改为战斗行动
 /// （规则书·特殊词条 战斗行动（行动牌））。
 pub fn timing_of_card_play(has_combat_action_tag: bool) -> Timing {
@@ -1823,80 +1765,73 @@ pub fn timing_of_card_play(has_combat_action_tag: bool) -> Timing {
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
-> Pure functions: the input `&DefState` is unchanged; on `Err` or zero branches the state is unchanged.
-> Every random point expands into branches + exact `Fraction`, never sampling; branch probabilities must sum to 1.
-> A step is the atomic unit (D204): no insertion inside a step; flow flushes / inserts only at step end / step boundary.
+
+> Flows are pure: the input `&DefState` is unchanged, and every random point expands into exact branches.
+
+> Insertion only happens at step boundaries; a step is atomic.
 
 > [!WARNING]
-> `before` (skill / before play) has already been executed by flow; `PlayCardOutcome::after`, `support_me/opp` and branch `pending` are not executed.
-> `TurnEndOutcome::end_phase` / `pending` are already executed in order; do not execute them again.
-> Advancing the right to act is not flow's job: `timing` only reports the timing; it does not switch the acting side.
 
-## 5. Basis (rulebook and D numbers)
+> Do not execute the `before` pending items again; the flow already ran them.
 
-| Rule / decision | Landing point |
-|---|---|
-| S3.1 actions (Fast / Combat) + S8.8 Combat Action (Action Card) | `play_card_*_with_timing` / `timing_of_card_play` (D263) |
-| S2.4 End Phase "1 effects -> 2 draw" | `turn::turn_end` (D262) |
-| S7.5 settlement order (current player -> source kind -> entry order) | dispatch ordering in `skill_use` / `play_card` / `turn` |
-| S8.10 Plunging Attack | `use_skill_*_with_plunging` + `battle_action_end_*` (D256 / D261) |
-| S8.1 Food (Satiated / one revive per round) | `play_card_*_food` + `flow::revive` (L1 / L2) |
-| Technique (Combat Action, no SkillUsed dispatch, damage not dealt by the character) | `flow::technique` (L4) |
-| Z12 / Arcane (one per player / edict consumption) | `play_card_*_arcane` (D264) |
-| Z6 support-card duration | `CardPlacement::Support{duration}` + support tick |
-| L9 Elemental Transmutation | `roll_*_with_transmutation` + `flow::elemental_transmutation` |
-| D186 dispatch only orders, does not execute | `pending.rs` + the per-entry documentation |
-| D190 / D191 observation expansion + folding | branches + `fold_states` |
-| D196 insertion-based settlement (not a stack) | `timeline::Resolution` / `SkillFrames` / `ReactionFrames` |
-| D204 / D208 step atomicity, Repeat in the same step | `execute_step_*` / `execute_steps_*` |
-| D225 / D227 flow recording | `FlowRecord` + `flow/recorded.rs` |
-| D255 settle -> clean up -> terminal | `DefeatCleanup` injection |
-| D267 / D268 double loss | `settlement_outcome` -> `Outcome::BothLose` |
-| D270 round-7 wrap-up | this page matches the 1130-test baseline |
+> `after`, support pending, and branch pending are not executed by the flow.
+
+## 5. Basis
+
+- S3.1 and S8.8: Fast and Combat actions, and the combat-action tag on action cards;
+- S2.4: End Phase executes effects before drawing;
+- S7.5: current player, then source kind, then entry order;
+- S8.10: plunging attack and its cleanup;
+- S8.1: Food, Satiated, and one revive per round;
+- Special keyword Technique: combat action, no SkillUsed dispatch;
+- Z12: Arcane, one per player and edict consumption;
+- D186: dispatch only orders;
+- D190 and D191: observation expansion and folding;
+- D196: insertion-based settlement;
+- D204 and D208: atomic step and Repeat;
+- D225 and D227: flow records;
+- D255: settle, clean up, judge;
+- D267 and D268: double loss;
+- D270: round-7 wrap-up.
 
 ## 6. Common misuse
 
 > [!WARNING]
-> Executing `SkillOutcome::before` / `PlayCardOutcome::before` again; they are already executed and kept only for observation / recording.
-> Manually calling insert / execute_pending inside a step executor; insertion only happens at step boundaries (D204).
-> Sending Arcane cards through the normal `play_card_me`; the normal entry does no edict check / accounting (Z12 has dedicated entries).
 
-> [!TIP]
-> Defeat cleanup before terminal: inject a real implementation via `SkillFlowEnv::defeat_cleanup` / `PlayCardEnv::defeat_cleanup` (default no-op).
-> Correct cost table after drawing: inject `TurnEnv::draw = DrawHooks::with_base_cost(...)` for the End Phase; opening draws in `state/flows/opening` already include `base_cost`.
+> Treating `before` as unexecuted, or re-running `TurnEndOutcome::end_phase`.
 
-- Playing a Food card without `FoodReviveEnv` while expecting a target in the defeat zone: you will get `FoodTargetNotAllowed`.
-- Treating `TechniqueOutcome::skill_used` as dispatchable: it is always empty (a technique does not trigger skill-use timings).
-- Using `transmute_roll_phase_*` instead of `roll_*_with_transmutation`: the direct hook only converts 4 dice and does not generate 8-die branches.
+> Playing an Arcane card through the normal entry, which does no edict accounting.
+
+- Playing a Food card without `FoodReviveEnv` while expecting a defeat-zone target;
+- Expecting `TechniqueOutcome::skill_used` to dispatch;
+- Using the direct transmutation hook instead of the roll entry.
 
 ## 7. Tests
 
-- `flow/skill_use.rs`: `skill_end_to_end_pays_damages_and_runs_reaction`, `skill_fails_without_enough_dice_and_changes_nothing`, `skill_pays_energy_for_burst_style_effects`, `skill_damage_goes_through_shield_and_reduction`, `after_skill_pending_is_inserted_at_the_current_settlement_position`, `before_skill_pending_is_dispatched_and_executed_before_the_effect_body`, `passive_skill_cannot_be_used_and_changes_nothing`, `damage_plan_without_enemy_active_character_is_rejected`, `opp_entry_uses_the_same_pipeline_and_binds_sides_correctly`, `step_effect_body_matches_the_plan_path_on_the_same_damage`, `step_pending_is_flushed_at_the_step_boundary_before_the_after_insertion`, `after_skill_triggers_follow_current_player_first_*`, `plunging_mark_turns_the_next_normal_attack_into_plunging_and_is_cleared`, `use_skill_reads_the_plunging_mark_from_state_and_clears_it_after_the_action`, `defeat_cleanup_runs_before_the_terminal_judgement`, `skill_branch_outcome_waits_for_defeat_cleanup`.
-- `flow/play_card.rs`: `support_card_goes_to_the_support_zone_and_pays_dice`, `full_support_zone_returns_one_branch_per_discard_choice`, `equipment_card_goes_to_the_equipment_zone_of_the_target_character`, `event_card_step_effect_runs_at_the_step_boundary`, `before_play_pending_is_executed_and_after_pending_is_returned`, `condition_is_checked_before_the_cost_check`, `play_card_triggers_follow_current_player_first_with_two_registries`, `card_play_timing_is_fast_unless_the_card_has_the_combat_action_rule`, `arcane_play_consumes_the_edict_and_rejects_the_second_play`, `food_play_marks_the_target_satiated`, `revive_food_puts_the_target_back_and_marks_it_satiated`, `defeat_cleanup_runs_before_the_terminal_judgement`.
-- `flow/turn.rs`: `round_begin_resets_skill_uses_and_dispatches_the_broadcast`, `roll_me_returns_eight_dice_branches_with_probability_one`, `reroll_keeps_dice_count_and_replaces_the_selected_ones`, `end_phase_ticks_combat_status_and_summons`, `end_phase_ticks_support_durations_and_returns_pending_to_callers`, `end_phase_draws_two_cards_for_each_side`, `end_phase_draw_branches_combine_with_exact_probabilities`, `end_phase_branch_carries_the_terminal_outcome`, `declare_round_end_records_first_declarer_and_opens_the_end_phase`, `first_declarer_becomes_the_next_round_first_player`, `ordered_end_phase_follows_the_first_player`, `end_phase_effects_execute_before_the_draw`, `roll_with_transmutation_guarantees_two_plus_two_among_eight_dice`, `opening_transmutation_applies_in_round_one`, `end_phase_draw_syncs_costs_and_materializes_drawn_marks`.
-- `flow/game_end.rs`: `settlement_outcome_reads_the_state_without_changing_it`, `unstarted_or_ongoing_games_are_not_terminal`.
-- `flow/hooks.rs`: `draw_hooks_sync_the_cost_table_for_new_hand_cards`, `draw_branch_materializes_drawn_marks_into_hand_card_states`, `apply_defeat_cleanup_cleans_both_sides_and_merges_pending`, `default_cleanup_is_a_noop`.
-- `flow/revive.rs`: `revive_puts_the_character_back_and_counts_once`, `revive_is_rejected_when_the_round_count_is_used_up`, `revive_rejects_characters_that_are_not_defeated`, `revive_rejects_a_full_character_zone`, `revive_opp_does_not_touch_me`.
-- `flow/technique.rs`: `technique_is_a_combat_action_and_dispatches_no_skill_used`, `technique_without_a_card_cost_does_not_pay`, `technique_rejection_reasons_are_surfaced`, `technique_rejects_when_the_card_cost_cannot_be_paid`, `use_technique_opp_binds_the_other_side`.
-- `flow/elemental_transmutation.rs`: `roll_phase_hook_turns_four_dice_into_two_plus_two`, `roll_phase_hook_rejects_fewer_than_four_dice_without_changing_state`, `opening_hook_only_applies_in_round_one`, `hook_is_additive_and_does_not_change_existing_flow_results`.
+- `flow/skill_use.rs`: end-to-end damage, payment failure, insertion, step path, plunging, cleanup before terminal;
+- `flow/play_card.rs`: support, equipment, event step, timing, Arcane, Food, revive Food, cleanup;
+- `flow/turn.rs`: round start, rolls, End Phase ticks and draws, declaration, transmutation, draw hooks;
+- `flow/hooks.rs`: cost sync, marks, cleanup merging, default no-op;
+- `flow/revive.rs` and `flow/technique.rs`: paired entries and rejections.
 
-## 8. Pending integration and to-be-verified
+## 8. Pending integration
 
 > [!NOTE]
-> Several old 留空 entries (#66 / #67 / #68 / #89 / #90 / #97 / #105 / #108 / #110 / #122) are covered by round-7 work,
-> but only the §22 summary was updated; the body wording still needs a uniform pass (see delivery message and 留空).
 
-- `DefeatCleanup` is currently a whole-side pure function (not per-character + `DefeatHpReset`); it is only injected into `use_skill_*` / `play_card_*`, and the End Phase branch is not injected yet (留空 §22 #122).
-- `drawn_marks` materialization does not dispatch "hand-card state added" triggers (留空 §22 #122).
-- The End Phase phase broadcast has only one `TurnTriggers` table (the opponent side is pending, 留空 #91).
-- Support-card duration decrement timing (留空 #67/#93) and the "support effects vs draw" order deviation (留空 #94).
-- L9 transmutation timing and trigger conditions are supplied by the card layer (留空 #108/#118/#122).
-- The Arcane edict container is held by the caller (`ArcaneEdict`, D264); the order of the check relative to the D217 condition is not specified (留空 #99).
-- Revive vs Food taking effect / HP after revive / target-side restriction: 留空 #109/#119.
-- Whether a technique consumes a per-round usage / cost rules / target legality: 留空 #85/#86/#101.
-- Recorder paths: `play_card_*_recorded_with_timing` exists; `use_skill_*_recorded` has no `_with_plunging` variant (to be confirmed).
-- Advancing the right to act is not flow's job (`DefRules::to_move` is still a placeholder; see [[定义层-State-EN]]).
+> The cleanup signature is a whole-side pure function, not per-character plus reset data.
+
+> Cleanup is only injected into skill use and card play; the End Phase is not wired yet.
+
+- End Phase phase broadcast uses a single trigger table; the opponent side is pending;
+- Support duration timing and its order relative to drawing are to be verified;
+- Arcane check order relative to the play condition is not defined;
+- Technique usage count, cost rules, and target legality are not defined;
+- Recorded skill entries have no plunging variant.
+
+## Summary
+
+A flow is a pipeline, not a black box: validate, pay, dispatch, execute one step, flush, clean up, judge. Read the pending ownership before executing anything.
 
 ---
 
-Last verified: 2026-10-19 (code: `crates/definitions/src/flow/`; `flow/hooks.rs`:DefeatCleanup / DrawHooks)
+Last verified: 2026-10-20 (code: `crates/definitions/src/flow/`; `rules/ops/stage.rs`)

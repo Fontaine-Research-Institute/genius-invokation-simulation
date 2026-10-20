@@ -6,19 +6,19 @@
 
 ---
 
+
 ## 1. Responsibility
 
 Provide **behavior-free, state-free** base data: `Element`, `CardFamily` (= id region), `CardId` / `SkillId`, and `Perspective`; plus the shared convention that state identities **use pointers as identity** (implementation: `families/action_card/status/state.rs`, not the `base/` directory).
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `Element` | `crates/definitions/src/base/element.rs` | Seven elements in fixed order Pyro / Hydro / Electro / Dendro / Cryo / Anemo / Geo; no numeric or priority semantics; `ELEMENTS` is the only complete array |
-| `CardFamily` | `crates/definitions/src/base/family.rs` | ActionCard / Character / Summon / Status / Enemy; **the family defines the id region**, so ids are not guaranteed unique across families |
-| `CardId` / `SkillId` | `crates/definitions/src/base/id.rs` | `#[repr(transparent)]` newtypes over `Nat`; `CardId` is unique only within its family; `SkillId` is derived from the character id (×10 + index) |
-| `Perspective` | `crates/definitions/src/base/perspective.rs` | "Our side / opponent" are two named relative-side instances (`Me` / `Opp`), not numbers; `other()` flips |
-| `StateIdentity` / `identity_address` | `crates/definitions/src/families/action_card/status/state.rs` | Identity = **the address of the definition data**, not the address of `&dyn` |
+- ---: ---; ---
+- `Element`: Seven elements in fixed order Pyro / Hydro / Electro / Dendro / Cryo / Anemo / Geo; no numeric or priority semantics; `ELEMENTS` is the only complete array (文件: `crates/definitions/src/base/element.rs`)
+- `CardFamily`: ActionCard / Character / Summon / Status / Enemy; **the family defines the id region**, so ids are not guaranteed unique across families (文件: `crates/definitions/src/base/family.rs`)
+- `CardId` / `SkillId`: `#[repr(transparent)]` newtypes over `Nat`; `CardId` is unique only within its family; `SkillId` is derived from the character id (×10 + index) (文件: `crates/definitions/src/base/id.rs`)
+- `Perspective`: "Our side / opponent" are two named relative-side instances (`Me` / `Opp`), not numbers; `other()` flips (文件: `crates/definitions/src/base/perspective.rs`)
+- `StateIdentity` / `identity_address`: Identity = **the address of the definition data**, not the address of `&dyn` (文件: `crates/definitions/src/families/action_card/status/state.rs`)
 
 ### Why identity_address does not compare &dyn addresses
 
@@ -28,13 +28,12 @@ Every identity therefore owns exactly one definition data item (`StateText` / `S
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `CardId::new(v: u32) -> CardId` | `base/id.rs` | `const`; ids always use newtypes, never bare integers |
-| `SkillId::new(v: u32) -> SkillId` | `base/id.rs` | `const`; skill ids derive from character ids |
-| `Perspective::other(self) -> Perspective` | `base/perspective.rs` | `const`; paired entry points bind the perspective |
-| `StateIdentity::{text, form, identity_address, name}` | `families/action_card/status/state.rs` | Identity trait; `name` defaults to Chinese |
-| `same_state_identity(left, right)` | same | Compares `identity_address`; the only correct comparison |
+- ---: ---; ---
+- `CardId::new(v: u32) -> CardId`: `const`; ids always use newtypes, never bare integers (文件: `base/id.rs`)
+- `SkillId::new(v: u32) -> SkillId`: `const`; skill ids derive from character ids (文件: `base/id.rs`)
+- `Perspective::other(self) -> Perspective`: `const`; paired entry points bind the perspective (文件: `base/perspective.rs`)
+- `StateIdentity::{text, form, identity_address, name}`: Identity trait; `name` defaults to Chinese (文件: `families/action_card/status/state.rs`)
+- `same_state_identity(left, right)`: same; Compares `identity_address`; the only correct comparison
 
 Example references (type + file + note): `ELEMENTS: [Element; 7]` in `base/element.rs`; the state trait in `families/action_card/status/state.rs`.
 
@@ -43,7 +42,9 @@ Example references (type + file + note): `ELEMENTS: [Element; 7]` in `base/eleme
 > [!NOTE]
 > The excerpts below are copied from the current repository (signatures and doc comments; bodies omitted where not needed — see the file for the full implementation).
 
-**`crates/definitions/src/base/element.rs`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/base/element.rs`
 
 ```rust
 
@@ -67,7 +68,9 @@ pub enum Element {
 }
 ```
 
-**`crates/definitions/src/base/family.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/base/family.rs`
 
 ```rust
 
@@ -87,7 +90,9 @@ pub enum CardFamily {
 }
 ```
 
-**`crates/definitions/src/base/id.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/base/id.rs`
 
 ```rust
 /// 卡牌 id：某个牌族 id 空间内的编号（跨牌族不保证唯一）。
@@ -103,7 +108,9 @@ impl CardId {
 }
 ```
 
-**`crates/definitions/src/base/perspective.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/base/perspective.rs`
 
 ```rust
 /// 卡面写法里不出现它（写的是 `SideScope::Own` / `SideScope::Opponent`，
@@ -117,7 +124,9 @@ pub enum Perspective {
 }
 ```
 
-**`crates/definitions/src/families/action_card/status/state.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/families/action_card/status/state.rs`
 
 ```rust
 /// 状态身份（D95/D96/D110）：具体状态模块定义自己的零大小类型 + 一份静态实例；
@@ -172,6 +181,8 @@ pub fn same_state_identity(
     std::ptr::eq(left.identity_address(), right.identity_address())
 }
 ```
+
+The file's current public interface is shown above; bodies are omitted.
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
@@ -187,13 +198,11 @@ pub fn same_state_identity(
 > [!NOTE]
 > Evidence priority: rulebook > authoritative keywords > card text (D122). All numbers below are in `决策日志.md`.
 
-| Number | Conclusion |
-|---|---|
-| D51 | Character status / combat status share one id region of the status family |
-| D53 / D54 | Tags are zero-sized types in the independent top-level `tags/` directory, one file per tag |
-| D29 / D34 | enemy/ally are named relative-side instances, not numbers |
-| D57 / D58 | Identity = the address of the definition data |
-| D67 | The runtime identity of a tag = `&TAGS.<field>` |
+- D51: Character status / combat status share one id region of the status family
+- D53 / D54: Tags are zero-sized types in the independent top-level `tags/` directory, one file per tag
+- D29 / D34: enemy/ally are named relative-side instances, not numbers
+- D57 / D58: Identity = the address of the definition data
+- D67: The runtime identity of a tag = `&TAGS.<field>`
 
 ## 6. Common misuse
 
@@ -206,19 +215,23 @@ pub fn same_state_identity(
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| `base/element.rs` | `element_enum_is_complete_and_ordered`, `elements_are_all_distinct` |
-| `base/family.rs` | `card_family_has_all_five_id_regions`, `card_family_is_not_a_numeric_encoding` |
-| `base/id.rs` | `id_is_transparent_over_nat`, `uniqueness_is_per_family_not_global`, `skill_id_is_a_nat_newtype` |
-| `base/perspective.rs` | `other_flips_between_the_two_named_sides` |
-| `families/action_card/status/state.rs` | different ZST identities may share an address and must be distinguished via `identity_address` |
+- `base/element.rs`: `element_enum_is_complete_and_ordered`, `elements_are_all_distinct`
+- `base/family.rs`: `card_family_has_all_five_id_regions`, `card_family_is_not_a_numeric_encoding`
+- `base/id.rs`: `id_is_transparent_over_nat`, `uniqueness_is_per_family_not_global`, `skill_id_is_a_nat_newtype`
+- `base/perspective.rs`: `other_flips_between_the_two_named_sides`
+- `families/action_card/status/state.rs`: different ZST identities may share an address and must be distinguished via `identity_address`
 
 ## 8. Not yet wired and to be verified
 
 - `留空.md#16`: reaction identities are ZSTs and `identity_address` defaults to the name-string data address; the plan is one static `ReactionDef` per reaction (affects the 14 reaction files).
 - `留空.md#6`: the initial deck / game-setup flow is not implemented (`cards_in_initial_deck` only accepts an externally supplied `&[CardId]`).
 
+## Summary
+
+This page defines the lowest data layer: elements, card families, ids and perspective are static identifiers without numeric semantics, and uniqueness is per family rather than global. Identity comparison must use the definition-data address and same_state_identity, never a raw &dyn pointer. Later modules follow this page for id conventions and identity rules.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/base/id.rs:CardId)

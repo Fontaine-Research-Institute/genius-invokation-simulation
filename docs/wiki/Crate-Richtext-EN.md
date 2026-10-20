@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Responsibility
+## 1. Responsibility (What This Layer Solves)
 
 Raw marked-up text -> neutral segment sequence. It recognizes syntax structure only (color tags, `$[` placeholders, `${[` tokens, `{SPRITE_PRESET#...}` icons, plain text); it knows nothing about languages, name tables, cards, tags, or keywords. Parsing is strict: any unrecognized content returns an error, with no fallback branch.
 
@@ -16,47 +16,72 @@ Raw marked-up text -> neutral segment sequence. It recognizes syntax structure o
 
 ## 2. Key Concepts and Types
 
-| Concept | Location | Notes |
-|---|---|---|
-| Segment | `src/parse.rs`: `Segment` | `Text` / `ColorStart` / `ColorEnd` / `Keyword { code, variant }` / `Card` / `Character` / `Skill` / `Damage` / `Variable` / `TokenValue` / `Icon` |
-| Damage placeholder | `src/parse.rs`: `DamageKey` | `Element` / `Damage` / `Numbered(u32)`; `marker()` rebuilds the raw marker |
-| Parse error | `src/parse.rs`: `ParseError` | `position` (byte index) + `found` + `expected`; `line_col()` / `snippet()` / `Display` / `Error` |
-| Any-match whitelist | `src/parse.rs`: `AnyMatch` / `ALLOWED_ANY_MATCHES` | the only wildcard point is the color value (`ColorDigits`, D65) |
-| Fixed allow-lists | `src/parse.rs` | `KEYWORD_VARIANTS = ["s1"]`, `SPRITE_PRESETS` (43), `TOKEN_VALUES` (1): enumerated, fixed matching, unregistered means failure (D65 / D66) |
-| Parse entry | `src/parse.rs`: `parse()` | whole text -> `Result<Vec<Segment>, ParseError>` |
-| Crate exports | `src/lib.rs` | re-exports `Segment` / `parse` / `ParseError` / `AnyMatch` / `DamageKey` / the three allow-lists; `#![forbid(unsafe_code)]` |
-| Tests | `src/tests.rs` | 17 unit tests + 1 doctest |
+- Segment
+  - Location: `src/parse.rs`: `Segment`
+  - Notes: `Text` / `ColorStart` / `ColorEnd` / `Keyword { code, variant }` / `Card` / `Character` / `Skill` / `Damage` / `Variable` / `TokenValue` / `Icon`
+- Damage placeholder
+  - Location: `src/parse.rs`: `DamageKey`
+  - Notes: `Element` / `Damage` / `Numbered(u32)`; `marker()` rebuilds the raw marker
+- Parse error
+  - Location: `src/parse.rs`: `ParseError`
+  - Notes: `position` (byte index) + `found` + `expected`; `line_col()` / `snippet()` / `Display` / `Error`
+- Any-match whitelist
+  - Location: `src/parse.rs`: `AnyMatch` / `ALLOWED_ANY_MATCHES`
+  - Notes: the only wildcard point is the color value (`ColorDigits`, D65)
+- Fixed allow-lists
+  - Location: `src/parse.rs`
+  - Notes: `KEYWORD_VARIANTS = ["s1"]`, `SPRITE_PRESETS` (43), `TOKEN_VALUES` (1): enumerated, fixed matching, unregistered means failure (D65 / D66)
+- Parse entry
+  - Location: `src/parse.rs`: `parse()`
+  - Notes: whole text -> `Result<Vec<Segment>, ParseError>`
+- Crate exports
+  - Location: `src/lib.rs`
+  - Notes: re-exports `Segment` / `parse` / `ParseError` / `AnyMatch` / `DamageKey` / the three allow-lists; `#![forbid(unsafe_code)]`
+- Tests
+  - Location: `src/tests.rs`
+  - Notes: 17 unit tests + 1 doctest
 
 **Accepted marker forms**
 
-| Form | Example | Output |
-|---|---|---|
-| Color | `<color=#FFFFFFFF>` / `</color>` | `ColorStart("#FFFFFFFF")` / `ColorEnd` (color value is the only any-match) |
-| Keyword | `$[K<id>]`, `$[K<id>|s1]` | `Keyword { code, variant }` (variant may only be `s1`) |
-| Name reference | `$[C114181]` / `$[A1418]` / `$[S14181]` | `Card` / `Character` / `Skill` |
-| Damage placeholder | `$[D__KEY__ELEMENT]` / `$[D__KEY__DAMAGE_1]` | `Damage(DamageKey)` |
-| Runtime variable | `$[G16121]` | `Variable` (kept as-is) |
-| Token value | `${[GCG_TOKEN_SHIELD]}` | `TokenValue` (name must be in `TOKEN_VALUES`) |
-| Icon | `{SPRITE_PRESET#3503}` | `Icon` (preset must be in `SPRITE_PRESETS`) |
+- Color
+  - Example: `<color=#FFFFFFFF>` / `</color>`
+  - Output: `ColorStart("#FFFFFFFF")` / `ColorEnd` (color value is the only any-match)
+- Keyword
+  - Example: `$[K<id>]`, `$[K<id>|s1]`
+  - Output: `Keyword { code, variant }` (variant may only be `s1`)
+- Name reference
+  - Example: `$[C114181]` / `$[A1418]` / `$[S14181]`
+  - Output: `Card` / `Character` / `Skill`
+- Damage placeholder
+  - Example: `$[D__KEY__ELEMENT]` / `$[D__KEY__DAMAGE_1]`
+  - Output: `Damage(DamageKey)`
+- Runtime variable
+  - Example: `$[G16121]`
+  - Output: `Variable` (kept as-is)
+- Token value
+  - Example: `${[GCG_TOKEN_SHIELD]}`
+  - Output: `TokenValue` (name must be in `TOKEN_VALUES`)
+- Icon
+  - Example: `{SPRITE_PRESET#3503}`
+  - Output: `Icon` (preset must be in `SPRITE_PRESETS`)
 
 ## 3. Public Entry Points
 
-| Entry point | Signature |
-|---|---|
-| `parse` | `pub fn parse(raw: &str) -> Result<Vec<Segment>, ParseError>` |
-| `Segment::any_match` | `pub fn any_match(&self) -> Option<AnyMatch>` (exhaustive match) |
-| `Segment::raw_marker` | `pub fn raw_marker(&self) -> Option<String>` (rebuild placeholder text) |
-| `DamageKey::marker` | `pub fn marker(self) -> String` |
-| `ParseError::line_col` / `snippet` | `(&self, raw: &str) -> (usize, usize)` / `-> String` |
-| Allow-list consts | `ALLOWED_ANY_MATCHES` / `KEYWORD_VARIANTS` / `SPRITE_PRESETS` / `TOKEN_VALUES` |
+- `parse`: `pub fn parse(raw: &str) -> Result<Vec<Segment>, ParseError>`
+- `Segment::any_match`: `pub fn any_match(&self) -> Option<AnyMatch>` (exhaustive match)
+- `Segment::raw_marker`: `pub fn raw_marker(&self) -> Option<String>` (rebuild placeholder text)
+- `DamageKey::marker`: `pub fn marker(self) -> String`
+- `ParseError::line_col` / `snippet`: `(&self, raw: &str) -> (usize, usize)` / `-> String`
+- Allow-list consts: `ALLOWED_ANY_MATCHES` / `KEYWORD_VARIANTS` / `SPRITE_PRESETS` / `TOKEN_VALUES`
 
 > [!NOTE]
 > The definitions side only `pub use`s this crate's parser (`generated::text`) and keeps no second parser (D75 / D76); rendering lives in `definitions/src/generated/text/render.rs`.
 
 ### 3.1 Real Source Excerpts
-**Damage placeholder `DamageKey`**
 
-`new/crates/richtext/src/parse.rs:58-67`
+The implementation of Damage placeholder `DamageKey` follows:
+
+File: crates/richtext/src/parse.rs:58-67
 
 ```rust
 /// `$[D__KEY__…]` 占位符的三种形态。
@@ -71,9 +96,12 @@ pub enum DamageKey {
 }
 ```
 
-**Any-match class `AnyMatch`**
+The code above defines Damage placeholder `DamageKey`; see the file for the full implementation.
 
-`new/crates/richtext/src/parse.rs:24-35`
+
+The implementation of Any-match class `AnyMatch` follows:
+
+File: crates/richtext/src/parse.rs:24-35
 
 ```rust
 /// D65 any 白名单里的匹配点。
@@ -90,9 +118,12 @@ pub enum AnyMatch {
 }
 ```
 
-**Any-match whitelist and fixed allow-lists**
+The code above defines Any-match class `AnyMatch`; see the file for the full implementation.
 
-`new/crates/richtext/src/parse.rs:37-47`
+
+The implementation of Any-match whitelist and fixed allow-lists follows:
+
+File: crates/richtext/src/parse.rs:37-47
 
 ```rust
 /// D65：允许「中间任意」的匹配点**白名单**（目前只有颜色值）。
@@ -108,9 +139,12 @@ pub enum AnyMatch {
 pub const ALLOWED_ANY_MATCHES: [AnyMatch; 1] = [AnyMatch::ColorDigits];
 ```
 
-**Parse error `ParseError`**
+The code above defines Any-match whitelist and fixed allow-lists; see the file for the full implementation.
 
-`new/crates/richtext/src/parse.rs:155-164`
+
+The implementation of Parse error `ParseError` follows:
+
+File: crates/richtext/src/parse.rs:155-164
 
 ```rust
 /// 解析失败的**位置与卡住的内容**（D63：失败必须能逐条打印出来）。
@@ -125,9 +159,12 @@ pub struct ParseError {
 }
 ```
 
-**Parse entry `parse`**
+The code above defines Parse error `ParseError`; see the file for the full implementation.
 
-`new/crates/richtext/src/parse.rs:195-201`
+
+The implementation of Parse entry `parse` follows:
+
+File: crates/richtext/src/parse.rs:195-201
 
 ```rust
 /// 解析整段原文：原始标记 → 片段序列。
@@ -139,10 +176,13 @@ pub fn parse(raw: &str) -> Result<Vec<Segment>, ParseError> {
 }
 ```
 
+The code above defines Parse entry `parse`; see the file for the full implementation.
 
-**Segment `Segment`**
 
-`new/crates/richtext/src/parse.rs:80-112`
+
+The implementation of Segment `Segment` follows:
+
+File: crates/richtext/src/parse.rs:80-112
 
 Keyword codes in comments were replaced with names; code lines are unchanged.
 
@@ -182,6 +222,9 @@ pub enum Segment {
 }
 ```
 
+The code above defines Segment `Segment`; see the file for the full implementation.
+
+
 ## 4. Invariants and Prohibitions
 
 > [!IMPORTANT]
@@ -197,16 +240,14 @@ pub enum Segment {
 > [!WARNING]
 > Color is the only any-match because the render layer deletes color tags, so the value cannot affect the final text. Icons, tokens, and keyword variants are unproven and must stay fixed-match (D66).
 
-## 5. Basis (Rulebook and D Numbers)
+## 5. Basis (Rulebook Clauses / Decision Numbers)
 
-| Topic | Basis |
-|---|---|
-| Split text handling into parse and render; parse all texts in tests | D62 |
-| Parsing must be strict: no match means failure | D63 |
-| Head/tail fixed; any-match only for proven-irrelevant classes | D65 / D66 |
-| Rich-text parser is a separate crate next to engine; no business deps | D75 / D76 |
-| Crate naming (the package name must not contain TCG) | D77 / D78 |
-| This crate has no rulebook mapping (pure string structure) | - |
+- Split text handling into parse and render; parse all texts in tests: D62
+- Parsing must be strict: no match means failure: D63
+- Head/tail fixed; any-match only for proven-irrelevant classes: D65 / D66
+- Rich-text parser is a separate crate next to engine; no business deps: D75 / D76
+- Crate naming (the package name must not contain TCG): D77 / D78
+- This crate has no rulebook mapping (pure string structure): -
 
 ## 6. Common Misuse
 
@@ -219,33 +260,35 @@ pub enum Segment {
 - Writing a second parser inside definitions: only `pub use` this crate.
 - Loosening matching when new data appears: gather evidence and register first; the full-text test will flag it.
 
-## 7. Tests
+## 7. Where the Tests Are
 
 - `cargo test --offline -p gi-genius-invokation-richtext`: currently 18 (17 unit tests + 1 doctest).
 - Representative cases:
 
-| Test | Coverage |
-|---|---|
-| `richtext/src/tests.rs::tests::plain_text_is_one_segment` | plain text |
-| `richtext/src/tests.rs::tests::unknown_placeholder_is_error` | unknown placeholder errors |
-| `richtext/src/tests.rs::tests::malformed_color_is_error` | malformed color |
-| `richtext/src/tests.rs::tests::lone_marker_characters_are_errors` | stray marker characters |
-| `richtext/src/tests.rs::tests::unregistered_sprite_preset_is_error` | unregistered icon |
-| `richtext/src/tests.rs::tests::unregistered_keyword_variant_and_token_are_errors` | unregistered variant/token |
-| `richtext/src/tests.rs::tests::color_is_the_only_any_match` | any-match whitelist |
-| `richtext/src/tests.rs::tests::raw_marker_rebuilds_placeholders` | marker rebuilding |
-| `richtext/src/tests.rs::tests::line_col_points_at_error` | error location |
+- `richtext/src/tests.rs::tests::plain_text_is_one_segment`: plain text
+- `richtext/src/tests.rs::tests::unknown_placeholder_is_error`: unknown placeholder errors
+- `richtext/src/tests.rs::tests::malformed_color_is_error`: malformed color
+- `richtext/src/tests.rs::tests::lone_marker_characters_are_errors`: stray marker characters
+- `richtext/src/tests.rs::tests::unregistered_sprite_preset_is_error`: unregistered icon
+- `richtext/src/tests.rs::tests::unregistered_keyword_variant_and_token_are_errors`: unregistered variant/token
+- `richtext/src/tests.rs::tests::color_is_the_only_any_match`: any-match whitelist
+- `richtext/src/tests.rs::tests::raw_marker_rebuilds_placeholders`: marker rebuilding
+- `richtext/src/tests.rs::tests::line_col_points_at_error`: error location
 
 > [!NOTE]
 > The full-text parse tests live on the definitions side (they need generated data): `definitions/src/generated/text/tests.rs::every_generated_text_parses_strictly` and `keyword_descriptions_parse_strictly`.
 
 ## 8. Pending Work and Field Verification
 
-| No. | Item |
-|---|---|
-| #3 | Keyword names include low-confidence reconstructed samples (about 182 language x K-code votes below 3); replacing the authoritative JSON fixes it; unrelated to the parser |
-| no number | Render-side "structure known but missing from the name table" is handled by `MissingPolicy` (`definitions/src/generated/text/render.rs`); not this crate |
-| no number | New icons / tokens / keyword variants in data: gather evidence and register constants (D65 / D66) |
+- #3: Keyword names include low-confidence reconstructed samples (about 182 language x K-code votes below 3); replacing the authoritative JSON fixes it; unrelated to the parser
+- no number: Render-side "structure known but missing from the name table" is handled by `MissingPolicy` (`definitions/src/generated/text/render.rs`); not this crate
+- no number: New icons / tokens / keyword variants in data: gather evidence and register constants (D65 / D66)
+
+---
+
+## Summary
+
+The parser recognizes structure, fails strictly, and never resolves names. Rendering and language selection stay on the definitions side.
 
 ---
 

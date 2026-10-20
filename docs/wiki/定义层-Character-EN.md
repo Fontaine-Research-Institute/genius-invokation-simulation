@@ -14,11 +14,15 @@ The character card family: **definition carriers** (`CharacterDef` / `SkillDef`)
 
 ### 2.1 Definition carriers
 
-| Type | File | Notes |
-|---|---|---|
-| `CharacterDef<Tags>` | `definition.rs` | `id` / `name` / `tags` (generic tag set) / `max_hp` / `max_energy` / `skills: &'static [&'static SkillDef]`; caps are **definition data**, runtime current values live in `CharacterState` |
-| `SkillDef` / `SkillCost` | `skill.rs` | `id` (= character id × 10 + index) / text / `kind: SkillKind` / `cost: SkillCost { dice: &'static [CostComponent], energy: Nat }` / `effect: SkillEffect = fn()` (**placeholder signature**, D162) |
-| `SkillKind` / `SpecialNormalAttack` / `DamageType` | `types.rs` | Four skill kinds: `NormalAttack(Option<SpecialNormalAttack>)` (`None` = plain normal attack / `Some(Charged)` = charged / `Some(Plunging)` = plunging) / `ElementalSkill` / `ElementalBurst` / `Passive`; damage types: `Elemental(Element)` / `Physical` / `Piercing` |
+- **`CharacterDef<Tags>`**
+  - File: `definition.rs`
+  - Notes: `id` / `name` / `tags` (generic tag set) / `max_hp` / `max_energy` / `skills: &'static [&'static SkillDef]`; caps are **definition data**, runtime current values live in `CharacterState`
+- **`SkillDef` / `SkillCost`**
+  - File: `skill.rs`
+  - Notes: `id` (= character id × 10 + index) / text / `kind: SkillKind` / `cost: SkillCost { dice: &'static [CostComponent], energy: Nat }` / `effect: SkillEffect = fn()` (**placeholder signature**, D162)
+- **`SkillKind` / `SpecialNormalAttack` / `DamageType`**
+  - File: `types.rs`
+  - Notes: Four skill kinds: `NormalAttack(Option<SpecialNormalAttack>)` (`None` = plain normal attack / `Some(Charged)` = charged / `Some(Plunging)` = plunging) / `ElementalSkill` / `ElementalBurst` / `Passive`; damage types: `Elemental(Element)` / `Physical` / `Piercing`
 
 > [!NOTE]
 > Charged / plunging attacks are not separate skill kinds (D123 / D126); they still count as normal attacks (D124). To test "affects normal attacks", use `is_normal_attack`.
@@ -36,11 +40,15 @@ The character card family: **definition carriers** (`CharacterDef` / `SkillDef`)
 
 ### 2.3 The three zones (D42: zone = field; sides = two instances)
 
-| Zone | File | Key rules |
-|---|---|---|
-| Character zone `CharacterZone` | `zones/field.rs` | `CHARACTER_SLOTS = 3`; `slots` order = entry order (switching does not reorder); **the active character is an independent pointer** (`active()` / `active_entity()`), not slot 0; timings `Entered / Left / SwitchOut / SwitchIn / ActiveChanged` |
-| Equipment zone `EquipmentZone` | `zones/equipment.rs` | **One per on-field character**; slots `SlotKind { Weapon, Artifact, Talent, Technique }`; exclusivity / weapon-type gate reuse `rules::ops::equip` (D16); occupied slot → forced replace and discard the old equipment; talents overwrite by identical card; timings `Equipped / Discarded` |
-| Combat status zone `CombatStatusZone` | `zones/combat_status.rs` | Attached to the active character (`attached_to`); switching **only changes attached_to, entries stay put**; re-attaching the same status adds layers and keeps the old duration; End Phase `tick_end_phase_with_triggers`; timings `Attached / Transferred / Removed / DurationTicked / Depleted` |
+- **Character zone `CharacterZone`**
+  - File: `zones/field.rs`
+  - Key rules: `CHARACTER_SLOTS = 3`; `slots` order = entry order (switching does not reorder); **the active character is an independent pointer** (`active()` / `active_entity()`), not slot 0; timings `Entered / Left / SwitchOut / SwitchIn / ActiveChanged`
+- **Equipment zone `EquipmentZone`**
+  - File: `zones/equipment.rs`
+  - Key rules: **One per on-field character**; slots `SlotKind { Weapon, Artifact, Talent, Technique }`; exclusivity / weapon-type gate reuse `rules::ops::equip` (D16); occupied slot → forced replace and discard the old equipment; talents overwrite by identical card; timings `Equipped / Discarded`
+- **Combat status zone `CombatStatusZone`**
+  - File: `zones/combat_status.rs`
+  - Key rules: Attached to the active character (`attached_to`); switching **only changes attached_to, entries stay put**; re-attaching the same status adds layers and keeps the old duration; End Phase `tick_end_phase_with_triggers`; timings `Attached / Transferred / Removed / DurationTicked / Depleted`
 
 ### 2.4 Damage chain (`damage_chain/`)
 
@@ -55,14 +63,24 @@ type_override: Option<DamageType>  // type override (physical -> element etc.; b
 
 **Settlement order**: immunity (zero it out; piercing ignores it) → bonuses → multiplication / division → shields → reductions → HP loss (only yields `to_hp`; does not subtract HP).
 
-| Stage | Implementation | Notes |
-|---|---|---|
-| 0 Immunity | `statuses::IMMUNITY_STATUSES` + `step_immunity` | "immune to all damage" → short-circuits into "base → immune → HP loss 0"; **piercing ignores immunity** (Piercing DMG) |
-| 1 Bonuses | `bonus::DamageBonus` + `step_bonus` | generic increases + reaction bonus + elemental mastery (`MASTERY_DAMAGE_PER_POINT` to be measured); piercing skips the whole stage |
-| 2 Multiplication / division | `bonus::{AmountOp, MulMode, MultiplierZone, Rounding}` + `step_scale` | Four-stage model (plan §4.4.5): in-zone add/subtract → standalone multipliers + multiplier zone (multipliers added) → multiply all divisors into one denominator, divide and round → out-of-zone add/subtract; division by zero panics (D44) |
-| 3 Shields | `rules::ops::damage::mitigate` + `step_shield` | combat status 203 + character status 134 points are summed; piercing ignores |
-| 4 Reductions | same + `step_reduction` | "damage negation" entries are summed and applied once; piercing ignores |
-| 5 HP loss | `step_to_hp` | the result is handed to `damage()` (attachment / reaction check / triggers unchanged) |
+- **0 Immunity**
+  - Implementation: `statuses::IMMUNITY_STATUSES` + `step_immunity`
+  - Notes: "immune to all damage" → short-circuits into "base → immune → HP loss 0"; **piercing ignores immunity** (Piercing DMG)
+- **1 Bonuses**
+  - Implementation: `bonus::DamageBonus` + `step_bonus`
+  - Notes: generic increases + reaction bonus + elemental mastery (`MASTERY_DAMAGE_PER_POINT` to be measured); piercing skips the whole stage
+- **2 Multiplication / division**
+  - Implementation: `bonus::{AmountOp, MulMode, MultiplierZone, Rounding}` + `step_scale`
+  - Notes: Four-stage model (plan §4.4.5): in-zone add/subtract → standalone multipliers + multiplier zone (multipliers added) → multiply all divisors into one denominator, divide and round → out-of-zone add/subtract; division by zero panics (D44)
+- **3 Shields**
+  - Implementation: `rules::ops::damage::mitigate` + `step_shield`
+  - Notes: combat status 203 + character status 134 points are summed; piercing ignores
+- **4 Reductions**
+  - Implementation: same + `step_reduction`
+  - Notes: "damage negation" entries are summed and applied once; piercing ignores
+- **5 HP loss**
+  - Implementation: `step_to_hp`
+  - Notes: the result is handed to `damage()` (attachment / reaction check / triggers unchanged)
 
 - Insert-style settlement (D196): `schedule()` returns `ScheduledChain` (a `timeline::Resolution` frame + cursor); supports `insert` of sub-settlements and `snapshot()` for debugging.
 - Result: `ChainStage` (Base / Bypassed / Boosted / Immune / Scaled / Shielded / Reduced / ToHp), `ChainOutcome` (`bonus_total` / `damage_after_bonus` / `after_scale` / `shield_used` / `reduction_total` / `to_hp` / `bypassed` / `immune` / `immunity_available` / `scale` / `stages`).
@@ -72,15 +90,13 @@ type_override: Option<DamageType>  // type override (physical -> element etc.; b
 
 ### 2.5 Skill flow (`skill_flow/`)
 
-| Module | Contents |
-|---|---|
-| `mod.rs` | `SkillUseContext` / `SkillUsePolicy` / `can_use` / `pay_skill_cost` / `skill_energy_gain` / `use_skill` / `use_skill_with_plunging` / `SkillUse { skill, effective_kind, dice, character, uses, before, after }` |
-| `attack_form.rs` | "Counts as" rulings of S8.9 / S8.10: `AttackForm{Normal,Charged,Plunging}`, `AttackFormInputs{dice_total,plunging_pending}`, `is_even`, `effective_normal_attack`, `PlungingMark` |
-| `forbidden.rs` | R5 query "which skills does a status forbid": `SKILL_FORBIDDING_STATUSES` (frozen / stun / petrified), `ForbiddenUses`, `ForbiddenState`, `forbidden_by` / `skill_allowed` / `technique_allowed` |
-| `technique.rs` | L4 technique flow: `SkillUseClass` + `UseFlow`, `TechniqueContext`, `can_use_technique` / `use_technique`, `TechniqueUse`, `dispatch_technique` (**always empty**) |
-| `usage.rs` | `SkillUses` (per-skill per-round limit + used count, `engine::stats::Counter`; **a rules state, not under stats/**, D198) |
-| `prepared.rs` | Prepared skills (Prepare Skill): `PreparedSkills` (begin / complete / interrupt / tick_action_round / pending_action); blocks active skill selection |
-| `timing.rs` | `dispatch_skill`: dispatches `SkillTiming::SkillUsed` across the three scopes "any → a kind → a specific skill", merges, returns pending effects (D186) |
+- `mod.rs`: `SkillUseContext` / `SkillUsePolicy` / `can_use` / `pay_skill_cost` / `skill_energy_gain` / `use_skill` / `use_skill_with_plunging` / `SkillUse { skill, effective_kind, dice, character, uses, before, after }`
+- `attack_form.rs`: "Counts as" rulings of S8.9 / S8.10: `AttackForm{Normal,Charged,Plunging}`, `AttackFormInputs{dice_total,plunging_pending}`, `is_even`, `effective_normal_attack`, `PlungingMark`
+- `forbidden.rs`: R5 query "which skills does a status forbid": `SKILL_FORBIDDING_STATUSES` (frozen / stun / petrified), `ForbiddenUses`, `ForbiddenState`, `forbidden_by` / `skill_allowed` / `technique_allowed`
+- `technique.rs`: L4 technique flow: `SkillUseClass` + `UseFlow`, `TechniqueContext`, `can_use_technique` / `use_technique`, `TechniqueUse`, `dispatch_technique` (**always empty**)
+- `usage.rs`: `SkillUses` (per-skill per-round limit + used count, `engine::stats::Counter`; **a rules state, not under stats/**, D198)
+- `prepared.rs`: Prepared skills (Prepare Skill): `PreparedSkills` (begin / complete / interrupt / tick_action_round / pending_action); blocks active skill selection
+- `timing.rs`: `dispatch_skill`: dispatches `SkillTiming::SkillUsed` across the three scopes "any → a kind → a specific skill", merges, returns pending effects (D186)
 
 **`can_use` check order** (fixed; returns the first matching `CannotUse`):
 
@@ -113,12 +129,10 @@ A trigger entry = "timing key + condition fn pointer + effect fn pointer + order
 
 ### 2.7 Form / growth / satiety
 
-| Module | Notes |
-|---|---|
-| `form.rs` | `FormDef` (name / element / tag pointer slice / skill list) / `Form` / `FormState` (base + current; `transform_to` / `restore` are pure); `FormTriggers` + `transform_with_triggers` dispatch `FormTransformed`; **`CharacterState` has no form field yet** (留空.md #32 / #22) |
-| `growth.rs` | `GrowthAttribute{Attack,MaxHp,MaxEnergy}` + `GrowthDirection` + `Growth` / `GrowthList`; `effective_max_hp` / `actual_max_hp(definition value)`; definition value immutable, actual = definition + growth; on defeat `reset_max_hp()` (D238) |
-| `satiated.rs` | Identity `SATIATED` (data 303300; boolean); `CharacterState::{satiated, with_satiated, clear_satiated, food_targetable}`; `clear_at_round_end` / `clear_on_defeat` (S8.1 clause 3) |
-| `energy.rs` | `energy_gain(base, modifiers)`: gain modifiers (D193: no "energy changed" timing key) |
+- `form.rs`: `FormDef` (name / element / tag pointer slice / skill list) / `Form` / `FormState` (base + current; `transform_to` / `restore` are pure); `FormTriggers` + `transform_with_triggers` dispatch `FormTransformed`; **`CharacterState` has no form field yet** (留空.md #32 / #22)
+- `growth.rs`: `GrowthAttribute{Attack,MaxHp,MaxEnergy}` + `GrowthDirection` + `Growth` / `GrowthList`; `effective_max_hp` / `actual_max_hp(definition value)`; definition value immutable, actual = definition + growth; on defeat `reset_max_hp()` (D238)
+- `satiated.rs`: Identity `SATIATED` (data 303300; boolean); `CharacterState::{satiated, with_satiated, clear_satiated, food_targetable}`; `clear_at_round_end` / `clear_on_defeat` (S8.1 clause 3)
+- `energy.rs`: `energy_gain(base, modifiers)`: gain modifiers (D193: no "energy changed" timing key)
 
 ### 2.8 Relation to statuses
 
@@ -132,7 +146,9 @@ A trigger entry = "timing key + condition fn pointer + effect fn pointer + order
 
 ### 3.1 Definition carriers
 
-**`CharacterDef`** — `crates/definitions/src/families/character/definition.rs`
+
+First, the definition of `CharacterDef`; its declaration follows.
+文件: crates/definitions/src/families/character/definition.rs
 
 ```rust
 /// 一张**角色牌**的定义（D162）。
@@ -163,7 +179,11 @@ pub struct CharacterDef<Tags> {
 }
 ```
 
-**`SkillDef`** — `crates/definitions/src/families/character/skill.rs`
+The snippet above gives the public shape of `CharacterDef`; its implementation lives in the same file.
+
+
+First, the definition of `SkillDef`; its declaration follows.
+文件: crates/definitions/src/families/character/skill.rs
 
 ```rust
 /// 一个技能的**定义**（D121 / D162）。
@@ -190,7 +210,11 @@ pub struct SkillDef {
 }
 ```
 
-**`SkillCost`** — `crates/definitions/src/families/character/skill.rs`
+The snippet above gives the public shape of `SkillDef`; its implementation lives in the same file.
+
+
+First, the definition of `SkillCost`; its declaration follows.
+文件: crates/definitions/src/families/character/skill.rs
 
 ```rust
 /// 技能消耗（D121 / D162）。
@@ -209,7 +233,11 @@ pub struct SkillCost {
 }
 ```
 
-**`SkillKind`** — `crates/definitions/src/families/character/types.rs`
+The snippet above gives the public shape of `SkillCost`; its implementation lives in the same file.
+
+
+First, the definition of `SkillKind`; its declaration follows.
+文件: crates/definitions/src/families/character/types.rs
 
 ```rust
 /// 技能的 4 个种类（D121）。
@@ -235,7 +263,11 @@ pub enum SkillKind {
 }
 ```
 
-**`SpecialNormalAttack`** — `crates/definitions/src/families/character/types.rs`
+The snippet above gives the public shape of `SkillKind`; its implementation lives in the same file.
+
+
+First, the definition of `SpecialNormalAttack`; its declaration follows.
+文件: crates/definitions/src/families/character/types.rs
 
 ```rust
 /// 普通攻击的**特殊形态**（D123 / D126）。
@@ -251,7 +283,11 @@ pub enum SpecialNormalAttack {
 }
 ```
 
-**`DamageType`** — `crates/definitions/src/families/character/types.rs`
+The snippet above gives the public shape of `SpecialNormalAttack`; its implementation lives in the same file.
+
+
+First, the definition of `DamageType`; its declaration follows.
+文件: crates/definitions/src/families/character/types.rs
 
 ```rust
 /// 伤害类型（D121）：元素 / 物理 / 穿透。
@@ -269,9 +305,13 @@ pub enum DamageType {
 }
 ```
 
+The snippet above gives the public shape of `DamageType`; its implementation lives in the same file.
+
 ### 3.2 Runtime state
 
-**`CharacterState`** — `crates/definitions/src/families/character/character.rs`
+
+First, the definition of `CharacterState`; its declaration follows.
+文件: crates/definitions/src/families/character/character.rs
 
 ```rust
 /// 一个角色的状态：生命 / 充能（当前值 + 上限）+ 状态列表 + 元素附着。
@@ -300,7 +340,11 @@ pub struct CharacterState {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/character/character.rs`
+The snippet above gives the public shape of `CharacterState`; its implementation lives in the same file.
+
+
+First, the definition of `new`; its declaration follows.
+文件: crates/definitions/src/families/character/character.rs
 
 ```rust
     /// 建一个角色状态：生命 / 充能先各自钳到自己的上限，状态列表与附着为空。
@@ -318,7 +362,11 @@ pub struct CharacterState {
     }
 ```
 
-**`from_def`** — `crates/definitions/src/families/character/character.rs`
+The snippet above gives the public shape of `new`; its implementation lives in the same file.
+
+
+First, the definition of `from_def`; its declaration follows.
+文件: crates/definitions/src/families/character/character.rs
 
 ```rust
     /// 按角色牌定义建**初始状态**（用户裁决的上限口径）：
@@ -337,7 +385,11 @@ pub struct CharacterState {
     }
 ```
 
-**`hp_add`** — `crates/definitions/src/families/character/character.rs`
+The snippet above gives the public shape of `from_def`; its implementation lives in the same file.
+
+
+First, the definition of `hp_add`; its declaration follows.
+文件: crates/definitions/src/families/character/character.rs
 
 ```rust
     /// 生命**加**：加到上限为止（不会超过 `max_hp`）。返回新状态，不改入参。
@@ -350,7 +402,11 @@ pub struct CharacterState {
     }
 ```
 
-**`hp_sub`** — `crates/definitions/src/families/character/character.rs`
+The snippet above gives the public shape of `hp_add`; its implementation lives in the same file.
+
+
+First, the definition of `hp_sub`; its declaration follows.
+文件: crates/definitions/src/families/character/character.rs
 
 ```rust
     /// 生命**减**：减到 0 为止（饱和减法，不为负）。返回新状态，不改入参。
@@ -364,7 +420,11 @@ pub struct CharacterState {
     }
 ```
 
-**`energy_add`** — `crates/definitions/src/families/character/character.rs`
+The snippet above gives the public shape of `hp_sub`; its implementation lives in the same file.
+
+
+First, the definition of `energy_add`; its declaration follows.
+文件: crates/definitions/src/families/character/character.rs
 
 ```rust
     /// 充能**加**：加到上限为止（不会超过 `max_energy`）。返回新状态，不改入参。
@@ -378,9 +438,13 @@ pub struct CharacterState {
     }
 ```
 
+The snippet above gives the public shape of `energy_add`; its implementation lives in the same file.
+
 ### 3.3 The three zones
 
-**`CharacterZone`** — `crates/definitions/src/families/character/zones/field.rs`
+
+First, the definition of `CharacterZone`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/field.rs
 
 ```rust
 /// **角色区**：最多 3 个槽位 + 当前出战角色指针 + 统计。
@@ -398,7 +462,11 @@ pub struct CharacterZone {
 }
 ```
 
-**`active_entity`** — `crates/definitions/src/families/character/zones/field.rs`
+The snippet above gives the public shape of `CharacterZone`; its implementation lives in the same file.
+
+
+First, the definition of `active_entity`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/field.rs
 
 ```rust
     /// 当前出战角色实体号（没有 -> None）。
@@ -407,7 +475,11 @@ pub struct CharacterZone {
     }
 ```
 
-**`switch_active_with_triggers`** — `crates/definitions/src/families/character/zones/field.rs`
+The snippet above gives the public shape of `active_entity`; its implementation lives in the same file.
+
+
+First, the definition of `switch_active_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/field.rs
 
 ```rust
     /// **切换角色**（战斗行动）：把后台角色 `to` 切为出战角色，原出战角色变后台。
@@ -429,7 +501,11 @@ pub struct CharacterZone {
     // ...（其余实现从略；见 crates/definitions/src/families/character/zones/field.rs）
 ```
 
-**`EquipmentZone`** — `crates/definitions/src/families/character/zones/equipment.rs`
+The snippet above gives the public shape of `switch_active_with_triggers`; its implementation lives in the same file.
+
+
+First, the definition of `EquipmentZone`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/equipment.rs
 
 ```rust
 /// **装备栏**：某个场上角色的装备列表。
@@ -447,7 +523,11 @@ pub struct EquipmentZone {
 }
 ```
 
-**`slot_entry`** — `crates/definitions/src/families/character/zones/equipment.rs`
+The snippet above gives the public shape of `EquipmentZone`; its implementation lives in the same file.
+
+
+First, the definition of `slot_entry`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/equipment.rs
 
 ```rust
     /// 某个槽位的第一件装备（只读指针；空槽 -> None）。
@@ -456,7 +536,11 @@ pub struct EquipmentZone {
     }
 ```
 
-**`equip_with_triggers`** — `crates/definitions/src/families/character/zones/equipment.rs`
+The snippet above gives the public shape of `slot_entry`; its implementation lives in the same file.
+
+
+First, the definition of `equip_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/equipment.rs
 
 ```rust
     /// **挂装备**（规则书·游戏区域 II(1)）+ 派发「装备 / 弃置」。
@@ -479,7 +563,11 @@ pub struct EquipmentZone {
     // ...（其余实现从略；见 crates/definitions/src/families/character/zones/equipment.rs）
 ```
 
-**`CombatStatusZone`** — `crates/definitions/src/families/character/zones/combat_status.rs`
+The snippet above gives the public shape of `equip_with_triggers`; its implementation lives in the same file.
+
+
+First, the definition of `CombatStatusZone`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/combat_status.rs
 
 ```rust
 /// **出战状态区**：挂在某个出战角色上的状态列表。
@@ -497,7 +585,11 @@ pub struct CombatStatusZone {
 }
 ```
 
-**`attach_with_triggers`** — `crates/definitions/src/families/character/zones/combat_status.rs`
+The snippet above gives the public shape of `CombatStatusZone`; its implementation lives in the same file.
+
+
+First, the definition of `attach_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/combat_status.rs
 
 ```rust
     /// **进入出战状态区**（生成 / 附着）+ 派发「附着」。
@@ -518,7 +610,11 @@ pub struct CombatStatusZone {
     // ...（其余实现从略；见 crates/definitions/src/families/character/zones/combat_status.rs）
 ```
 
-**`tick_end_phase_with_triggers`** — `crates/definitions/src/families/character/zones/combat_status.rs`
+The snippet above gives the public shape of `attach_with_triggers`; its implementation lives in the same file.
+
+
+First, the definition of `tick_end_phase_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/character/zones/combat_status.rs
 
 ```rust
     /// **结束阶段**：所有带持续回合的出战状态 -1；耗尽的**立刻弃置**。
@@ -535,9 +631,13 @@ pub struct CombatStatusZone {
     // ...（其余实现从略；见 crates/definitions/src/families/character/zones/combat_status.rs）
 ```
 
+The snippet above gives the public shape of `tick_end_phase_with_triggers`; its implementation lives in the same file.
+
 ### 3.4 Damage chain
 
-**`MulMode`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
+
+First, the definition of `MulMode`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/bonus.rs
 
 ```rust
 /// 乘法怎么算（分工计划 §4.4.5）。
@@ -550,7 +650,11 @@ pub enum MulMode {
 }
 ```
 
-**`Rounding`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
+The snippet above gives the public shape of `MulMode`; its implementation lives in the same file.
+
+
+First, the definition of `Rounding`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/bonus.rs
 
 ```rust
 /// 取整方向（分工计划 §4.4.5：具体值**暂不决定**，由调用方给；默认 `Down`）。
@@ -563,7 +667,11 @@ pub enum Rounding {
 }
 ```
 
-**`AmountOp`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
+The snippet above gives the public shape of `Rounding`; its implementation lives in the same file.
+
+
+First, the definition of `AmountOp`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/bonus.rs
 
 ```rust
 /// 一条**数值修正**（分工计划 §4.4.5 的 `AmountOp`）：只允许「运算 + 数值」，
@@ -599,7 +707,11 @@ pub enum AmountOp {
 }
 ```
 
-**`MultiplierZone`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
+The snippet above gives the public shape of `AmountOp`; its implementation lives in the same file.
+
+
+First, the definition of `MultiplierZone`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/bonus.rs
 
 ```rust
 /// 统一的**倍数区**（分工计划 §4.4.5：只有一个，挂在角色 types 上）。
@@ -616,7 +728,11 @@ pub struct MultiplierZone {
 }
 ```
 
-**`DamageModifiers`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
+The snippet above gives the public shape of `MultiplierZone`; its implementation lives in the same file.
+
+
+First, the definition of `DamageModifiers`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/bonus.rs
 
 ```rust
 /// 一次伤害的**乘算 / 除算输入**（第 2 / 3 / 4 段的修正列表 + 取整方向）。
@@ -632,7 +748,11 @@ pub struct DamageModifiers<'a> {
 }
 ```
 
-**`scale`** — `crates/definitions/src/families/character/damage_chain/bonus.rs`
+The snippet above gives the public shape of `DamageModifiers`; its implementation lives in the same file.
+
+
+First, the definition of `scale`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/bonus.rs
 
 ```rust
     /// **完整结算四段运算**：输入 = 「基础伤害 + 加伤」（第 1 段的加法部分），
@@ -649,7 +769,11 @@ pub struct DamageModifiers<'a> {
     // ...（其余实现从略；见 crates/definitions/src/families/character/damage_chain/bonus.rs）
 ```
 
-**`DamageChainEnv`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
+The snippet above gives the public shape of `scale`; its implementation lives in the same file.
+
+
+First, the definition of `DamageChainEnv`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/chain.rs
 
 ```rust
 /// 修正链从「区」读数据的**只读依赖**（D183：只借不拥有、不拷贝、不重造承载）。
@@ -680,10 +804,14 @@ pub struct DamageChainEnv<'a> {
 }
 ```
 
-**`with_type_override`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
+The snippet above gives the public shape of `DamageChainEnv`; its implementation lives in the same file.
+
+
+First, the definition of `with_type_override`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/chain.rs
 
 ```rust
-    /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前节等价）。
+    /// **覆盖本次伤害的类型**（默认 None = 不覆盖；None 时与改前逐字节等价）。
     ///
     /// 依据：天赋 / 状态卡面「使角色造成的物理伤害变为水元素伤害」类效果；规则书没有
     /// 「伤害类型转换」词条 —— 口径 = 覆盖后完全按新类型结算（含反应判定、穿透 / 免疫）；
@@ -694,7 +822,11 @@ pub struct DamageChainEnv<'a> {
     }
 ```
 
-**`effective_type`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
+The snippet above gives the public shape of `with_type_override`; its implementation lives in the same file.
+
+
+First, the definition of `effective_type`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/chain.rs
 
 ```rust
     /// 本次伤害**实际生效**的类型（有覆盖用覆盖值，否则用原始值）。
@@ -703,7 +835,11 @@ pub struct DamageChainEnv<'a> {
     }
 ```
 
-**`settle`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
+The snippet above gives the public shape of `effective_type`; its implementation lives in the same file.
+
+
+First, the definition of `settle`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/chain.rs
 
 ```rust
 /// **跑一次伤修链**（= `schedule(...).run()`；最常用的入口，不记录）。
@@ -716,9 +852,13 @@ pub fn settle(
 }
 ```
 
+The snippet above gives the public shape of `settle`; its implementation lives in the same file.
+
 ### 3.5 Skill flow
 
-**`CannotUse`** — `crates/definitions/src/families/character/skill_flow/mod.rs`
+
+First, the definition of `CannotUse`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/mod.rs
 
 ```rust
 /// 不能使用技能的原因。
@@ -768,7 +908,11 @@ pub enum CannotUse {
 }
 ```
 
-**`SkillUseContext`** — `crates/definitions/src/families/character/skill_flow/mod.rs`
+The snippet above gives the public shape of `CannotUse`; its implementation lives in the same file.
+
+
+First, the definition of `SkillUseContext`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/mod.rs
 
 ```rust
 /// 一次「使用技能」判定的**只读局面上下文**（D42：容器没有身份，就是个值）。
@@ -793,7 +937,11 @@ pub struct SkillUseContext<'a> {
 }
 ```
 
-**`can_use`** — `crates/definitions/src/families/character/skill_flow/mod.rs`
+The snippet above gives the public shape of `SkillUseContext`; its implementation lives in the same file.
+
+
+First, the definition of `can_use`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/mod.rs
 
 ```rust
 /// **能否使用**这个技能（只读；成功 -> `Ok(())`，失败 -> 第一个命中的原因）。
@@ -817,7 +965,11 @@ pub fn can_use(context: &SkillUseContext<'_>) -> Result<(), CannotUse> {
     // ...（其余实现从略；见 crates/definitions/src/families/character/skill_flow/mod.rs）
 ```
 
-**`pay_skill_cost`** — `crates/definitions/src/families/character/skill_flow/mod.rs`
+The snippet above gives the public shape of `can_use`; its implementation lives in the same file.
+
+
+First, the definition of `pay_skill_cost`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/mod.rs
 
 ```rust
 /// **支付技能费用**：骰子（复用 `DicePool::pay`）+ 充能（`CharacterState::energy_sub`）。
@@ -853,7 +1005,11 @@ pub fn pay_skill_cost(
 }
 ```
 
-**`use_skill`** — `crates/definitions/src/families/character/skill_flow/mod.rs`
+The snippet above gives the public shape of `pay_skill_cost`; its implementation lives in the same file.
+
+
+First, the definition of `use_skill`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/mod.rs
 
 ```rust
 /// **使用技能**：把「能否使用 -> 派发使用技能时 -> 支付 -> 派发使用技能后 -> 记使用 + 给充能」
@@ -885,7 +1041,11 @@ pub fn use_skill(
 }
 ```
 
-**`use_skill_with_plunging`** — `crates/definitions/src/families/character/skill_flow/mod.rs`
+The snippet above gives the public shape of `use_skill`; its implementation lives in the same file.
+
+
+First, the definition of `use_skill_with_plunging`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/mod.rs
 
 ```rust
 /// **使用技能（带下落攻击标记）**：与 [`use_skill`] 完全一致，只是把 [`PlungingMark`]
@@ -908,7 +1068,11 @@ pub fn use_skill_with_plunging(
 }
 ```
 
-**`AttackForm`** — `crates/definitions/src/families/character/skill_flow/attack_form.rs`
+The snippet above gives the public shape of `use_skill_with_plunging`; its implementation lives in the same file.
+
+
+First, the definition of `AttackForm`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/attack_form.rs
 
 ```rust
 /// 一次普通攻击**生效的形态**（判定结果的标注；`None` = 不是普通攻击）。
@@ -923,7 +1087,11 @@ pub enum AttackForm {
 }
 ```
 
-**`AttackFormInputs`** — `crates/definitions/src/families/character/skill_flow/attack_form.rs`
+The snippet above gives the public shape of `AttackForm`; its implementation lives in the same file.
+
+
+First, the definition of `AttackFormInputs`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/attack_form.rs
 
 ```rust
 /// 判定「视为重击 / 下落攻击」需要的两个输入。
@@ -938,7 +1106,11 @@ pub struct AttackFormInputs {
 }
 ```
 
-**`effective_normal_attack`** — `crates/definitions/src/families/character/skill_flow/attack_form.rs`
+The snippet above gives the public shape of `AttackFormInputs`; its implementation lives in the same file.
+
+
+First, the definition of `effective_normal_attack`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/attack_form.rs
 
 ```rust
 /// **生效形态判定**（S8.9 / S8.10）：给「定义上的技能种类」+ 判定输入，返回本次**生效**的种类。
@@ -969,7 +1141,11 @@ pub fn effective_normal_attack(kind: SkillKind, inputs: AttackFormInputs) -> Ski
 }
 ```
 
-**`PlungingMark`** — `crates/definitions/src/families/character/skill_flow/attack_form.rs`
+The snippet above gives the public shape of `effective_normal_attack`; its implementation lives in the same file.
+
+
+First, the definition of `PlungingMark`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/attack_form.rs
 
 ```rust
 /// 「切换后本回合下一个战斗行动视为下落攻击」的**待消耗标记**（S8.10）。
@@ -986,7 +1162,11 @@ pub struct PlungingMark {
 }
 ```
 
-**`ForbiddenUses`** — `crates/definitions/src/families/character/skill_flow/forbidden.rs`
+The snippet above gives the public shape of `PlungingMark`; its implementation lives in the same file.
+
+
+First, the definition of `ForbiddenUses`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/forbidden.rs
 
 ```rust
 /// 被禁用的**主动使用入口**（哪些动作不能做）。
@@ -1005,7 +1185,11 @@ pub struct ForbiddenUses {
 }
 ```
 
-**`forbidden_by`** — `crates/definitions/src/families/character/skill_flow/forbidden.rs`
+The snippet above gives the public shape of `ForbiddenUses`; its implementation lives in the same file.
+
+
+First, the definition of `forbidden_by`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/forbidden.rs
 
 ```rust
 /// 用**默认身份集合**查询：角色身上有没有导致禁用技能的状态。
@@ -1020,7 +1204,11 @@ pub fn forbidden_by(states: &StateList) -> Option<ForbiddenState> {
 }
 ```
 
-**`skill_allowed`** — `crates/definitions/src/families/character/skill_flow/forbidden.rs`
+The snippet above gives the public shape of `forbidden_by`; its implementation lives in the same file.
+
+
+First, the definition of `skill_allowed`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/forbidden.rs
 
 ```rust
 /// 这个技能种类现在**还能不能用**（只看状态禁用；费用 / 次数 / 准备技能归 can_use）。
@@ -1032,7 +1220,11 @@ pub fn skill_allowed(states: &StateList, kind: SkillKind) -> bool {
 }
 ```
 
-**`technique_allowed`** — `crates/definitions/src/families/character/skill_flow/forbidden.rs`
+The snippet above gives the public shape of `skill_allowed`; its implementation lives in the same file.
+
+
+First, the definition of `technique_allowed`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/forbidden.rs
 
 ```rust
 /// 特技现在**还能不能用**（S8.4：冻结 / 石化 / 眩晕时同时无法使用特技）。
@@ -1044,7 +1236,11 @@ pub fn technique_allowed(states: &StateList) -> bool {
 }
 ```
 
-**`SkillUseClass`** — `crates/definitions/src/families/character/skill_flow/technique.rs`
+The snippet above gives the public shape of `technique_allowed`; its implementation lives in the same file.
+
+
+First, the definition of `SkillUseClass`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/technique.rs
 
 ```rust
 /// **可主动使用入口的分类**：把「技能」与「特技」并列成一个判定点。
@@ -1067,7 +1263,11 @@ pub enum SkillUseClass {
 }
 ```
 
-**`TechniqueContext`** — `crates/definitions/src/families/character/skill_flow/technique.rs`
+The snippet above gives the public shape of `SkillUseClass`; its implementation lives in the same file.
+
+
+First, the definition of `TechniqueContext`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/technique.rs
 
 ```rust
 /// 特技使用判定的**只读上下文**（D42：容器没有身份，就是个值）。
@@ -1084,7 +1284,11 @@ pub struct TechniqueContext<'a> {
 }
 ```
 
-**`use_technique`** — `crates/definitions/src/families/character/skill_flow/technique.rs`
+The snippet above gives the public shape of `TechniqueContext`; its implementation lives in the same file.
+
+
+First, the definition of `use_technique`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/technique.rs
 
 ```rust
 /// **使用特技**：判定通过后返回结果（不支付 / 不派发 / 不执行效果）。
@@ -1109,7 +1313,11 @@ pub fn use_technique(context: &TechniqueContext<'_>) -> Result<TechniqueUse, Can
 }
 ```
 
-**`SkillUses`** — `crates/definitions/src/families/character/skill_flow/usage.rs`
+The snippet above gives the public shape of `use_technique`; its implementation lives in the same file.
+
+
+First, the definition of `SkillUses`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/usage.rs
 
 ```rust
 /// 每个技能的**每回合使用计数**（区自持的普通值，D182）。
@@ -1123,7 +1331,11 @@ pub struct SkillUses {
 }
 ```
 
-**`with_limit`** — `crates/definitions/src/families/character/skill_flow/usage.rs`
+The snippet above gives the public shape of `SkillUses`; its implementation lives in the same file.
+
+
+First, the definition of `with_limit`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/usage.rs
 
 ```rust
     /// 登记 / 覆盖一个技能的每回合上限（**纯函数**：返回新容器）。
@@ -1141,7 +1353,11 @@ pub struct SkillUses {
     }
 ```
 
-**`recorded`** — `crates/definitions/src/families/character/skill_flow/usage.rs`
+The snippet above gives the public shape of `with_limit`; its implementation lives in the same file.
+
+
+First, the definition of `recorded`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/usage.rs
 
 ```rust
     /// 记一次使用（**纯函数**：返回「已用 +1」的新容器，不改入参）。
@@ -1163,7 +1379,11 @@ pub struct SkillUses {
     }
 ```
 
-**`PreparedSkills`** — `crates/definitions/src/families/character/skill_flow/prepared.rs`
+The snippet above gives the public shape of `recorded`; its implementation lives in the same file.
+
+
+First, the definition of `PreparedSkills`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/prepared.rs
 
 ```rust
 /// 一个角色身上的**准备技能槽**（D182：普通值类型，由区自己持有；没有全局状态）。
@@ -1176,7 +1396,11 @@ pub struct PreparedSkills {
 }
 ```
 
-**`begin`** — `crates/definitions/src/families/character/skill_flow/prepared.rs`
+The snippet above gives the public shape of `PreparedSkills`; its implementation lives in the same file.
+
+
+First, the definition of `begin`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/prepared.rs
 
 ```rust
     /// **开始准备**：追加一个准备槽，`rounds` = 还需几个行动轮（`ZERO` = 立刻完成准备）。
@@ -1192,7 +1416,11 @@ pub struct PreparedSkills {
     }
 ```
 
-**`pending_action`** — `crates/definitions/src/families/character/skill_flow/prepared.rs`
+The snippet above gives the public shape of `begin`; its implementation lives in the same file.
+
+
+First, the definition of `pending_action`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/prepared.rs
 
 ```rust
     /// 「轮到该角色行动时」应该做什么（准备技能）。
@@ -1210,7 +1438,11 @@ pub struct PreparedSkills {
     }
 ```
 
-**`dispatch_skill`** — `crates/definitions/src/families/character/skill_flow/timing.rs`
+The snippet above gives the public shape of `pending_action`; its implementation lives in the same file.
+
+
+First, the definition of `dispatch_skill`; its declaration follows.
+文件: crates/definitions/src/families/character/skill_flow/timing.rs
 
 ```rust
 /// **一次技能使用的有序派发**（D186：只排序不执行）。
@@ -1242,9 +1474,13 @@ pub fn dispatch_skill(
 }
 ```
 
+The snippet above gives the public shape of `dispatch_skill`; its implementation lives in the same file.
+
 ### 3.6 Timings / form / growth / satiety
 
-**`CharacterTiming`** — `crates/definitions/src/families/character/trigger.rs`
+
+First, the definition of `CharacterTiming`; its declaration follows.
+文件: crates/definitions/src/families/character/trigger.rs
 
 ```rust
 /// 角色族的**时机键**（D185：由角色族自己定义；通用层不认识它）。
@@ -1313,7 +1549,11 @@ pub enum CharacterTiming {
 }
 ```
 
-**`dispatch_character`** — `crates/definitions/src/families/character/trigger.rs`
+The snippet above gives the public shape of `CharacterTiming`; its implementation lives in the same file.
+
+
+First, the definition of `dispatch_character`; its declaration follows.
+文件: crates/definitions/src/families/character/trigger.rs
 
 ```rust
 /// 主动派发：从角色族注册表里取出「这个时机、条件成立」的登记项，按结算顺序排成**待执行**。
@@ -1332,7 +1572,11 @@ pub fn dispatch_character(
 }
 ```
 
-**`FormState`** — `crates/definitions/src/families/character/form.rs`
+The snippet above gives the public shape of `dispatch_character`; its implementation lives in the same file.
+
+
+First, the definition of `FormState`; its declaration follows.
+文件: crates/definitions/src/families/character/form.rs
 
 ```rust
 /// 一个角色的**形态状态**：基础形态 + 当前形态（对应「角色当前形态字段」）。
@@ -1349,7 +1593,11 @@ pub struct FormState {
 }
 ```
 
-**`transform_to`** — `crates/definitions/src/families/character/form.rs`
+The snippet above gives the public shape of `FormState`; its implementation lives in the same file.
+
+
+First, the definition of `transform_to`; its declaration follows.
+文件: crates/definitions/src/families/character/form.rs
 
 ```rust
     /// **转换到某个形态**（纯函数：返回新状态，不改入参）。
@@ -1364,7 +1612,11 @@ pub struct FormState {
     }
 ```
 
-**`GrowthList`** — `crates/definitions/src/families/character/growth.rs`
+The snippet above gives the public shape of `transform_to`; its implementation lives in the same file.
+
+
+First, the definition of `GrowthList`; its declaration follows.
+文件: crates/definitions/src/families/character/growth.rs
 
 ```rust
 /// 一组**成长条目**（叠加容器；纯函数风格）。
@@ -1378,7 +1630,11 @@ pub struct GrowthList {
 }
 ```
 
-**`effective_max_hp`** — `crates/definitions/src/families/character/growth.rs`
+The snippet above gives the public shape of `GrowthList`; its implementation lives in the same file.
+
+
+First, the definition of `effective_max_hp`; its declaration follows.
+文件: crates/definitions/src/families/character/growth.rs
 
 ```rust
     /// 读**成长后的生命上限**（基础生命上限 + 生命上限成长）。
@@ -1387,7 +1643,11 @@ pub struct GrowthList {
     }
 ```
 
-**`actual_max_hp`** — `crates/definitions/src/families/character/growth.rs`
+The snippet above gives the public shape of `effective_max_hp`; its implementation lives in the same file.
+
+
+First, the definition of `actual_max_hp`; its declaration follows.
+文件: crates/definitions/src/families/character/growth.rs
 
 ```rust
     /// 读**实际最大生命值上限**（= 定义值 + 生命上限成长；D238）。
@@ -1400,7 +1660,11 @@ pub struct GrowthList {
     }
 ```
 
-**`Satiated`** — `crates/definitions/src/families/character/satiated.rs`
+The snippet above gives the public shape of `actual_max_hp`; its implementation lives in the same file.
+
+
+First, the definition of `Satiated`; its declaration follows.
+文件: crates/definitions/src/families/character/satiated.rs
 
 ```rust
 /// 「饱腹」状态身份（D95 / D96：静态实例指针即身份）。
@@ -1415,7 +1679,11 @@ impl Satiated {
 }
 ```
 
-**`with_satiated`** — `crates/definitions/src/families/character/satiated.rs`
+The snippet above gives the public shape of `Satiated`; its implementation lives in the same file.
+
+
+First, the definition of `with_satiated`; its declaration follows.
+文件: crates/definitions/src/families/character/satiated.rs
 
 ```rust
     /// **料理生效后**：让角色进入饱腹（规则书 S8.1 第 1 条）。
@@ -1429,12 +1697,16 @@ impl Satiated {
     }
 ```
 
+The snippet above gives the public shape of `with_satiated`; its implementation lives in the same file.
+
 ### 3.7 Keyword and rules-ops interfaces referenced by this page
 
 > [!NOTE]
 > Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied as-is).
 
-**`DamageArgs`** — `crates/definitions/src/keywords/op.rs`
+
+First, the definition of `DamageArgs`; its declaration follows.
+文件: crates/definitions/src/keywords/op.rs
 
 ```rust
 /// **造成伤害**的参数。
@@ -1460,7 +1732,11 @@ pub struct DamageArgs {
 }
 ```
 
-**`with_modifiers`** — `crates/definitions/src/keywords/op.rs`
+The snippet above gives the public shape of `DamageArgs`; its implementation lives in the same file.
+
+
+First, the definition of `with_modifiers`; its declaration follows.
+文件: crates/definitions/src/keywords/op.rs
 
 ```rust
     /// 补上乘算 / 除算修饰（链式）。
@@ -1470,7 +1746,11 @@ pub struct DamageArgs {
     }
 ```
 
-**`Step`** — `crates/definitions/src/keywords/step.rs`
+The snippet above gives the public shape of `with_modifiers`; its implementation lives in the same file.
+
+
+First, the definition of `Step`; its declaration follows.
+文件: crates/definitions/src/keywords/step.rs
 
 ```rust
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
@@ -1480,7 +1760,11 @@ pub struct Step {
 }
 ```
 
-**`execute_step_me`** — `crates/definitions/src/keywords/step.rs`
+The snippet above gives the public shape of `Step`; its implementation lives in the same file.
+
+
+First, the definition of `execute_step_me`; its declaration follows.
+文件: crates/definitions/src/keywords/step.rs
 
 ```rust
 /// **执行一步**（我方视角）。
@@ -1493,7 +1777,11 @@ pub fn execute_step_me(state: &DefState, step: &Step, env: &EffectEnv<'_>) -> St
 }
 ```
 
-**`ChainStage`** — `crates/definitions/src/families/character/damage_chain/chain.rs`
+The snippet above gives the public shape of `execute_step_me`; its implementation lives in the same file.
+
+
+First, the definition of `ChainStage`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/chain.rs
 
 ```rust
 /// 修正链的**一段**（观测用；顺序就是执行顺序，`结算顺序.md` §三 第 1 行）。
@@ -1550,7 +1838,11 @@ pub enum ChainStage {
 }
 ```
 
-**`mitigate`** — `crates/definitions/src/rules/ops/damage.rs`
+The snippet above gives the public shape of `ChainStage`; its implementation lives in the same file.
+
+
+First, the definition of `mitigate`; its declaration follows.
+文件: crates/definitions/src/rules/ops/damage.rs
 
 ```rust
 /// 伤害修正（纯函数）：先护盾吸收，再减伤扣减；穿透伤害两者都不吃。
@@ -1563,7 +1855,11 @@ pub fn mitigate(damage: Nat, ty: DamageType, shield: Nat, reductions: &[Nat]) ->
     // ...（其余实现从略；见 crates/definitions/src/rules/ops/damage.rs）
 ```
 
-**`uses_after_trigger`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `mitigate`; its implementation lives in the same file.
+
+
+First, the definition of `uses_after_trigger`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 触发一次后的可用次数（减到 0 为止；调用方随后弃置）。
@@ -1572,7 +1868,11 @@ pub fn uses_after_trigger(uses: Nat) -> Nat {
 }
 ```
 
-**`is_depleted`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `uses_after_trigger`; its implementation lives in the same file.
+
+
+First, the definition of `is_depleted`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 是否耗尽（= 0 -> 立刻弃置）。
@@ -1581,7 +1881,11 @@ pub fn is_depleted(value: Nat) -> bool {
 }
 ```
 
-**`duration_after_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `is_depleted`; its implementation lives in the same file.
+
+
+First, the definition of `duration_after_end_phase`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 经过一个结束阶段后的持续回合（减到 0 为止）。
@@ -1590,7 +1894,11 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 }
 ```
 
-**`can_be_targeted_by_food`** — `crates/definitions/src/rules/ops/food.rs`
+The snippet above gives the public shape of `duration_after_end_phase`; its implementation lives in the same file.
+
+
+First, the definition of `can_be_targeted_by_food`; its declaration follows.
+文件: crates/definitions/src/rules/ops/food.rs
 
 ```rust
 /// 处于饱腹状态的角色**不能成为**其他料理事件牌的目标（规则书第 2 条）。
@@ -1598,6 +1906,8 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
     !satiated
 }
 ```
+
+The snippet above gives the public shape of `can_be_targeted_by_food`; its implementation lives in the same file.
 
 ## 4. Invariants and prohibitions
 
@@ -1617,19 +1927,17 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
 
 ## 5. Basis (rulebook and D-numbers)
 
-| Topic | Basis |
-|---|---|
-| Character zone: 3 slots / active character / switching (pay 1 die) | Rulebook "Game Zones I(3)(4)(5)" + combat action [Switch Character]; payment lives in flow |
-| Equipment zone: per character 1 weapon / 1 artifact / 1 technique / any talents | Rulebook "Game Zones II(1)"; D16 |
-| Combat statuses transfer on switch, -1 per End Phase | Rulebook "Game Zones II(3)" + special entry "Duration (Rounds)" |
-| Damage attaches elements and triggers reactions | D164 / D167 |
-| Damage-chain order | Rulebook special entries + `结算顺序.md` §3 + plan §4.4.5; 留空.md #17 / #25–#28 |
-| Defeat / avoid-defeat / healing split apart | D193 / D194 / D195 |
-| Skill timing keys and three scopes | D198; rulebook "Take Action: Use Skill" + card wording |
-| Charged / plunging "counts as" | S8.9 / S8.10; D123–D126; 留空.md #29 / #30 |
-| Technique flow | S8.4 + Technique; 留空.md #85–#87 / #101 |
-| Satiety and food | S8.1 + data 303300; D17; 留空.md #78–#81 |
-| Form transformation / growth | Rulebook "Other Rules: Form Transformation" + Crimson Witch of Embers/Deactivated; Character Level/Character Rank; D238 |
+- Character zone: 3 slots / active character / switching (pay 1 die): Rulebook "Game Zones I(3)(4)(5)" + combat action [Switch Character]; payment lives in flow
+- Equipment zone: per character 1 weapon / 1 artifact / 1 technique / any talents: Rulebook "Game Zones II(1)"; D16
+- Combat statuses transfer on switch, -1 per End Phase: Rulebook "Game Zones II(3)" + special entry "Duration (Rounds)"
+- Damage attaches elements and triggers reactions: D164 / D167
+- Damage-chain order: Rulebook special entries + `结算顺序.md` §3 + plan §4.4.5; 留空.md #17 / #25–#28
+- Defeat / avoid-defeat / healing split apart: D193 / D194 / D195
+- Skill timing keys and three scopes: D198; rulebook "Take Action: Use Skill" + card wording
+- Charged / plunging "counts as": S8.9 / S8.10; D123–D126; 留空.md #29 / #30
+- Technique flow: S8.4 + Technique; 留空.md #85–#87 / #101
+- Satiety and food: S8.1 + data 303300; D17; 留空.md #78–#81
+- Form transformation / growth: Rulebook "Other Rules: Form Transformation" + Crimson Witch of Embers/Deactivated; Character Level/Character Rank; D238
 
 ### 5.1 Documentation vs code mismatches (for review)
 
@@ -1657,16 +1965,14 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
 
 ## 7. Tests
 
-| File | Representative tests |
-|---|---|
-| `character.rs` | `new_clamps_current_values_to_their_maxima`, `hp_sub_saturates_at_zero`, `numeric_operations_are_pure` |
-| `types.rs` | `four_skill_kinds_are_covered`, `special_forms_still_count_as_normal_attack`, `physical_and_piercing_are_not_elemental` |
-| `definition.rs` / `skill.rs` | `definition_carries_skill_list_in_order`, `skill_def_carries_identity_kind_cost_and_effect` |
-| `zones/field.rs` / `zones/equipment.rs` / `zones/combat_status.rs` | `switch_dispatches_out_then_in_then_active_changed`, `occupied_slot_replaces_and_discards_old_equipment`, `transfer_moves_attachment_and_keeps_entries` |
-| `damage_chain/chain.rs` / `bonus.rs` / `record.rs` | `immunity_short_circuits_the_chain_and_deals_zero`, `multipliers_apply_between_bonus_and_shield`, `type_override_rewrites_the_type_before_the_chain` |
-| `damage.rs` | `damage_with_chain_shield_reduces_the_damage_that_lands`, `damage_with_chain_is_pure_on_the_character_state` |
-| `skill_flow/*` | `forbidden_status_blocks_skill_use_and_changes_nothing`, `even_dice_total_turns_normal_attack_into_charged`, `technique_dispatches_no_skill_used_trigger` |
-| `form.rs` / `growth.rs` / `satiated.rs` | `transform_switches_name_element_tags_and_skills`, `reset_max_hp_returns_actual_cap_to_definition`, `food_effect_grants_satiated_once_and_blocks_food_targeting` |
+- `character.rs`: `new_clamps_current_values_to_their_maxima`, `hp_sub_saturates_at_zero`, `numeric_operations_are_pure`
+- `types.rs`: `four_skill_kinds_are_covered`, `special_forms_still_count_as_normal_attack`, `physical_and_piercing_are_not_elemental`
+- `definition.rs` / `skill.rs`: `definition_carries_skill_list_in_order`, `skill_def_carries_identity_kind_cost_and_effect`
+- `zones/field.rs` / `zones/equipment.rs` / `zones/combat_status.rs`: `switch_dispatches_out_then_in_then_active_changed`, `occupied_slot_replaces_and_discards_old_equipment`, `transfer_moves_attachment_and_keeps_entries`
+- `damage_chain/chain.rs` / `bonus.rs` / `record.rs`: `immunity_short_circuits_the_chain_and_deals_zero`, `multipliers_apply_between_bonus_and_shield`, `type_override_rewrites_the_type_before_the_chain`
+- `damage.rs`: `damage_with_chain_shield_reduces_the_damage_that_lands`, `damage_with_chain_is_pure_on_the_character_state`
+- `skill_flow/*`: `forbidden_status_blocks_skill_use_and_changes_nothing`, `even_dice_total_turns_normal_attack_into_charged`, `technique_dispatches_no_skill_used_trigger`
+- `form.rs` / `growth.rs` / `satiated.rs`: `transform_switches_name_element_tags_and_skills`, `reset_max_hp_returns_actual_cap_to_definition`, `food_effect_grants_satiated_once_and_blocks_food_targeting`
 
 ## 8. Pending and to be verified
 
@@ -1678,5 +1984,10 @@ pub fn can_be_targeted_by_food(satiated: bool) -> bool {
 - **Form / type conversion**: `CharacterState` has no form field and the event cannot carry form identity #22; `DamageChainEnv::type_override` is wired (#120), which cards use which conversion belongs to cards.
 - **Enemy cards**: `EnemyDef` lacks an energy cap and has no runtime zone (留空.md #15).
 
+## Summary
+
+The character family separates definition carriers, runtime state and the three zones; every write is a pure function that leaves state unchanged on failure.
+The damage chain settles in a fixed order (immunity, bonuses, scaling, shields, reductions, HP loss) and piercing skips the first four stages; the skill flow only validates and pays, and never runs the skill effect body.
+Concrete card behaviour lives in the cards layer; this layer provides the carriers and primitives only.
 ---
 Last verified: 2026-10-19 (code: `crates/definitions/src/families/character/skill_flow/mod.rs::can_use`)

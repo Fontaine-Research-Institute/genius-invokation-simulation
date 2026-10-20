@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Elemental Transfiguration |
-| K code | K67 |
+> Keyword: Elemental Transfiguration
+>
+> K code: K67
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Elemental Transfiguration is the keyword K67.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

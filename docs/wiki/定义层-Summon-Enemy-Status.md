@@ -14,12 +14,18 @@
 
 ### 2.1 召唤物 (`summon/`) 
 
-| 类型 | 文件 | 要点 |
-|---|---|---|
-| `SummonDef<Tags>` | `summon/def.rs` | `id` / `name` / `description` / `effect_kind: SummonEffectKind` / `effect_points: Nat` / `default_uses: Option<Nat>` / `tags`; `entry(summon) -> SummonEntry` 纯搬运 |
-| `SummonEffectKind` | `summon/def.rs` | 最小集合: `Damage` / `Heal` / `Status` / `Other` (数据没有结构化字段, 反推; 待复核)  |
-| `SummonEntry` | `summon/zones/mod.rs` | `summon` (实体) / `card` (卡 id) / `uses: Option<Nat>` (可用次数) / `points: Option<Nat>` (效果量) / `effect_kind: Option<SummonEffectKind>` |
-| `SummonZone` | `summon/zones/mod.rs` | `entries` (顺序 = 召唤先后) + `stats`; `SUMMON_CAP = 4` |
+- **`SummonDef<Tags>`**
+  - 文件: `summon/def.rs`
+  - 要点: `id` / `name` / `description` / `effect_kind: SummonEffectKind` / `effect_points: Nat` / `default_uses: Option<Nat>` / `tags`; `entry(summon) -> SummonEntry` 纯搬运
+- **`SummonEffectKind`**
+  - 文件: `summon/def.rs`
+  - 要点: 最小集合: `Damage` / `Heal` / `Status` / `Other` (数据没有结构化字段, 反推; 待复核)
+- **`SummonEntry`**
+  - 文件: `summon/zones/mod.rs`
+  - 要点: `summon` (实体) / `card` (卡 id) / `uses: Option<Nat>` (可用次数) / `points: Option<Nat>` (效果量) / `effect_kind: Option<SummonEffectKind>`
+- **`SummonZone`**
+  - 文件: `summon/zones/mod.rs`
+  - 要点: `entries` (顺序 = 召唤先后) + `stats`; `SUMMON_CAP = 4`
 
 召唤物区规则: 
 
@@ -43,12 +49,18 @@
 
 ### 2.3 状态 (`status/`) 
 
-| 类型 | 文件 | 要点 |
-|---|---|---|
-| `StatusType` | `status/mod.rs` | `CharacterStatus` / `CombatStatus`; **两个类型共用状态牌族的同一个 id 区域** (D51) , 靠类型区分 |
-| `StatusDef<Tags>` | `status/def.rs` | `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>` (None = 布尔) / `duration: Option<Nat>` / `tags`; `form()` 由 `default_layers` 推导 |
-| 正式身份 (5 个)  | `status/known.rs` | 203 出战护盾 / 134 角色护盾 / 106 冻结 / 116 草原核 / 117 激化领域; 身份实例持有 `&'static StatusDef` (指针大小, **不是 ZST**: ZST 静态地址会重合, D200)  |
-| `ArcaneEdict` + `ARCANE_EDICT` | `status/arcane_edict.rs` | 秘传揭令 (秘传揭令) : **没有状态卡行 → 不伪造 StatusDef**; 只给状态身份 (布尔) + 每位牌手一份的使用机会容器 |
+- **`StatusType`**
+  - 文件: `status/mod.rs`
+  - 要点: `CharacterStatus` / `CombatStatus`; **两个类型共用状态牌族的同一个 id 区域** (D51) , 靠类型区分
+- **`StatusDef<Tags>`**
+  - 文件: `status/def.rs`
+  - 要点: `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>` (None = 布尔) / `duration: Option<Nat>` / `tags`; `form()` 由 `default_layers` 推导
+- **正式身份 (5 个)**
+  - 文件: `status/known.rs`
+  - 要点: 203 出战护盾 / 134 角色护盾 / 106 冻结 / 116 草原核 / 117 激化领域; 身份实例持有 `&'static StatusDef` (指针大小, **不是 ZST**: ZST 静态地址会重合, D200)
+- **`ArcaneEdict` + `ARCANE_EDICT`**
+  - 文件: `status/arcane_edict.rs`
+  - 要点: 秘传揭令 (秘传揭令) : **没有状态卡行 → 不伪造 StatusDef**; 只给状态身份 (布尔) + 每位牌手一份的使用机会容器
 
 状态类型与承载 (D51 / D105 / D201) : 
 
@@ -64,16 +76,46 @@
 
 ### 2.4 关键状态身份 (跨文件) 
 
-| 状态 | 身份实例 | 形态 | 数据 / 依据 | 定义位置 |
-|---|---|---|---|---|
-| 冻结 | `FROZEN` | 布尔 (duration 1, 待复核)  | 状态 106; S6.6'角色无法使用技能' | `families/status/known.rs` |
-| 眩晕 | `STUN` | 布尔 | 眩晕 + 数据 100001 | `families/character/skill_flow/forbidden.rs` (共享身份)  |
-| 石化 | `PETRIFIED` | 布尔 | 数据 116033 / 176033 (同效果两份)  | 同上 |
-| 饱腹 | `SATIATED` | 布尔 | 数据 303300; S8.1 | `families/character/satiated.rs` (共享身份)  |
-| 护盾 (出战 / 角色)  | `SHIELD_COMBAT` / `SHIELD_CHARACTER` | 层数 | 状态 203 / 134 | `families/status/known.rs` |
-| 草原核 / 激化领域 | `DENDRO_CORE` / `CATALYZING_FIELD` | 层数 (可用次数)  | 状态 116 / 117 | `families/status/known.rs` |
-| 伤害抵消 (减伤)  | `DAMAGE_NEGATION` | 层数 | 规则书·特殊词条; 无独立卡牌实体 | `families/character/damage_chain/statuses.rs` (共享身份)  |
-| 伤害免疫 | `DAMAGE_IMMUNITY` | 布尔 | 穿透伤害 + 卡面"免疫所有伤害"; 无独立卡牌实体 | 同上 (共享身份)  |
+- **冻结**
+  - 身份实例: `FROZEN`
+  - 形态: 布尔 (duration 1, 待复核)
+  - 数据 / 依据: 状态 106; S6.6`角色无法使用技能`
+  - 定义位置: `families/status/known.rs`
+- **眩晕**
+  - 身份实例: `STUN`
+  - 形态: 布尔
+  - 数据 / 依据: 眩晕 + 数据 100001
+  - 定义位置: `families/character/skill_flow/forbidden.rs` (共享身份)
+- **石化**
+  - 身份实例: `PETRIFIED`
+  - 形态: 布尔
+  - 数据 / 依据: 数据 116033 / 176033 (同效果两份)
+  - 定义位置: 同上
+- **饱腹**
+  - 身份实例: `SATIATED`
+  - 形态: 布尔
+  - 数据 / 依据: 数据 303300; S8.1
+  - 定义位置: `families/character/satiated.rs` (共享身份)
+- **护盾 (出战 / 角色)**
+  - 身份实例: `SHIELD_COMBAT` / `SHIELD_CHARACTER`
+  - 形态: 层数
+  - 数据 / 依据: 状态 203 / 134
+  - 定义位置: `families/status/known.rs`
+- **草原核 / 激化领域**
+  - 身份实例: `DENDRO_CORE` / `CATALYZING_FIELD`
+  - 形态: 层数 (可用次数)
+  - 数据 / 依据: 状态 116 / 117
+  - 定义位置: `families/status/known.rs`
+- **伤害抵消 (减伤)**
+  - 身份实例: `DAMAGE_NEGATION`
+  - 形态: 层数
+  - 数据 / 依据: 规则书·特殊词条; 无独立卡牌实体
+  - 定义位置: `families/character/damage_chain/statuses.rs` (共享身份)
+- **伤害免疫**
+  - 身份实例: `DAMAGE_IMMUNITY`
+  - 形态: 布尔
+  - 数据 / 依据: 穿透伤害 + 卡面"免疫所有伤害"; 无独立卡牌实体
+  - 定义位置: 同上 (共享身份)
 
 桥表 (`families/character/damage_chain/statuses.rs`) : 
 
@@ -98,7 +140,9 @@
 
 ### 3.1 召唤物定义
 
-**`SummonEffectKind`** — `crates/definitions/src/families/summon/def.rs`
+
+先看 `SummonEffectKind` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/def.rs
 
 ```rust
 /// 召唤物的**效果类型**（最小集合：伤害 / 治疗 / 状态 / 其它）。
@@ -121,7 +165,11 @@ pub enum SummonEffectKind {
 }
 ```
 
-**`SummonDef`** — `crates/definitions/src/families/summon/def.rs`
+上面这段给出 `SummonEffectKind` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SummonDef` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/def.rs
 
 ```rust
 /// 一个**召唤物**的定义（纯数据）。
@@ -146,7 +194,11 @@ pub struct SummonDef<Tags> {
 }
 ```
 
-**`entry`** — `crates/definitions/src/families/summon/def.rs`
+上面这段给出 `SummonDef` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `entry` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/def.rs
 
 ```rust
     /// 用这份定义造召唤物区条目（实体 + 卡 id + 可用次数 + 效果量 + 效果类型）。
@@ -160,16 +212,24 @@ pub struct SummonDef<Tags> {
     }
 ```
 
+上面这段给出 `entry` 的公开形状, 具体实现在同一文件里.
+
 ### 3.2 召唤物区
 
-**`SUMMON_CAP`** — `crates/definitions/src/families/summon/zones/mod.rs`
+
+先看 `SUMMON_CAP` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
 /// 一方召唤物区上限：4（规则书·游戏区域 IV）。
 pub const SUMMON_CAP: Nat = Nat::new(4);
 ```
 
-**`SummonEntry`** — `crates/definitions/src/families/summon/zones/mod.rs`
+上面这段给出 `SUMMON_CAP` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SummonEntry` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
 /// 一个召唤物：召唤物实体 + 召唤物卡 id + 计量（可用次数 / 效果量 / 效果类型标识）。
@@ -192,7 +252,11 @@ pub struct SummonEntry {
 }
 ```
 
-**`SummonZone`** — `crates/definitions/src/families/summon/zones/mod.rs`
+上面这段给出 `SummonEntry` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SummonZone` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
 /// **召唤物区**：最多 4 个召唤物，按召唤先后排列。
@@ -208,7 +272,11 @@ pub struct SummonZone {
 }
 ```
 
-**`summon_with_triggers`** — `crates/definitions/src/families/summon/zones/mod.rs`
+上面这段给出 `SummonZone` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `summon_with_triggers` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
     /// **召唤 / 生成**（规则书·游戏区域 IV）+ 派发「生成 / 合并」。
@@ -227,7 +295,11 @@ pub struct SummonZone {
     // ...（其余实现从略；见 crates/definitions/src/families/summon/zones/mod.rs）
 ```
 
-**`tick_with_triggers`** — `crates/definitions/src/families/summon/zones/mod.rs`
+上面这段给出 `summon_with_triggers` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `tick_with_triggers` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
     /// **触发一次**（规则书·特殊词条 可用次数）：可用次数 -1；耗尽则立刻弃置。
@@ -247,9 +319,13 @@ pub struct SummonZone {
     // ...（其余实现从略；见 crates/definitions/src/families/summon/zones/mod.rs）
 ```
 
+上面这段给出 `tick_with_triggers` 的公开形状, 具体实现在同一文件里.
+
 ### 3.3 敌人牌
 
-**`EnemyDef`** — `crates/definitions/src/families/enemy/def.rs`
+
+先看 `EnemyDef` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/enemy/def.rs
 
 ```rust
 /// 一张**敌人牌**的定义（纯数据）。
@@ -272,7 +348,11 @@ pub struct EnemyDef<Tags> {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/enemy/def.rs`
+上面这段给出 `EnemyDef` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `new` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/enemy/def.rs
 
 ```rust
     /// 建一张敌人牌定义（常量 / 测试用）。
@@ -295,7 +375,11 @@ pub struct EnemyDef<Tags> {
     }
 ```
 
-**`has_skills`** — `crates/definitions/src/families/enemy/def.rs`
+上面这段给出 `new` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `has_skills` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/enemy/def.rs
 
 ```rust
     /// 是否有技能（数据里每个敌人都有技能，但定义层不假设至少一个）。
@@ -304,9 +388,13 @@ pub struct EnemyDef<Tags> {
     }
 ```
 
+上面这段给出 `has_skills` 的公开形状, 具体实现在同一文件里.
+
 ### 3.4 状态定义
 
-**`StatusType`** — `crates/definitions/src/families/status/mod.rs`
+
+先看 `StatusType` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/mod.rs
 
 ```rust
 /// 状态的类型（L2）：角色状态 / 出战状态。
@@ -319,7 +407,11 @@ pub enum StatusType {
 }
 ```
 
-**`StatusDef`** — `crates/definitions/src/families/status/def.rs`
+上面这段给出 `StatusType` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `StatusDef` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/def.rs
 
 ```rust
 /// 一张**状态牌**的定义（纯数据；身份由 `known.rs` 的具体类型给）。
@@ -347,7 +439,11 @@ pub struct StatusDef<Tags> {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/status/def.rs`
+上面这段给出 `StatusDef` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `new` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/def.rs
 
 ```rust
     /// 建一份状态定义（常量 / 测试用；6 个参数，不再拆构造器）。
@@ -370,7 +466,11 @@ pub struct StatusDef<Tags> {
     }
 ```
 
-**`form`** — `crates/definitions/src/families/status/def.rs`
+上面这段给出 `new` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `form` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/def.rs
 
 ```rust
     /// 状态的形态（D104）：`default_layers` 为 `None` -> 布尔；`Some` -> 层数。
@@ -384,7 +484,11 @@ pub struct StatusDef<Tags> {
     }
 ```
 
-**`status_identity`** — `crates/definitions/src/families/status/known.rs`
+上面这段给出 `form` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `status_identity` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/known.rs
 
 ```rust
 /// 声明一个状态的「身份类型 + 身份静态实例」。
@@ -397,7 +501,11 @@ macro_rules! status_identity {
     // ...（其余实现从略；见 crates/definitions/src/families/status/known.rs）
 ```
 
-**`SHIELD_COMBAT_DEF`** — `crates/definitions/src/families/status/known.rs`
+上面这段给出 `status_identity` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SHIELD_COMBAT_DEF` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/known.rs
 
 ```rust
 /// 出战状态「护盾」（id 203）的定义。
@@ -423,7 +531,11 @@ pub static SHIELD_COMBAT_DEF: StatusDef<Shield> = StatusDef::new(
 );
 ```
 
-**`FROZEN_DEF`** — `crates/definitions/src/families/status/known.rs`
+上面这段给出 `SHIELD_COMBAT_DEF` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `FROZEN_DEF` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/known.rs
 
 ```rust
 /// 角色状态「冻结」（id 106）的定义。
@@ -451,9 +563,13 @@ pub static FROZEN_DEF: StatusDef<()> = StatusDef::new(
 );
 ```
 
+上面这段给出 `FROZEN_DEF` 的公开形状, 具体实现在同一文件里.
+
 ### 3.5 状态身份桥
 
-**`StatusEntity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+
+先看 `StatusEntity` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 一条「卡 id -> 状态身份」登记。
@@ -466,7 +582,11 @@ pub struct StatusEntity {
 }
 ```
 
-**`STATUS_ENTITIES`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `StatusEntity` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `STATUS_ENTITIES` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 反应会附属 / 生成的状态**静态登记表**（顺序 = 规则书条目顺序，不参与判定）。
@@ -486,7 +606,11 @@ pub const STATUS_ENTITIES: [StatusEntity; 8] = [
 ];
 ```
 
-**`status_of_card`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `STATUS_ENTITIES` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `status_of_card` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 按卡 id 查状态身份（没登记 -> `None`）。
@@ -498,7 +622,11 @@ pub fn status_of_card(card: CardId) -> Option<&'static dyn StateIdentity> {
 }
 ```
 
-**`same_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `status_of_card` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `same_identity` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 两个状态身份是否**同一份身份**（比较 `identity_address()` = 指向定义数据的地址；见模块文档）。
@@ -507,7 +635,11 @@ pub fn same_identity(left: &'static dyn StateIdentity, right: &'static dyn State
 }
 ```
 
-**`identity_in`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `same_identity` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `identity_in` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 这条身份是否在给定的身份集合里（按地址比较）。
@@ -521,7 +653,11 @@ pub fn identity_in(
 }
 ```
 
-**`SHIELD_STATUSES`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `identity_in` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SHIELD_STATUSES` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 算作**护盾**的全部状态身份（出战状态 203 + 角色状态 134）。
@@ -531,19 +667,27 @@ pub fn identity_in(
 pub const SHIELD_STATUSES: &[&'static dyn StateIdentity] = &[&SHIELD_COMBAT, &SHIELD_CHARACTER];
 ```
 
+上面这段给出 `SHIELD_STATUSES` 的公开形状, 具体实现在同一文件里.
+
 ### 3.6 本页引用的规则 ops
 
 > [!NOTE]
 > 以下为本文引用的关键字层 / 规则 ops 的真实源码 (签名与文档注释取自仓库) .
 
-**`USES_PER_TRIGGER`** — `crates/definitions/src/rules/ops/lifetime.rs`
+
+先看 `USES_PER_TRIGGER` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 每次触发消耗的可用次数（规则书：1 次）。
 pub const USES_PER_TRIGGER: Nat = Nat::new(1);
 ```
 
-**`uses_after_trigger`** — `crates/definitions/src/rules/ops/lifetime.rs`
+上面这段给出 `USES_PER_TRIGGER` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `uses_after_trigger` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 触发一次后的可用次数（减到 0 为止；调用方随后弃置）。
@@ -552,7 +696,11 @@ pub fn uses_after_trigger(uses: Nat) -> Nat {
 }
 ```
 
-**`is_depleted`** — `crates/definitions/src/rules/ops/lifetime.rs`
+上面这段给出 `uses_after_trigger` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `is_depleted` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 是否耗尽（= 0 -> 立刻弃置）。
@@ -561,14 +709,22 @@ pub fn is_depleted(value: Nat) -> bool {
 }
 ```
 
-**`DURATION_PER_END_PHASE`** — `crates/definitions/src/rules/ops/lifetime.rs`
+上面这段给出 `is_depleted` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `DURATION_PER_END_PHASE` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 每个结束阶段扣减的持续回合（规则书：1）。
 pub const DURATION_PER_END_PHASE: Nat = Nat::new(1);
 ```
 
-**`duration_after_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+上面这段给出 `DURATION_PER_END_PHASE` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `duration_after_end_phase` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 经过一个结束阶段后的持续回合（减到 0 为止）。
@@ -577,7 +733,11 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 }
 ```
 
-**`ticks_in_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+上面这段给出 `duration_after_end_phase` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `ticks_in_end_phase` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 持续回合的递减发生在**结束阶段**（不是回合开始、也不是行动阶段开始）。
@@ -588,6 +748,8 @@ pub fn ticks_in_end_phase() -> bool {
     true
 }
 ```
+
+上面这段给出 `ticks_in_end_phase` 的公开形状, 具体实现在同一文件里.
 
 ## 4. 不变量与禁止
 
@@ -609,17 +771,15 @@ pub fn ticks_in_end_phase() -> bool {
 
 ## 5. 依据 (规则书与 D 编号) 
 
-| 主题 | 依据 |
-|---|---|
-| 召唤物区上限 4 / 满员无法生成 / 按排列顺序结算 | 规则书"游戏区域 IV" |
-| 可用次数按触发次数递减, 耗尽弃置 | 规则书·特殊词条"可用次数"; D12 |
-| 持续回合每个结束阶段 -1 | 规则书·特殊词条"持续回合"; 代码按规则书, D13 旧写法已覆盖 |
-| 同名召唤物合并口径 | 分工计划 §4.4.15 (Lead 已定)  |
-| 状态两个类型共用 id 区域 | D51; 规则书"游戏区域 II" |
-| 状态公共列表 / 布尔存在即真 / 身份指针 | D95 / D96 / D104 / D105 / D108 / D110 / D200 |
-| 秘传揭令每人一份 | 规则书"特殊词条 秘传"+ 秘传揭令; D264; 留空 #68 / #98 / #99 |
-| 饱腹 / 冻结 / 眩晕 / 石化 | S8.1 / S6.6 / 眩晕 / 特技 / S8.4; 留空 #31 / #79 / #80 / #82 |
-| 敌人牌 | 数据 `tcgenemycards`; 运行期承载未设计 (待接入)  |
+- 召唤物区上限 4 / 满员无法生成 / 按排列顺序结算: 规则书"游戏区域 IV"
+- 可用次数按触发次数递减, 耗尽弃置: 规则书·特殊词条"可用次数"; D12
+- 持续回合每个结束阶段 -1: 规则书·特殊词条"持续回合"; 代码按规则书, D13 旧写法已覆盖
+- 同名召唤物合并口径: 分工计划 §4.4.15 (Lead 已定)
+- 状态两个类型共用 id 区域: D51; 规则书"游戏区域 II"
+- 状态公共列表 / 布尔存在即真 / 身份指针: D95 / D96 / D104 / D105 / D108 / D110 / D200
+- 秘传揭令每人一份: 规则书"特殊词条 秘传"+ 秘传揭令; D264; 留空 #68 / #98 / #99
+- 饱腹 / 冻结 / 眩晕 / 石化: S8.1 / S6.6 / 眩晕 / 特技 / S8.4; 留空 #31 / #79 / #80 / #82
+- 敌人牌: 数据 `tcgenemycards`; 运行期承载未设计 (待接入)
 
 ### 5.1 文档与代码不一致 (供复核) 
 
@@ -646,16 +806,14 @@ pub fn ticks_in_end_phase() -> bool {
 
 ## 7. 测试
 
-| 文件 | 代表测试 |
-|---|---|
-| `summon/def.rs` | `summon_def_carries_id_text_kind_points_uses_and_tags`, `entry_carries_the_def_measurements_into_the_zone_entry` |
-| `summon/zones/mod.rs` | `cap_is_four_and_fifth_is_rejected_without_state_change`, `same_card_merges_uses_points_and_keeps_kind_newest`, `merge_keeps_position_and_works_when_full`, `tick_decrements_uses_and_discards_at_zero` |
-| `enemy/def.rs` | `enemy_def_carries_id_name_description_hp_tags_and_skills`, `enemy_def_reuses_skill_defs_in_data_order` |
-| `status/def.rs` | `status_def_carries_id_type_text_layers_duration_and_tags`, `form_is_derived_from_default_layers_only` |
-| `status/known.rs` | `known_status_defs_use_the_data_ids_and_types`, `identities_are_distinct_static_instances_with_one_text_copy` |
-| `status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict` |
-| `families/character/damage_chain/statuses.rs` | `keyword_and_card_statuses_are_registered_by_their_data_ids` (100001 / 116033 / 303300 桥登记)  |
-| `families/character/satiated.rs` | `satiated_identity_comes_from_the_status_data`, `food_effect_grants_satiated_once_and_blocks_food_targeting` |
+- `summon/def.rs`: `summon_def_carries_id_text_kind_points_uses_and_tags`, `entry_carries_the_def_measurements_into_the_zone_entry`
+- `summon/zones/mod.rs`: `cap_is_four_and_fifth_is_rejected_without_state_change`, `same_card_merges_uses_points_and_keeps_kind_newest`, `merge_keeps_position_and_works_when_full`, `tick_decrements_uses_and_discards_at_zero`
+- `enemy/def.rs`: `enemy_def_carries_id_name_description_hp_tags_and_skills`, `enemy_def_reuses_skill_defs_in_data_order`
+- `status/def.rs`: `status_def_carries_id_type_text_layers_duration_and_tags`, `form_is_derived_from_default_layers_only`
+- `status/known.rs`: `known_status_defs_use_the_data_ids_and_types`, `identities_are_distinct_static_instances_with_one_text_copy`
+- `status/arcane_edict.rs`: `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict`
+- `families/character/damage_chain/statuses.rs`: `keyword_and_card_statuses_are_registered_by_their_data_ids` (100001 / 116033 / 303300 桥登记)
+- `families/character/satiated.rs`: `satiated_identity_comes_from_the_status_data`, `food_effect_grants_satiated_once_and_blocks_food_targeting`
 
 ## 8. 待接入与待实测
 
@@ -669,5 +827,10 @@ pub fn ticks_in_end_phase() -> bool {
 - **元素幻变**: #108 / #118.
 - **持续回合与 D13**: 代码按规则书 (结束阶段) , D13 旧口径已覆盖 —— 建议决策日志补修正记录.
 
+## 小结
+
+召唤物, 敌人与状态三族里, 只有召唤物与状态有承载; 敌人本轮只有定义.
+召唤物上限为 4, 同名合并保留位置并取最大值; 可用次数按触发递减, 持续回合按结束阶段递减.
+状态身份是指向定义数据的指针, 语义解释在伤害链与流程层, 本层不做.
 ---
 最后核对: 2026-10-19 (代码: `crates/definitions/src/rules/ops/lifetime.rs::duration_after_end_phase`) 

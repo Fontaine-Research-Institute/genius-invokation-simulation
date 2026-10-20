@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Dendro Application |
-| K code | K207 |
+> Keyword: Dendro Application
+>
+> K code: K207
 
 ## Effect
 
@@ -27,3 +26,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Dendro Application is the keyword K207.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

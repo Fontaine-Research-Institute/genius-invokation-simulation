@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Random Hilichurl Summon |
-| K code | K1001 |
+> Keyword: Random Hilichurl Summon
+>
+> K code: K1001
 
 ## Effect
 
@@ -28,3 +27,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Random Hilichurl Summon is the keyword K1001.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

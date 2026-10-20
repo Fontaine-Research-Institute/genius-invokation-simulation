@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Mutual Weapons Mentorship |
-| K code | K1045 |
+> Keyword: Mutual Weapons Mentorship
+>
+> K code: K1045
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Mutual Weapons Mentorship is the keyword K1045.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

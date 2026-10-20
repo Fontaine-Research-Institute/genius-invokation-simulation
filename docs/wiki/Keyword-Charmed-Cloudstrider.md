@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Charmed Cloudstrider |
-| K code | K1043 |
+> Keyword: Charmed Cloudstrider
+>
+> K code: K1043
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Charmed Cloudstrider is the keyword K1043.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

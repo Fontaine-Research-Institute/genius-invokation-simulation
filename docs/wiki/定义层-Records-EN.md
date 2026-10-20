@@ -6,47 +6,47 @@
 
 ---
 
+
 ## 1. Responsibility
 
 The unified record API: a very thin generic container of "which step + arbitrary content"; content types and display are defined by each module. When feature `records` is off, `Recorder` is zero-sized and `push` is a no-op, without affecting settlement.
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `Record<T>` | `crates/definitions/src/records/mod.rs` | One record: `step: Nat` + `content: T` |
-| `Recorder<T>` | same | Single writer `push`; read-only `entries`; `clear` / `len` / `is_empty` / `step_entries` |
-| `ShowRecord` | same | Content types implement `show(&self, out: &mut String)`; the recorder presets no kinds / fields |
-| feature `records` | `crates/definitions/Cargo.toml` | On by default; off -> zero-sized `Recorder`, `push` discards, `entries` always empty |
+- ---: ---; ---
+- `Record<T>`: One record: `step: Nat` + `content: T` (文件: `crates/definitions/src/records/mod.rs`)
+- `Recorder<T>`: same; Single writer `push`; read-only `entries`; `clear` / `len` / `is_empty` / `step_entries`
+- `ShowRecord`: same; Content types implement `show(&self, out: &mut String)`; the recorder presets no kinds / fields
+- feature `records`: On by default; off -> zero-sized `Recorder`, `push` discards, `entries` always empty (文件: `crates/definitions/Cargo.toml`)
 
 Per-module content types (one `record.rs` per module, D225):
 
-| Module | File | Content type |
-|---|---|---|
-| Keywords | `keywords/record.rs` | `KeywordRecord` |
-| Damage chain | `families/character/damage_chain/record.rs` | `DamageChainRecord` |
-| Flow | `flow/record.rs` | `FlowRecord` |
-| Character zone / combat status / equipment | `families/character/zones/record.rs` | `CharacterZoneRecord` |
-| Summon zone | `families/summon/zones/record.rs` | `SummonZoneRecord` |
-| Support zone / hand-card states / current cost | `families/action_card/areas/record.rs` | `SupportRecord` / `HandCardStateRecord` / `CostRecord` |
-| Deck / hand | `families/action_card/zones/{pile,hand}/record.rs` | `PileRecord` / `HandRecord` |
+- ---: ---; ---
+- Keywords: `KeywordRecord` (文件: `keywords/record.rs`)
+- Damage chain: `DamageChainRecord` (文件: `families/character/damage_chain/record.rs`)
+- Flow: `FlowRecord` (文件: `flow/record.rs`)
+- Character zone / combat status / equipment: `CharacterZoneRecord` (文件: `families/character/zones/record.rs`)
+- Summon zone: `SummonZoneRecord` (文件: `families/summon/zones/record.rs`)
+- Support zone / hand-card states / current cost: `SupportRecord` / `HandCardStateRecord` / `CostRecord` (文件: `families/action_card/areas/record.rs`)
+- Deck / hand: `PileRecord` / `HandRecord` (文件: `families/action_card/zones/{pile,hand}/record.rs`)
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `Record::new(step, content)` | `records/mod.rs` | `const` construction of one record |
-| `Recorder::{new, push, entries, clear, len, is_empty, step_entries}` | same | Write / read-only / clear / filter by step |
-| `impl<T> Default for Recorder<T>` | same | Equivalent to `new()` |
-| `trait ShowRecord` | same | Content types implement display themselves |
-| `type XRecorder = Recorder<XRecord>` and `*_recorded` entries | each module's `record.rs` | Module-specific recorders / recorded entry points |
+- ---: ---; ---
+- `Record::new(step, content)`: `const` construction of one record (文件: `records/mod.rs`)
+- `Recorder::{new, push, entries, clear, len, is_empty, step_entries}`: same; Write / read-only / clear / filter by step
+- `impl<T> Default for Recorder<T>`: same; Equivalent to `new()`
+- `trait ShowRecord`: same; Content types implement display themselves
+- `type XRecorder = Recorder<XRecord>` and `*_recorded` entries: each module's `record.rs`; Module-specific recorders / recorded entry points
 
 ### Source
 
 > [!NOTE]
 > The core definitions of `records/mod.rs` are reproduced below (`Record` / `ShowRecord` / both `Recorder` variants and their impls, including `cfg` and `derive` lines).
 
-**`crates/definitions/src/records/mod.rs`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/records/mod.rs`
 
 ```rust
 /// 一条记录：**属于哪一步** + 任意内容（内容类型由使用方定义）。
@@ -186,6 +186,8 @@ impl<T: ShowRecord> Recorder<T> {
     }
 }
 ```
+
+The file's current public interface is shown above; bodies are omitted.
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
@@ -203,13 +205,11 @@ impl<T: ShowRecord> Recorder<T> {
 > [!NOTE]
 > The recorder itself interprets no rules; it only serves the observation need "inserted settlements can be replayed / compared".
 
-| Number | Conclusion |
-|---|---|
-| D221 | Recording need for replaying inserted settlements |
-| D223 / D224 | Minimal record API: step + arbitrary content; content types and display are self-defined |
-| D225 | Content types in a separate file (each module's `record.rs`) |
-| D190 / D191 | Randomized observation expansion can be recorded but is not written back to state |
-| D187 | Statistics (counts) and records (what happened at which step) are separate tracks |
+- D221: Recording need for replaying inserted settlements
+- D223 / D224: Minimal record API: step + arbitrary content; content types and display are self-defined
+- D225: Content types in a separate file (each module's `record.rs`)
+- D190 / D191: Randomized observation expansion can be recorded but is not written back to state
+- D187: Statistics (counts) and records (what happened at which step) are separate tracks
 
 ## 6. Common misuse
 
@@ -224,16 +224,20 @@ impl<T: ShowRecord> Recorder<T> {
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| `records/mod.rs` | `records_keep_push_order_and_step_numbers`, `display_is_defined_by_content_types`, `entries_are_read_only_and_clear_empties_the_container`, `empty_recorder_renders_nothing_and_records_belong_to_explicit_steps` |
-| Each module's `record.rs` | record tests for damage chain / keywords / character zones / summon zones / support zone / pile / hand / flow (feature-gated) |
+- `records/mod.rs`: `records_keep_push_order_and_step_numbers`, `display_is_defined_by_content_types`, `entries_are_read_only_and_clear_empties_the_container`, `empty_recorder_renders_nothing_and_records_belong_to_explicit_steps`
+- Each module's `record.rs`: record tests for damage chain / keywords / character zones / summon zones / support zone / pile / hand / flow (feature-gated)
 
 ## 8. Not yet wired and to be verified
 
 - `留空.md#56`: trace / record paths do not settle reactions (trace types have no reaction entries), diverging from `execute_step_me`.
 - The recorder itself has no rule semantics and no dedicated `留空` entry; each module's "which actions are recorded" grows with block wiring.
 
+## Summary
+
+Record only answers which step plus arbitrary content, while content types and ShowRecord display belong to each module. Recorder has a single writer, push, and a read-only entries view; with the feature off it is zero-sized and push is a no-op. Records observe only: they take no part in position equivalence and must never feed back into settlement.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/records/mod.rs:Recorder)

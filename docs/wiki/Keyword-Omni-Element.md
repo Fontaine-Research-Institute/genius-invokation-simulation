@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Omni Element |
-| K code | K411 |
+> Keyword: Omni Element
+>
+> K code: K411
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Omni Element is the keyword K411.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

@@ -14,21 +14,46 @@ Organize the **five card families (L1 `CardFamily`)** into "type definitions + z
 
 ### 2.1 The three-level model (D51 / D53–D55)
 
-| Level | Concept | Definition site | Notes |
-|---|---|---|---|
-| L1 | Card family | `CardFamily` in `src/base/family.rs` | `ActionCard` / `Summon` / `Character` / `Enemy` / `Status`; **the family decides the id region**, ids are not guaranteed unique across families |
-| L2 | Type | **Only action cards and statuses have one**: `ActionCardType` in `src/families/action_card/mod.rs`, `StatusType` in `src/families/status/mod.rs` | Character / summon / enemy have no type; pinned by an exhaustive match in `src/families/mod.rs` |
-| L3 | Tag | Top-level `src/tags/` (sibling of families, D53) | Each tag = one **zero-sized type + one static `TagText`** (D54 / D57 / D58 / D64); no "tag enum", no numeric ids |
+- **L1**
+  - Concept: Card family
+  - Definition site: `CardFamily` in `src/base/family.rs`
+  - Notes: `ActionCard` / `Summon` / `Character` / `Enemy` / `Status`; **the family decides the id region**, ids are not guaranteed unique across families
+- **L2**
+  - Concept: Type
+  - Definition site: **Only action cards and statuses have one**: `ActionCardType` in `src/families/action_card/mod.rs`, `StatusType` in `src/families/status/mod.rs`
+  - Notes: Character / summon / enemy have no type; pinned by an exhaustive match in `src/families/mod.rs`
+- **L3**
+  - Concept: Tag
+  - Definition site: Top-level `src/tags/` (sibling of families, D53)
+  - Notes: Each tag = one **zero-sized type + one static `TagText`** (D54 / D57 / D58 / D64); no "tag enum", no numeric ids
 
 ### 2.2 The five families at a glance
 
-| Family | Definition carriers | Zones / containers owned | Extension points | Files |
-|---|---|---|---|---|
-| ActionCard | `ActionCardDef` (type / text / base cost / play condition D217) | Hand `HandState`, pile `PileState`, support zone `SupportZone`, hand-card states `HandCardStates`, current cost `CurrentCost` | New card: cards crate; type-level behaviour: `rules/` rows + `flow/` | `src/families/action_card/{def.rs, zones/, areas/}` |
-| Character | `CharacterDef` + `SkillDef` + `SkillKind` | Character zone `CharacterZone` (3 slots + active pointer), per-character `EquipmentZone`, combat status zone `CombatStatusZone`, `CharacterState` (HP / energy / statuses / attachment) | New skill: `SkillDef`; new timing: `CharacterTiming`; new reaction: `ReactionRegistry`; damage modifiers: `DamageModifiers` | `src/families/character/` |
-| Summon | `SummonDef` + `SummonEffectKind` | Summon zone `SummonZone` (cap 4 / same-name merge / usage decrement D12) | New summon: cards crate; execution action pending | `src/families/summon/{def.rs, zones/mod.rs}` |
-| Enemy | `EnemyDef` (HP / skill list, reusing `SkillDef`) | **No zone / no operations** | Definition data only; runtime bearing not designed | `src/families/enemy/def.rs` |
-| Status | `StatusDef` + five formal identities in `known.rs` + `ArcaneEdict` | **Statuses have no zone of their own**: character statuses in `CharacterState.states` (shared `StateList`, D105), combat statuses in `CombatStatusZone` | New status: `StatusDef` + identity instance; semantics belong to the status block | `src/families/status/{def.rs, known.rs, arcane_edict.rs}` |
+- **ActionCard**
+  - Definition carriers: `ActionCardDef` (type / text / base cost / play condition D217)
+  - Zones / containers owned: Hand `HandState`, pile `PileState`, support zone `SupportZone`, hand-card states `HandCardStates`, current cost `CurrentCost`
+  - Extension points: New card: cards crate; type-level behaviour: `rules/` rows + `flow/`
+  - Files: `src/families/action_card/{def.rs, zones/, areas/}`
+- **Character**
+  - Definition carriers: `CharacterDef` + `SkillDef` + `SkillKind`
+  - Zones / containers owned: Character zone `CharacterZone` (3 slots + active pointer), per-character `EquipmentZone`, combat status zone `CombatStatusZone`, `CharacterState` (HP / energy / statuses / attachment)
+  - Extension points: New skill: `SkillDef`; new timing: `CharacterTiming`; new reaction: `ReactionRegistry`; damage modifiers: `DamageModifiers`
+  - Files: `src/families/character/`
+- **Summon**
+  - Definition carriers: `SummonDef` + `SummonEffectKind`
+  - Zones / containers owned: Summon zone `SummonZone` (cap 4 / same-name merge / usage decrement D12)
+  - Extension points: New summon: cards crate; execution action pending
+  - Files: `src/families/summon/{def.rs, zones/mod.rs}`
+- **Enemy**
+  - Definition carriers: `EnemyDef` (HP / skill list, reusing `SkillDef`)
+  - Zones / containers owned: **No zone / no operations**
+  - Extension points: Definition data only; runtime bearing not designed
+  - Files: `src/families/enemy/def.rs`
+- **Status**
+  - Definition carriers: `StatusDef` + five formal identities in `known.rs` + `ArcaneEdict`
+  - Zones / containers owned: **Statuses have no zone of their own**: character statuses in `CharacterState.states` (shared `StateList`, D105), combat statuses in `CombatStatusZone`
+  - Extension points: New status: `StatusDef` + identity instance; semantics belong to the status block
+  - Files: `src/families/status/{def.rs, known.rs, arcane_edict.rs}`
 
 ### 2.3 Zone conventions (D40 / D42 / D182 / D183)
 
@@ -48,7 +73,9 @@ Organize the **five card families (L1 `CardFamily`)** into "type definitions + z
 
 ### 3.1 Card family and type enums
 
-**`CardFamily`** — `crates/definitions/src/base/family.rs`
+
+First, the definition of `CardFamily`; its declaration follows.
+文件: crates/definitions/src/base/family.rs
 
 ```rust
 /// L1 牌族（id 区域）。
@@ -67,7 +94,11 @@ pub enum CardFamily {
 }
 ```
 
-**`ActionCardType`** — `crates/definitions/src/families/action_card/mod.rs`
+The snippet above gives the public shape of `CardFamily`; its implementation lives in the same file.
+
+
+First, the definition of `ActionCardType`; its declaration follows.
+文件: crates/definitions/src/families/action_card/mod.rs
 
 ```rust
 /// 行动牌的类型（L2）。
@@ -82,7 +113,11 @@ pub enum ActionCardType {
 }
 ```
 
-**`StatusType`** — `crates/definitions/src/families/status/mod.rs`
+The snippet above gives the public shape of `ActionCardType`; its implementation lives in the same file.
+
+
+First, the definition of `StatusType`; its declaration follows.
+文件: crates/definitions/src/families/status/mod.rs
 
 ```rust
 /// 状态的类型（L2）：角色状态 / 出战状态。
@@ -94,6 +129,8 @@ pub enum StatusType {
     CombatStatus,
 }
 ```
+
+The snippet above gives the public shape of `StatusType`; its implementation lives in the same file.
 
 ## 4. Invariants and prohibitions
 
@@ -109,16 +146,14 @@ pub enum StatusType {
 
 ## 5. Basis (rulebook and D-numbers)
 
-| Topic | Basis |
-|---|---|
-| Three zones (character / support / summon) + hand / pile / equipment attachment | Rulebook "Game Zones I–VI"; `families/*/zones/` |
-| Family = id region; type / tag layering | D51 / D53 / D54 / D55 |
-| Sides stay out of the engine; two named instances | D29 / D30 / D34 |
-| Zone = field; no zone numbers / registry | D40 / D42 |
-| Stats sink into `stats/`, read-only pointers, trimmable | D181 / D182 / D183 / D187 |
-| Timings defined and dispatched by each family | D184 / D185 / D186 |
-| Record API / content type in its own file | D221 / D223 / D224 / D225 |
-| Framework vs concrete cards split into crates | D240 / D241 / D242 / D243 |
+- Three zones (character / support / summon) + hand / pile / equipment attachment: Rulebook "Game Zones I–VI"; `families/*/zones/`
+- Family = id region; type / tag layering: D51 / D53 / D54 / D55
+- Sides stay out of the engine; two named instances: D29 / D30 / D34
+- Zone = field; no zone numbers / registry: D40 / D42
+- Stats sink into `stats/`, read-only pointers, trimmable: D181 / D182 / D183 / D187
+- Timings defined and dispatched by each family: D184 / D185 / D186
+- Record API / content type in its own file: D221 / D223 / D224 / D225
+- Framework vs concrete cards split into crates: D240 / D241 / D242 / D243
 
 ### 5.1 Documentation vs code mismatches (for review)
 
@@ -144,12 +179,10 @@ pub enum StatusType {
 
 ## 7. Tests
 
-| Location | Tests |
-|---|---|
-| `src/families/mod.rs` | `tests::only_action_card_and_status_have_types`, `tests::type_enums_belong_to_their_own_family` |
-| `src/families/action_card/mod.rs` | `tests::action_card_has_exactly_three_types` |
-| `src/families/status/mod.rs` | `tests::status_types_share_one_id_region` |
-| Family pages | see the "Tests" sections of [[定义层-Character-EN]] / [[定义层-Action-Card-EN]] / [[定义层-Summon-Enemy-Status-EN]] |
+- `src/families/mod.rs`: `tests::only_action_card_and_status_have_types`, `tests::type_enums_belong_to_their_own_family`
+- `src/families/action_card/mod.rs`: `tests::action_card_has_exactly_three_types`
+- `src/families/status/mod.rs`: `tests::status_types_share_one_id_region`
+- Family pages: see the "Tests" sections of [[定义层-Character-EN]] / [[定义层-Action-Card-EN]] / [[定义层-Summon-Enemy-Status-EN]]
 
 ## 8. Pending and to be verified
 
@@ -159,5 +192,10 @@ pub enum StatusType {
 - **No `types/` subdirectories for action cards / statuses**: see §5.1.
 - Per-zone pending items (duration timing, support order, summon merge semantics, …) are listed on the family pages and reference `留空.md #67` / `#93` / `#94`.
 
+## Summary
+
+This page indexes the five card families: each has definition carriers plus its own zones, and concrete cards live in the cards layer.
+Families compose through the keyword layer, rules ops and the flow layer; they do not call each other.
+New families follow the zone-as-field convention, with no zone numbers and no entity-to-zone map.
 ---
 Last verified: 2026-10-19 (code: `crates/definitions/src/families/mod.rs::tests::only_action_card_and_status_have_types`)

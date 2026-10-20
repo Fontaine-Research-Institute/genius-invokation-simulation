@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Curse of the Undercurrent |
-| K code | K1022 |
+> Keyword: Curse of the Undercurrent
+>
+> K code: K1022
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Curse of the Undercurrent is the keyword K1022.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

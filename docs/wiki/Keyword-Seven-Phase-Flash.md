@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Seven-Phase Flash |
-| K code | K1046 |
+> Keyword: Seven-Phase Flash
+>
+> K code: K1046
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Seven-Phase Flash is the keyword K1046.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

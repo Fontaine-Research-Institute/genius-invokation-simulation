@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Tune |
-| K code | K57 |
+> Keyword: Tune
+>
+> K code: K57
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Tune is the keyword K57.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

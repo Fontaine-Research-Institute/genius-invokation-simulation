@@ -2,7 +2,7 @@
 
 > [[卡牌定义-模板-召唤物|中文]] · English
 
-*Scope: writing template for summon; mirrors the character template [[卡牌定义-模板]] (Chinese reference).*
+*Scope: writing template for summon; mirrors the character template [[卡牌定义-模板-EN]].*
 
 > [!IMPORTANT]
 > General hard rules:
@@ -31,11 +31,15 @@
 >
 > [[Keyword-Duration|Duration (Rounds)]]: 1 Round
 
+File: <file path>
+
 ```rust
 // Example Summon definition code
 ```
 
 > <card-face description here>
+
+File: <file path>
 
 ```rust
 // Example Summon implementation code
@@ -55,6 +59,10 @@
 > Card image path: `assets/summon/<id>.jpg`; register each new image in `new/assets/SOURCES.md`.
 >
 > Do not use skill icons.
+
+## Summary
+
+The summon template follows type, Usages, Duration, definition code, description and implementation code. Write Usages and Duration only when present; otherwise omit those quote lines.
 
 ---
 

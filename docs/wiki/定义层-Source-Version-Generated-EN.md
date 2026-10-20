@@ -6,39 +6,40 @@
 
 ---
 
+
 ## 1. Responsibility
 
 Three non-rule infrastructure pieces: ① each file declares its own source (full text + dependencies + ownership embedded at compile time, feature-trimmable); ② a game-version declaration macro (only "the version this card / module has been synced to"); ③ generated data and rich-text rendering (`generated/`, nothing read from files at runtime).
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `card_source!` / `module_source!` | `crates/definitions/src/source/mod.rs` | Declare "this file ↔ ownership" at the file top; the card macro binds the module's `pub const ID: CardId` and does not write the id |
-| `SourceFile` | same | `owner` / `path` / `segments` / `content` (`include_str!` original text) / `dependencies`; `dependencies()` returns a zero-allocation view |
-| `SOURCE_FILES` / `source_files` / `source_of` / `source_files_under` | same | Summary entry points; `SOURCE_FILES` is a hand-written list — missing entries compile but cannot be found |
-| `GameVersion` / `card_game_version!` | `crates/definitions/src/version/mod.rs`, `version/macros.rs` | `major.minor`; the macro generates `GAME_VERSION`, meaning "synced to this game version" |
-| Generated data | `crates/definitions/build.rs` + `generated/data/*.json` | JSON is read at compile time to build static tables; nothing is read at runtime |
-| `Localized` / `Resolved` / `TagText` / `TAGS` | `generated/localized.rs`, `build.rs` | Three-state text and the single tag data (see [[定义层-Tags-EN]]) |
-| Rich-text two-stage | `generated/text/mod.rs`, `generated/text/render.rs`, richtext crate | Parsing (strict, no game semantics) separated from rendering (name tables + damage values + missing policy) |
+- ---: ---; ---
+- `card_source!` / `module_source!`: Declare "this file ↔ ownership" at the file top; the card macro binds the module's `pub const ID: CardId` and does not write the id (文件: `crates/definitions/src/source/mod.rs`)
+- `SourceFile`: same; `owner` / `path` / `segments` / `content` (`include_str!` original text) / `dependencies`; `dependencies()` returns a zero-allocation view
+- `SOURCE_FILES` / `source_files` / `source_of` / `source_files_under`: same; Summary entry points; `SOURCE_FILES` is a hand-written list — missing entries compile but cannot be found
+- `GameVersion` / `card_game_version!`: `major.minor`; the macro generates `GAME_VERSION`, meaning "synced to this game version" (文件: `crates/definitions/src/version/mod.rs`, `version/macros.rs`)
+- Generated data: JSON is read at compile time to build static tables; nothing is read at runtime (文件: `crates/definitions/build.rs` + `generated/data/*.json`)
+- `Localized` / `Resolved` / `TagText` / `TAGS`: Three-state text and the single tag data (see [[定义层-Tags-EN]]) (文件: `generated/localized.rs`, `build.rs`)
+- Rich-text two-stage: Parsing (strict, no game semantics) separated from rendering (name tables + damage values + missing policy) (文件: `generated/text/mod.rs`, `generated/text/render.rs`, richtext crate)
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `source_files()` / `source_of(path)` / `source_files_under(prefix)` | `source/mod.rs` | Read-only queries over the hand-written summary list |
-| `SourceFile::dependencies()` / `Dependency::{kind, is_parsed, path, members, alias, raw}` | same | Dependencies store only byte spans of the original text; unparsable entries become `Unparsed` and keep their raw text |
-| `GameVersion::{new, major, minor}` | `version/mod.rs` | `const`, `Ord`, `Display` prints `major.minor` |
-| `card_game_version!(major, minor)` | `version/macros.rs` | Generates `pub const GAME_VERSION` |
-| `keyword` / `keywords_all` / `action_card_type_text` / `status_type_text` | `generated/mod.rs` | Queries over generated tables |
-| `render` / `render_segments` / `TextSources` / `MissingPolicy` | `generated/text/render.rs` | Render after strict parsing; the default missing policy keeps placeholders |
+- ---: ---; ---
+- `source_files()` / `source_of(path)` / `source_files_under(prefix)`: Read-only queries over the hand-written summary list (文件: `source/mod.rs`)
+- `SourceFile::dependencies()` / `Dependency::{kind, is_parsed, path, members, alias, raw}`: same; Dependencies store only byte spans of the original text; unparsable entries become `Unparsed` and keep their raw text
+- `GameVersion::{new, major, minor}`: `const`, `Ord`, `Display` prints `major.minor` (文件: `version/mod.rs`)
+- `card_game_version!(major, minor)`: Generates `pub const GAME_VERSION` (文件: `version/macros.rs`)
+- `keyword` / `keywords_all` / `action_card_type_text` / `status_type_text`: Queries over generated tables (文件: `generated/mod.rs`)
+- `render` / `render_segments` / `TextSources` / `MissingPolicy`: Render after strict parsing; the default missing policy keeps placeholders (文件: `generated/text/render.rs`)
 
 ### Source
 
 > [!NOTE]
 > Real source excerpts for source embedding, the version macro, and generated data (macro definitions included; bodies omitted).
 
-**`crates/definitions/src/source/mod.rs (SourceOwner / SourceFile)`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/source/mod.rs`
 
 ```rust
 
@@ -68,7 +69,9 @@ pub struct SourceFile {
 }
 ```
 
-**`crates/definitions/src/source/mod.rs (card_source! macro, embed-source enabled)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/source/mod.rs`
 
 ```rust
 #[cfg(feature = "embed-source")]
@@ -99,7 +102,9 @@ macro_rules! card_source {
 }
 ```
 
-**`crates/definitions/src/source/mod.rs (module_source! macro, embed-source enabled)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/source/mod.rs`
 
 ```rust
 #[cfg(feature = "embed-source")]
@@ -125,7 +130,9 @@ macro_rules! module_source {
 }
 ```
 
-**`crates/definitions/src/source/mod.rs (public query function signatures)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/source/mod.rs`
 
 ```rust
     /// 从原文切出这一段（区间来自编译期解析，安全；span 越界会 panic 而不是返回错数据）。
@@ -176,7 +183,9 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 pub const fn parse_dependencies(source: &str) -> ParsedDependencies
 ```
 
-**`crates/definitions/src/version/mod.rs (GameVersion)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/version/mod.rs`
 
 ```rust
 ///
@@ -216,7 +225,9 @@ impl fmt::Display for GameVersion {
 }
 ```
 
-**`crates/definitions/src/version/macros.rs (card_game_version!)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/version/macros.rs`
 
 ```rust
 /// 声明「本卡 / 本模块已同步（核对）到的最新游戏版本」（D245 / D246）。
@@ -245,7 +256,9 @@ macro_rules! card_game_version {
 }
 ```
 
-**`crates/definitions/src/generated/mod.rs (generated-table query signatures)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/generated/mod.rs`
 
 ```rust
     /// const 构造（生成表 / 代码里的常量用）。
@@ -271,7 +284,9 @@ pub fn action_card_type_text(card_type: ActionCardType) -> Option<&'static TextE
 pub fn status_type_text(status_type: StatusType) -> Option<&'static TextEntry>
 ```
 
-**`crates/definitions/src/generated/text/render.rs (MissingPolicy / TextSources / render)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/generated/text/render.rs`
 
 ```rust
 /// 注意：这不是解析兜底 —— 解析阶段的未匹配一律 ParseError（D63）；
@@ -331,6 +346,8 @@ pub fn render_segments(segments: &[Segment], lang: Lang, sources: &dyn TextSourc
 pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String, ParseError>
 ```
 
+The file's current public interface is shown above; bodies are omitted.
+
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
@@ -347,15 +364,13 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 > [!NOTE]
 > This section covers infrastructure, not rulebook clauses; version / source policies come from user decisions and the decision log.
 
-| Number | Conclusion |
-|---|---|
-| D213 / D214 / D215 / D216 | Each file declares its source, dependencies parsed at compile time, the card macro writes no id, two macro forms |
-| D242 | Shared mechanisms stay in definitions; the card source table lives in the cards crate; `SOURCE_FILES` is hand-written |
-| D244 / D245 / D246 | Version macro and "declare the synced version only"; D247 closed the phase |
-| D248 / D249 / D250 / D251 | Card version intervals (design only, not implemented); per-card selection, latest by default, implemented old versions are kept |
-| D62 / D75 / D76 | Rich-text two-stage: parsing in the richtext crate, rendering in definitions |
-| D67 | Single tag data source, field access |
-| D240 / D241 / D243 | Concrete cards live in the cards crate (optional feature); simulation excludes cards by default |
+- D213 / D214 / D215 / D216: Each file declares its source, dependencies parsed at compile time, the card macro writes no id, two macro forms
+- D242: Shared mechanisms stay in definitions; the card source table lives in the cards crate; `SOURCE_FILES` is hand-written
+- D244 / D245 / D246: Version macro and "declare the synced version only"; D247 closed the phase
+- D248 / D249 / D250 / D251: Card version intervals (design only, not implemented); per-card selection, latest by default, implemented old versions are kept
+- D62 / D75 / D76: Rich-text two-stage: parsing in the richtext crate, rendering in definitions
+- D67: Single tag data source, field access
+- D240 / D241 / D243: Concrete cards live in the cards crate (optional feature); simulation excludes cards by default
 
 ## 6. Common misuse
 
@@ -371,13 +386,11 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| `source/mod.rs` | `registry_lists_onboarded_module_files_in_path_order`, `prefix_helper_filters_by_path_prefix`, `module_owner_keeps_multilingual_name`, `disabled_embed_means_empty_registry`, `parses_single_alias_brace_and_keeps_unparsed_raw`, `parses_multi_line_brace_import`, `unsupported_forms_are_unparsed_with_raw_text` |
-| `version/mod.rs` | `version_compares_and_displays`, `macro_generates_a_readable_constant`, `different_cards_can_declare_different_versions` |
-| `generated/mod.rs` | `keyword_table_is_non_empty_sorted_and_complete`, `type_texts_cover_all_four_languages`, `damage_element_names_are_complete`, `tag_data_is_one_field_per_tag_and_pointers_are_distinct`, `descriptions_corpus_is_non_empty` |
-| `generated/text/render.rs` | `strips_color_and_sprite_markers`, `replaces_names_by_language`, `replaces_keyword_and_ignores_variant`, `replaces_damage_and_element`, `missing_names_keep_placeholder_or_empty`, `runtime_placeholders_are_kept`, `definitions_sources_uses_generated_keyword_table` |
-| `generated/text/tests.rs` | `every_generated_text_parses_strictly`, `keyword_descriptions_parse_strictly` |
+- `source/mod.rs`: `registry_lists_onboarded_module_files_in_path_order`, `prefix_helper_filters_by_path_prefix`, `module_owner_keeps_multilingual_name`, `disabled_embed_means_empty_registry`, `parses_single_alias_brace_and_keeps_unparsed_raw`, `parses_multi_line_brace_import`, `unsupported_forms_are_unparsed_with_raw_text`
+- `version/mod.rs`: `version_compares_and_displays`, `macro_generates_a_readable_constant`, `different_cards_can_declare_different_versions`
+- `generated/mod.rs`: `keyword_table_is_non_empty_sorted_and_complete`, `type_texts_cover_all_four_languages`, `damage_element_names_are_complete`, `tag_data_is_one_field_per_tag_and_pointers_are_distinct`, `descriptions_corpus_is_non_empty`
+- `generated/text/render.rs`: `strips_color_and_sprite_markers`, `replaces_names_by_language`, `replaces_keyword_and_ignores_variant`, `replaces_damage_and_element`, `missing_names_keep_placeholder_or_empty`, `runtime_placeholders_are_kept`, `definitions_sources_uses_generated_keyword_table`
+- `generated/text/tests.rs`: `every_generated_text_parses_strictly`, `keyword_descriptions_parse_strictly`
 
 ## 8. Not yet wired and to be verified
 
@@ -385,6 +398,12 @@ pub fn render(raw: &str, lang: Lang, sources: &dyn TextSources) -> Result<String
 - `留空.md#11`: card-face text fills Chinese only; other languages are empty (rendered via `Resolved::Fallback`); filling all four is undecided.
 - Source embedding / generated data have no rule semantics and no dedicated `留空` entry; the hand-written `SOURCE_FILES` list is a known limitation (documented in D242).
 
+## Summary
+
+Source macros embed file text, dependencies and ownership at compile time; SOURCE_FILES is a hand-written list and embed-source can be disabled to trim it. The version macro only states the game version a card or module has been synced to; there is no repository-wide latest-version constant, and version intervals plus selection are design only, not implemented. Generated data becomes static tables at compile time with no runtime file IO, and rich text is strictly parsed before rendering.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/source/mod.rs:SourceFile)

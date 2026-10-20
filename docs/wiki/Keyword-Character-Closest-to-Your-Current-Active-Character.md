@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Character Closest to Your Current Active Character |
-| K code | K7 |
+> Keyword: Character Closest to Your Current Active Character
+>
+> K code: K7
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Character Closest to Your Current Active Character is the keyword K7.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

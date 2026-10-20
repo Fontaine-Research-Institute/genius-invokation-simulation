@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Taroumaru's Savings |
-| K code | K2001 |
+> Keyword: Taroumaru's Savings
+>
+> K code: K2001
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Taroumaru’s Savings is the keyword K2001.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

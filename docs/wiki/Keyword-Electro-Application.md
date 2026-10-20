@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Electro Application |
-| K code | K204 |
+> Keyword: Electro Application
+>
+> K code: K204
 
 ## Effect
 
@@ -28,3 +27,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Electro Application is the keyword K204.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

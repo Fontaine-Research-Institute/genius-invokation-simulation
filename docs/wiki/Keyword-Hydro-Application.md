@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Hydro Application |
-| K code | K202 |
+> Keyword: Hydro Application
+>
+> K code: K202
 
 ## Effect
 
@@ -28,3 +27,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Hydro Application is the keyword K202.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

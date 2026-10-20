@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Usage(s) |
-| K code | K3 |
+> Keyword: Usage(s)
+>
+> K code: K3
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 - [[卡牌定义-爱诺-EN|Aino]]
+
+## Summary
+
+Usage(s) is the keyword K3.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+The implemented cards that use it are listed above, 1 in total.

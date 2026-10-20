@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Responsibility
+## 1. Responsibility (What This Layer Solves)
 
 The single public entry point of this workspace (facade crate): re-exports only, no logic. External users depend on this crate alone and get a uniform path to engine / definitions / richtext (and optionally cards).
 
@@ -15,27 +15,32 @@ The single public entry point of this workspace (facade crate): re-exports only,
 
 ## 2. Key Concepts and Types
 
-| Concept | Location | Notes |
-|---|---|---|
-| Facade crate | `src/lib.rs` | the whole file is four `pub use` lines |
-| Facade path | `gi_genius_invokation_simulation::{engine, definitions, richtext}` | the uniform cross-crate import path |
-| Optional cards | `#[cfg(feature = "cards")] pub use gi_genius_invokation_cards as cards;` | not compiled and not in the dependency graph by default (D243) |
-| Features | `Cargo.toml`: `default = []`, `cards = ["dep:gi-genius-invokation-cards"]` | enable explicitly when concrete cards are needed |
+- Facade crate
+  - Location: `src/lib.rs`
+  - Notes: the whole file is four `pub use` lines
+- Facade path
+  - Location: `gi_genius_invokation_simulation::{engine, definitions, richtext}`
+  - Notes: the uniform cross-crate import path
+- Optional cards
+  - Location: `#[cfg(feature = "cards")] pub use gi_genius_invokation_cards as cards;`
+  - Notes: not compiled and not in the dependency graph by default (D243)
+- Features
+  - Location: `Cargo.toml`: `default = []`, `cards = ["dep:gi-genius-invokation-cards"]`
+  - Notes: enable explicitly when concrete cards are needed
 
 Dependencies: engine, definitions, and richtext are required; cards is optional (D243). Direction: simulation is on top; cards depends on definitions / engine and never on simulation.
 
 ## 3. Public Entry Points
 
-| Usage | Notes |
-|---|---|
-| `simulation = { path = "crates/simulation" }` | downstream depends on the facade only |
-| `... features = ["cards"]` | enable when concrete cards are needed |
-| `use gi_genius_invokation_simulation::{engine, definitions, richtext};` | the uniform path for cross-crate types |
+- `simulation = { path = "crates/simulation" }`: downstream depends on the facade only
+- `... features = ["cards"]`: enable when concrete cards are needed
+- `use gi_genius_invokation_simulation::{engine, definitions, richtext};`: the uniform path for cross-crate types
 
 ### 3.1 Real Source Excerpts
-**The whole facade crate `src/lib.rs`**
 
-`new/crates/simulation/src/lib.rs:1-23`
+The implementation of The whole facade crate `src/lib.rs` follows:
+
+File: crates/simulation/src/lib.rs:1-23
 
 ```rust
 //! `gi-genius-invokation-simulation`：本工作区的**对外唯一入口**（门面 crate）。
@@ -63,6 +68,9 @@ pub use gi_genius_invokation_cards as cards;
 
 ```
 
+The code above defines The whole facade crate `src/lib.rs`; see the file for the full implementation.
+
+
 
 ## 4. Invariants and Prohibitions
 
@@ -73,15 +81,13 @@ pub use gi_genius_invokation_cards as cards;
 - Uniform external path: cross-crate types are always used via `simulation::{engine, definitions, richtext}`, never by depending on internal crates directly.
 - Features do not change semantics: enabling `cards` only adds the `cards` path.
 
-## 5. Basis (Rulebook and D Numbers)
+## 5. Basis (Rulebook Clauses / Decision Numbers)
 
-| Topic | Basis |
-|---|---|
-| Repo-wide crate prefix `gi-genius-invokation-*` | D78 |
-| Facade package name = `gi-genius-invokation-simulation`; short directory names under `crates/` | D79 |
-| Concrete cards split into their own crate (cards) | D240 / D241 |
-| Facade excludes concrete cards by default (cards optional) | D243 |
-| This crate has no rulebook mapping | - |
+- Repo-wide crate prefix `gi-genius-invokation-*`: D78
+- Facade package name = `gi-genius-invokation-simulation`; short directory names under `crates/`: D79
+- Concrete cards split into their own crate (cards): D240 / D241
+- Facade excludes concrete cards by default (cards optional): D243
+- This crate has no rulebook mapping: -
 
 ## 6. Common Misuse
 
@@ -92,23 +98,29 @@ pub use gi_genius_invokation_cards as cards;
 - Forgetting `--features cards` for concrete cards: `simulation::cards` does not exist by default (a compile error is expected).
 - Expecting default features to compile cards: they do not (intentional).
 
-## 7. Tests
+## 7. Where the Tests Are
 
 - This crate has no tests (the facade contract is re-exports only; `cargo test -p gi-genius-invokation-simulation -- --list` currently reports 0).
-- Correctness is guaranteed by compilation:
+Correctness is guaranteed by compilation:
 
 ```bash
 cargo build --offline -p gi-genius-invokation-simulation
 cargo build --offline -p gi-genius-invokation-simulation --features cards
 ```
 
+Both commands above should compile.
+
 ## 8. Pending Work and Field Verification
 
-| No. | Item |
-|---|---|
-| #24 / #25 | Card multi-versioning and load-time version selection (D248-D251) are not implemented; the entry points are expected to live in the loading / facade layer |
-| no number | The `solver` crate does not exist yet (`new/Cargo.toml` comment); it will be a separate crate |
-| no number | The documentation site (D239: GitHub Pages first) and this wiki relationship is up to maintainers; this crate has no doc code |
+- #24 / #25: Card multi-versioning and load-time version selection (D248-D251) are not implemented; the entry points are expected to live in the loading / facade layer
+- no number: The `solver` crate does not exist yet (`new/Cargo.toml` comment); it will be a separate crate
+- no number: The documentation site (D239: GitHub Pages first) and this wiki relationship is up to maintainers; this crate has no doc code
+
+---
+
+## Summary
+
+The facade only re-exports and has no logic. Depend on it, and enable the cards feature explicitly when concrete cards are needed.
 
 ---
 

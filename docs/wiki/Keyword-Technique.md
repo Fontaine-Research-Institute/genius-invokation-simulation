@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Technique |
-| K code | K58 |
+> Keyword: Technique
+>
+> K code: K58
 
 ## Effect
 
@@ -26,3 +25,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Technique is the keyword K58.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

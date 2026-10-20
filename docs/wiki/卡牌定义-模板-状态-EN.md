@@ -2,7 +2,7 @@
 
 > [[卡牌定义-模板-状态|中文]] · English
 
-*Scope: writing template for status; mirrors the character template [[卡牌定义-模板]] (Chinese reference).*
+*Scope: writing template for status; mirrors the character template [[卡牌定义-模板-EN]].*
 
 > [!IMPORTANT]
 > General hard rules:
@@ -26,11 +26,15 @@
 >
 > [[Keyword-Duration|Duration (Rounds)]]: 1 Round
 
+File: <file path>
+
 ```rust
 // Example Status definition code
 ```
 
 > <card-face description here>
+
+File: <file path>
 
 ```rust
 // Example Status implementation code
@@ -50,6 +54,10 @@
 > Status pages use no card image and are not registered in the image sources list.
 >
 > Do not use skill icons.
+
+## Summary
+
+The status template mirrors the summon template but uses Character Status or Combat Status. Status pages have no card image and are not registered in the image sources list; write Usages and Duration only when present.
 
 ---
 

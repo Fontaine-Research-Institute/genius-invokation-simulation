@@ -14,21 +14,46 @@
 
 ### 2.1 三级模型 (D51 / D53–D55) 
 
-| 层级 | 概念 | 定义位置 | 说明 |
-|---|---|---|---|
-| L1 | 牌族 | `src/base/family.rs` 的 `CardFamily` | `ActionCard` / `Summon` / `Character` / `Enemy` / `Status`; **牌族决定 id 区域**, 跨牌族 id 不保证唯一 |
-| L2 | 类型 | **只有行动牌与状态有**: `src/families/action_card/mod.rs` 的 `ActionCardType`, `src/families/status/mod.rs` 的 `StatusType` | 角色 / 召唤物 / 敌人没有类型; `src/families/mod.rs` 用穷尽 match 钉死 |
-| L3 | 标签 | 顶层 `src/tags/` (与 families 同级, D53)  | 每个标签 = 一个**零大小类型 + 一份静态 `TagText`** (D54 / D57 / D58 / D64) ; 没有"标签总枚举", 没有编号 |
+- **L1**
+  - 概念: 牌族
+  - 定义位置: `src/base/family.rs` 的 `CardFamily`
+  - 说明: `ActionCard` / `Summon` / `Character` / `Enemy` / `Status`; **牌族决定 id 区域**, 跨牌族 id 不保证唯一
+- **L2**
+  - 概念: 类型
+  - 定义位置: **只有行动牌与状态有**: `src/families/action_card/mod.rs` 的 `ActionCardType`, `src/families/status/mod.rs` 的 `StatusType`
+  - 说明: 角色 / 召唤物 / 敌人没有类型; `src/families/mod.rs` 用穷尽 match 钉死
+- **L3**
+  - 概念: 标签
+  - 定义位置: 顶层 `src/tags/` (与 families 同级, D53)
+  - 说明: 每个标签 = 一个**零大小类型 + 一份静态 `TagText`** (D54 / D57 / D58 / D64) ; 没有"标签总枚举", 没有编号
 
 ### 2.2 五个牌族一览
 
-| 牌族 | 定义载体 | 本族拥有的区 / 容器 | 扩展点 | 文件 |
-|---|---|---|---|---|
-| ActionCard | `ActionCardDef` (类型 / 文案 / 基础费用 / 打出条件 D217)  | 手牌 `HandState`, 牌库 `PileState`, 支援区 `SupportZone`, 手牌卡状态 `HandCardStates`, 当前费用 `CurrentCost` | 新行动牌: cards crate; 新类型级行为: `rules/` 规则行 + `flow/` | `src/families/action_card/{def.rs, zones/, areas/}` |
-| Character | `CharacterDef` + `SkillDef` + `SkillKind` | 角色区 `CharacterZone` (3 槽 + 出战指针) , 每角色装备栏 `EquipmentZone`, 出战状态区 `CombatStatusZone`, `CharacterState` (生命 / 充能 / 状态 / 附着)  | 新技能: `SkillDef`; 新时机: `CharacterTiming`; 新反应: `ReactionRegistry`; 伤害修饰: `DamageModifiers` | `src/families/character/` |
-| Summon | `SummonDef` + `SummonEffectKind` | 召唤物区 `SummonZone` (上限 4 / 同名合并 / 可用次数递减 D12)  | 新召唤物: cards crate; 执行动作待接 | `src/families/summon/{def.rs, zones/mod.rs}` |
-| Enemy | `EnemyDef` (生命 / 技能列表, 复用 `SkillDef`)  | **暂无区 / 无操作** | 只给定义数据; 运行期承载尚未设计 | `src/families/enemy/def.rs` |
-| Status | `StatusDef` + `known.rs` 的 5 个正式身份 + `ArcaneEdict` | **状态没有自己的区**: 角色状态在 `CharacterState.states` (公共 `StateList`, D105) , 出战状态在 `CombatStatusZone` | 新状态: `StatusDef` + 身份实例; 具体状态语义归状态块 | `src/families/status/{def.rs, known.rs, arcane_edict.rs}` |
+- **ActionCard**
+  - 定义载体: `ActionCardDef` (类型 / 文案 / 基础费用 / 打出条件 D217)
+  - 本族拥有的区 / 容器: 手牌 `HandState`, 牌库 `PileState`, 支援区 `SupportZone`, 手牌卡状态 `HandCardStates`, 当前费用 `CurrentCost`
+  - 扩展点: 新行动牌: cards crate; 新类型级行为: `rules/` 规则行 + `flow/`
+  - 文件: `src/families/action_card/{def.rs, zones/, areas/}`
+- **Character**
+  - 定义载体: `CharacterDef` + `SkillDef` + `SkillKind`
+  - 本族拥有的区 / 容器: 角色区 `CharacterZone` (3 槽 + 出战指针) , 每角色装备栏 `EquipmentZone`, 出战状态区 `CombatStatusZone`, `CharacterState` (生命 / 充能 / 状态 / 附着)
+  - 扩展点: 新技能: `SkillDef`; 新时机: `CharacterTiming`; 新反应: `ReactionRegistry`; 伤害修饰: `DamageModifiers`
+  - 文件: `src/families/character/`
+- **Summon**
+  - 定义载体: `SummonDef` + `SummonEffectKind`
+  - 本族拥有的区 / 容器: 召唤物区 `SummonZone` (上限 4 / 同名合并 / 可用次数递减 D12)
+  - 扩展点: 新召唤物: cards crate; 执行动作待接
+  - 文件: `src/families/summon/{def.rs, zones/mod.rs}`
+- **Enemy**
+  - 定义载体: `EnemyDef` (生命 / 技能列表, 复用 `SkillDef`)
+  - 本族拥有的区 / 容器: **暂无区 / 无操作**
+  - 扩展点: 只给定义数据; 运行期承载尚未设计
+  - 文件: `src/families/enemy/def.rs`
+- **Status**
+  - 定义载体: `StatusDef` + `known.rs` 的 5 个正式身份 + `ArcaneEdict`
+  - 本族拥有的区 / 容器: **状态没有自己的区**: 角色状态在 `CharacterState.states` (公共 `StateList`, D105) , 出战状态在 `CombatStatusZone`
+  - 扩展点: 新状态: `StatusDef` + 身份实例; 具体状态语义归状态块
+  - 文件: `src/families/status/{def.rs, known.rs, arcane_edict.rs}`
 
 ### 2.3 区的口径 (D40 / D42 / D182 / D183) 
 
@@ -48,7 +73,9 @@
 
 ### 3.1 牌族与类型枚举
 
-**`CardFamily`** — `crates/definitions/src/base/family.rs`
+
+先看 `CardFamily` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/base/family.rs
 
 ```rust
 /// L1 牌族（id 区域）。
@@ -67,7 +94,11 @@ pub enum CardFamily {
 }
 ```
 
-**`ActionCardType`** — `crates/definitions/src/families/action_card/mod.rs`
+上面这段给出 `CardFamily` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `ActionCardType` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/mod.rs
 
 ```rust
 /// 行动牌的类型（L2）。
@@ -82,7 +113,11 @@ pub enum ActionCardType {
 }
 ```
 
-**`StatusType`** — `crates/definitions/src/families/status/mod.rs`
+上面这段给出 `ActionCardType` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `StatusType` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/mod.rs
 
 ```rust
 /// 状态的类型（L2）：角色状态 / 出战状态。
@@ -94,6 +129,8 @@ pub enum StatusType {
     CombatStatus,
 }
 ```
+
+上面这段给出 `StatusType` 的公开形状, 具体实现在同一文件里.
 
 ## 4. 不变量与禁止
 
@@ -109,16 +146,14 @@ pub enum StatusType {
 
 ## 5. 依据 (规则书与 D 编号) 
 
-| 主题 | 依据 |
-|---|---|
-| 三个区域 (角色 / 支援 / 召唤物) + 手牌 / 牌库 / 装备附属 | 规则书"游戏区域 I–VI"; `families/*/zones/` |
-| 牌族 = id 区域; 类型 / 标签分层 | D51 / D53 / D54 / D55 |
-| 敌我不进引擎, 两个具名实例 | D29 / D30 / D34 |
-| 区 = 字段, 无区号 / 区表 | D40 / D42 |
-| 统计下沉 `stats/`, 只读指针, 可裁剪 | D181 / D182 / D183 / D187 |
-| 时机由牌族自己定义并主动派发 | D184 / D185 / D186 |
-| 记录 API / 内容类型单独文件 | D221 / D223 / D224 / D225 |
-| 框架 / 具体卡分 crate | D240 / D241 / D242 / D243 |
+- 三个区域 (角色 / 支援 / 召唤物) + 手牌 / 牌库 / 装备附属: 规则书"游戏区域 I–VI"; `families/*/zones/`
+- 牌族 = id 区域; 类型 / 标签分层: D51 / D53 / D54 / D55
+- 敌我不进引擎, 两个具名实例: D29 / D30 / D34
+- 区 = 字段, 无区号 / 区表: D40 / D42
+- 统计下沉 `stats/`, 只读指针, 可裁剪: D181 / D182 / D183 / D187
+- 时机由牌族自己定义并主动派发: D184 / D185 / D186
+- 记录 API / 内容类型单独文件: D221 / D223 / D224 / D225
+- 框架 / 具体卡分 crate: D240 / D241 / D242 / D243
 
 ### 5.1 文档与代码不一致 (供复核) 
 
@@ -144,12 +179,10 @@ pub enum StatusType {
 
 ## 7. 测试
 
-| 位置 | 测试 |
-|---|---|
-| `src/families/mod.rs` | `tests::only_action_card_and_status_have_types`, `tests::type_enums_belong_to_their_own_family` |
-| `src/families/action_card/mod.rs` | `tests::action_card_has_exactly_three_types` |
-| `src/families/status/mod.rs` | `tests::status_types_share_one_id_region` |
-| 各牌族专页 | 见 [[定义层-Character]] / [[定义层-Action-Card]] / [[定义层-Summon-Enemy-Status]] 的"测试"节 |
+- `src/families/mod.rs`: `tests::only_action_card_and_status_have_types`, `tests::type_enums_belong_to_their_own_family`
+- `src/families/action_card/mod.rs`: `tests::action_card_has_exactly_three_types`
+- `src/families/status/mod.rs`: `tests::status_types_share_one_id_region`
+- 各牌族专页: 见 [[定义层-Character]] / [[定义层-Action-Card]] / [[定义层-Summon-Enemy-Status]] 的"测试"节
 
 ## 8. 待接入与待实测
 
@@ -159,5 +192,10 @@ pub enum StatusType {
 - **行动牌 / 状态没有 `types/` 子目录**: 见 §5.1.
 - 各区自己的待实测 (持续回合时机, 支援区顺序, 召唤物合并口径等) 见对应牌族专页, 并引用 `留空 #67` / `#93` / `#94`.
 
+## 小结
+
+本页是五个牌族的索引: 每族只有定义载体与自己的区, 具体卡牌在 cards 层.
+族与族之间通过关键字层, 规则 ops 与流程层组合, 不在族内互相调用.
+新增牌族时按区等于字段的口径落地, 不建区号与实体到区的映射.
 ---
 最后核对: 2026-10-19 (代码: `crates/definitions/src/families/mod.rs::tests::only_action_card_and_status_have_types`) 

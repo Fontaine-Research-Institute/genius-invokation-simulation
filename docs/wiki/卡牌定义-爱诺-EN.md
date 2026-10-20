@@ -17,6 +17,10 @@
 >
 > Max Energy 2
 
+Character definition:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
+
 ```rust
 pub static AINO: CharacterDef<Tags> = CharacterDef {
     id: ID,
@@ -35,6 +39,10 @@ pub static AINO: CharacterDef<Tags> = CharacterDef {
 >
 > Cost 1 Hydro Elemental Dice, 2 Any Elemental Dice
 
+Skill definition:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
+
 ```rust
 pub static SKILL_12161: SkillDef = SkillDef {
     id: SKILL_ID_NORMAL_ATTACK,
@@ -49,7 +57,13 @@ pub static SKILL_12161: SkillDef = SkillDef {
 };
 ```
 
+Card text:
+
 > Deals 2 [[Keyword-Physical-DMG|Physical DMG]].
+
+Effect implementation:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
 
 ```rust
 fn normal_attack_effect() {
@@ -66,6 +80,10 @@ fn normal_attack_effect() {
 >
 > Cost 3 Hydro Elemental Dice
 
+Skill definition:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
+
 ```rust
 pub static SKILL_12162: SkillDef = SkillDef {
     id: SKILL_ID_ELEMENTAL_SKILL,
@@ -79,9 +97,15 @@ pub static SKILL_12162: SkillDef = SkillDef {
 };
 ```
 
+Card text:
+
 > Deal 2 [[Keyword-Hydro-DMG|Hydro DMG]] with 1 stack of [[Keyword-Agile-Switch|Agile Switch]] created. If you have a card with [[Keyword-Empowerment|Empowerment]] in your Hand, deal 3 [[Keyword-Hydro-DMG|Hydro DMG]] instead.
 
+Effect implementation:
+
 *注: 代码注释中的关键字编号已替换为名称.*
+文件: crates/cards/src/cards/character/aino/mod.rs
+
 ```rust
 fn elemental_skill_effect() {
     // 效果：造成 2 点水元素伤害，生成 1 层「敏捷切换」；
@@ -101,6 +125,10 @@ fn elemental_skill_effect() {
 >
 > 2 Energy
 
+Skill definition:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
+
 ```rust
 pub static SKILL_12163: SkillDef = SkillDef {
     id: SKILL_ID_ELEMENTAL_BURST,
@@ -115,7 +143,13 @@ pub static SKILL_12163: SkillDef = SkillDef {
 };
 ```
 
+Card text:
+
 > Deals 2 [[Keyword-Hydro-DMG|Hydro DMG]] and summons Cool Your Jets Ducky.
+
+Effect implementation:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
 
 ```rust
 fn elemental_burst_effect() {
@@ -130,6 +164,10 @@ fn elemental_burst_effect() {
 
 > Passive Skill
 
+Skill definition:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
+
 ```rust
 pub static SKILL_12164: SkillDef = SkillDef {
     id: SKILL_ID_PASSIVE,
@@ -143,7 +181,13 @@ pub static SKILL_12164: SkillDef = SkillDef {
 };
 ```
 
+Card text:
+
 > (Passive) When [[Keyword-Empowerment|Empowerment]] is attached to your card: If there is Cool Your Jets Ducky on your side, it gains 1 [[Keyword-Usage|Usage]], otherwise, gains 1 [[Keyword-Energy|Energy]]. (Once per Round)
+
+Effect implementation:
+
+文件: crates/cards/src/cards/character/aino/mod.rs
 
 ```rust
 fn passive_effect() {
@@ -158,8 +202,13 @@ fn passive_effect() {
 }
 ```
 
-
 ## Missing Images
 
 > [!NOTE]
 > Image to be added: the following card art is not in the repository yet: Aino.
+
+## Summary
+
+Aino is a character card.
+Max HP 10, Max Energy 2, tags Hydro, Claymore, Nod-Krai.
+All 4 skill definitions and implementation bodies on this page are filled from the repository.

@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Simulanka Summon |
-| K code | K1035 |
+> Keyword: Simulanka Summon
+>
+> K code: K1035
 
 ## Effect
 
@@ -28,3 +27,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Simulanka Summon is the keyword K1035.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

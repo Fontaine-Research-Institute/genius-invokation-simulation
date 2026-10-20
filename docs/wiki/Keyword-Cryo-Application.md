@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Cryo Application |
-| K code | K201 |
+> Keyword: Cryo Application
+>
+> K code: K201
 
 ## Effect
 
@@ -27,3 +26,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Cryo Application is the keyword K201.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

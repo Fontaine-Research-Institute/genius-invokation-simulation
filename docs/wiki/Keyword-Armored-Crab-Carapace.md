@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Armored Crab Carapace |
-| K code | K1023 |
+> Keyword: Armored Crab Carapace
+>
+> K code: K1023
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Armored Crab Carapace is the keyword K1023.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

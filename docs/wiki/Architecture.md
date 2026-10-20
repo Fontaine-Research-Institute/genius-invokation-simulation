@@ -8,6 +8,8 @@
 
 ## 1. crate 与依赖方向
 
+依赖方向如下:
+
 ```text
 richtext（零依赖：只解析文本）
      ▲
@@ -20,20 +22,40 @@ simulation（门面）──► engine / definitions / richtext（+ cards 可选
 compute（算力 bin）──► 默认无依赖；按计算需要自己加
 ```
 
-| crate (package 名)  | 目录 | 依赖 | 职责 |
-|---|---|---|---|
-| `gi-genius-invokation-engine` | `new/crates/engine` | 无 (仅 `dll` feature 引 `libloading`)  | 机制原语: 数值 / 标识 / 实体 / 区 / 随机与选择 / 精确分数 / 统计 |
-| `gi-genius-invokation-richtext` | `new/crates/richtext` | 无 | 富文本解析: 原始标记文本 → 中性片段序列 |
-| `gi-genius-invokation-definitions` | `new/crates/definitions` | engine, richtext | 游戏定义层 (牌族 / 类型 / 标签 / 资源 / 规则 / 状态 / 流程 / 关键字 / 调度 / 记录)  |
-| `gi-genius-invokation-cards` | `new/crates/cards` | definitions, engine | 具体卡牌: 每张卡的数据 + 效果逻辑 |
-| `gi-genius-invokation-simulation` | `new/crates/simulation` | 上列四项 (cards 可选)  | 对外唯一门面: 只有 re-export, 没有逻辑 |
-| `gi-genius-invokation-compute` | `new/crates/compute` | 默认无 | 算力工具链: 一个计算 = 一个 bin 文件夹 |
+以上是 crate 依赖方向, 具体的依赖声明见各 crate 的 Cargo.toml.
+
+- `gi-genius-invokation-engine`
+  - 目录: `new/crates/engine`
+  - 依赖: 无 (仅 `dll` feature 引 `libloading`)
+  - 职责: 机制原语: 数值 / 标识 / 实体 / 区 / 随机与选择 / 精确分数 / 统计
+- `gi-genius-invokation-richtext`
+  - 目录: `new/crates/richtext`
+  - 依赖: 无
+  - 职责: 富文本解析: 原始标记文本 → 中性片段序列
+- `gi-genius-invokation-definitions`
+  - 目录: `new/crates/definitions`
+  - 依赖: engine, richtext
+  - 职责: 游戏定义层 (牌族 / 类型 / 标签 / 资源 / 规则 / 状态 / 流程 / 关键字 / 调度 / 记录)
+- `gi-genius-invokation-cards`
+  - 目录: `new/crates/cards`
+  - 依赖: definitions, engine
+  - 职责: 具体卡牌: 每张卡的数据 + 效果逻辑
+- `gi-genius-invokation-simulation`
+  - 目录: `new/crates/simulation`
+  - 依赖: 上列四项 (cards 可选)
+  - 职责: 对外唯一门面: 只有 re-export, 没有逻辑
+- `gi-genius-invokation-compute`
+  - 目录: `new/crates/compute`
+  - 依赖: 默认无
+  - 职责: 算力工具链: 一个计算 = 一个 bin 文件夹
 
 > [!IMPORTANT]
 > 依赖方向由 Cargo 强制: `definitions` 不依赖 `cards` (有守卫测试) ; `richtext` 不依赖任何业务 crate; `engine` 无上层语义.
 > 外部使用者只依赖 `simulation` 门面; 跨 crate 导入统一为 `gi_genius_invokation_simulation::{engine, definitions, richtext}`.
 
 ## 2. 目录结构
+
+仓库目录如下:
 
 ```text
 new/
@@ -45,19 +67,33 @@ new/
 └─ .github/workflows/      # ci.yml、compute.yml
 ```
 
+以上是目录示意, 具体文件以仓库为准.
+
 `definitions` 内部: `base/` (L1 牌族 + id + 元素 + 视角) , `families/` (每牌族的类型枚举 + 定义载体 + 区域 + 操作) , `tags/` (L3 标签, 顶层目录) , `resources/` (骰池) , `rules/` (三级统一基础操作) , `timeline/` (触发注册 + 派发 + 结算帧) , `reactions/` (元素反应) , `records/` (记录 API) , `source/` (源码嵌入) , `version/` (版本同步) , `generated/` (生成数据 + 渲染) , `state/` (`DefState` + 串联流程) , `flow/` (端到端动作) , `keywords/` (关键字函数 + 一步) .详见 [[Crate-Definitions]].
 
 ## 3. 一局对局的数据流
 
-| 层 | 位置 | 作用 |
-|---|---|---|
-| 状态 | `definitions/src/state/` | `DefState`: `me` / `opp` 两个具名实例 + `round` + `first_player`; 各区自持状态 (D42 / D182 / D183)  |
-| 流程 | `definitions/src/flow/` | 吃 `&DefState` 的动作入口: 使用技能 / 打牌 / 切人 / 调和 / 特技 / 回合骨架; 返回新状态 + 待执行, 失败 `Err` |
-| 效果组合 | `definitions/src/keywords/` | 关键字函数 + **一步 Step** (D204) : 步内按书写顺序, 禁止插入 |
-| 调度 | `definitions/src/timeline/` | 注册表 + 有序派发 (只排序, 不执行, D186) + 结算帧 (插入式, D196)  |
-| 基础操作 | `definitions/src/rules/` | 三级统一基础操作纯函数 (槽位 / 上限 / 开局 / 查询 / 结算顺序…)  |
-| 反应 | `definitions/src/reactions/` | 反应身份 → 效果函数指针; 伤害修正链在 `families/character/damage_chain/` |
-| 记录 | `definitions/src/records/` | `Recorder<T>`: 属于哪一步 + 任意内容 (D223 / D224)  |
+- 状态
+  - 位置: `definitions/src/state/`
+  - 作用: `DefState`: `me` / `opp` 两个具名实例 + `round` + `first_player`; 各区自持状态 (D42 / D182 / D183)
+- 流程
+  - 位置: `definitions/src/flow/`
+  - 作用: 吃 `&DefState` 的动作入口: 使用技能 / 打牌 / 切人 / 调和 / 特技 / 回合骨架; 返回新状态 + 待执行, 失败 `Err`
+- 效果组合
+  - 位置: `definitions/src/keywords/`
+  - 作用: 关键字函数 + **一步 Step** (D204) : 步内按书写顺序, 禁止插入
+- 调度
+  - 位置: `definitions/src/timeline/`
+  - 作用: 注册表 + 有序派发 (只排序, 不执行, D186) + 结算帧 (插入式, D196)
+- 基础操作
+  - 位置: `definitions/src/rules/`
+  - 作用: 三级统一基础操作纯函数 (槽位 / 上限 / 开局 / 查询 / 结算顺序…)
+- 反应
+  - 位置: `definitions/src/reactions/`
+  - 作用: 反应身份 → 效果函数指针; 伤害修正链在 `families/character/damage_chain/`
+- 记录
+  - 位置: `definitions/src/records/`
+  - 作用: `Recorder<T>`: 属于哪一步 + 任意内容 (D223 / D224)
 
 **以"使用技能"为例** (`definitions/src/flow/skill_use.rs`) : 
 
@@ -68,12 +104,13 @@ new/
 5. 派发"使用技能后", 用 `timeline::Resolution::insert` 插到当前结算位置 (D196) ; 
 6. 分支终局判定 (`state/terminal.rs`; 双负 = `BothLose`, D267) .
 
-**文本数据流**: `generated/data/*.json` → `build.rs` (编译期生成静态表到 `OUT_DIR`) → `generated` 访问器 → `richtext::parse` (严格解析) → `generated::text::render` (取值来源 → 最终字符串) .
+**文本数据流**: 生成数据在编译期由 `build.rs` 产出静态表, 再经 `generated` 访问器交给 `richtext::parse` 严格解析, 最后由 `generated::text::render` 拼接为最终字符串.
 
 ### 3.1 接口源码摘录
-**根状态 `DefState`**
 
-`new/crates/definitions/src/state/def_state.rs:58-82`
+下面给出 根状态 `DefState` 的实现:
+
+文件: crates/definitions/src/state/def_state.rs:58-82
 
 ```rust
 /// **一局对局的完整状态**：我方全部区 + 敌方全部区（两个具名实例，D34）+ 回合数。
@@ -103,9 +140,12 @@ pub struct DefState {
 }
 ```
 
-**动作入口 `use_skill_me`**
+以上是 根状态 `DefState` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/flow/skill_use.rs:430-446`
+
+下面给出 动作入口 `use_skill_me` 的实现:
+
+文件: crates/definitions/src/flow/skill_use.rs:430-446
 
 ```rust
 /// **使用技能**（我方使用；下落标记读根状态）。
@@ -127,9 +167,12 @@ pub fn use_skill_me(
 }
 ```
 
-**一步 `Step`**
+以上是 动作入口 `use_skill_me` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/step.rs:44-48`
+
+下面给出 一步 `Step` 的实现:
+
+文件: crates/definitions/src/keywords/step.rs:44-48
 
 ```rust
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
@@ -139,9 +182,12 @@ pub struct Step {
 }
 ```
 
-**派发 `dispatch`**
+以上是 一步 `Step` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/dispatch.rs:60-96`
+
+下面给出 派发 `dispatch` 的实现:
+
+文件: crates/definitions/src/timeline/dispatch.rs:60-96
 
 ```rust
 /// **单侧派发**：从一个牌手的注册表里取出「这个时机、条件成立」的登记项，按结算顺序排好。
@@ -183,9 +229,12 @@ where
 }
 ```
 
-**插入子结算 `Resolution::insert`**
+以上是 派发 `dispatch` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/suspend.rs:168-178`
+
+下面给出 插入子结算 `Resolution::insert` 的实现:
+
+文件: crates/definitions/src/timeline/suspend.rs:168-178
 
 ```rust
     /// **插入子结算**：在当前帧当前位置压入新帧（父帧的 `cursor` 不动）。
@@ -201,9 +250,12 @@ where
     }
 ```
 
-**结算快照 `Resolution::snapshot`**
+以上是 插入子结算 `Resolution::insert` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/suspend.rs:202-217`
+
+下面给出 结算快照 `Resolution::snapshot` 的实现:
+
+文件: crates/definitions/src/timeline/suspend.rs:202-217
 
 ```rust
     /// **只读快照**：当前结算嵌套状态（当前帧 / 剩余步骤 / 插入点）。
@@ -224,9 +276,12 @@ where
     }
 ```
 
-**记录入口 `Recorder::push`**
+以上是 结算快照 `Resolution::snapshot` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:88-91`
+
+下面给出 记录入口 `Recorder::push` 的实现:
+
+文件: crates/definitions/src/records/mod.rs:88-91
 
 ```rust
     /// **唯一写入入口**：把一条内容记到某一步。
@@ -235,9 +290,12 @@ where
     }
 ```
 
-**折叠回 `fold_states`**
+以上是 记录入口 `Recorder::push` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/flow/mod.rs:130-147`
+
+下面给出 折叠回 `fold_states` 的实现:
+
+文件: crates/definitions/src/flow/mod.rs:130-147
 
 ```rust
 /// **折叠回**（D191）：把局面完全相同的分支合并，概率**精确相加**。
@@ -260,10 +318,13 @@ pub fn fold_states(branches: Vec<(DefState, Fraction)>) -> Vec<(DefState, Fracti
 }
 ```
 
+以上是 折叠回 `fold_states` 的定义; 具体行为以该文件为准.
 
-**关键字函数: 造成伤害**
 
-`new/crates/definitions/src/keywords/keyword.rs:241-292`
+
+下面给出 关键字函数: 造成伤害 的实现:
+
+文件: crates/definitions/src/keywords/keyword.rs:241-292
 
 ```rust
 /// **造成伤害**：对选择器解析出的每个角色走伤修链（加伤 -> 护盾 -> 减伤 -> 扣血 / 附着 / 反应）。
@@ -320,9 +381,12 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**规则 ops: 结算顺序判定**
+以上是 关键字函数: 造成伤害 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/ops/order.rs:38-59`
+
+下面给出 规则 ops: 结算顺序判定 的实现:
+
+文件: crates/definitions/src/rules/ops/order.rs:38-59
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -349,57 +413,84 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 }
 ```
 
+以上是 规则 ops: 结算顺序判定 的定义; 具体行为以该文件为准.
+
+
 
 ## 4. "框架只给接口"的落地
 
 > [!NOTE]
 > 这条是最高原则 (D20; `new/README.md` 的"项目理念"; `分工计划.md` §8.5) , 压过一切具体设计.
 
-| 功能 | 框架给的 (机制)  | 业务归谁 |
-|---|---|---|
-| 随机 / 选择 | `enumerate_random` / `enumerate_random_weighted` / `enumerate_select` + 精确分数 | 各块自己 `parse.rs` 的选择列表与去重函数 (D25 / D26)  |
-| 触发调度 | `timeline::TriggerRegistry` + `dispatch` (只排序, 不执行)  | 牌族 / 类型定义时机键并主动派发; 卡牌登记效果函数指针 (D185 / D186)  |
-| 结算插入 | `timeline::Resolution` 帧 + `cursor` | 效果层决定在哪插入什么 (D196)  |
-| 区 / 状态 | 各区自持状态 + `with_*` 纯函数; `state` 只组合 | 各区自己 (D42 / D182 / D183)  |
-| 三级基础操作 | `rules/` 静态规则表 + `rules::ops` 纯函数 | 具体卡牌按需调用; 不建中枢表 (D176–D179)  |
-| 支付 | 骰池 / 充能 / 秘传各自的 `can_afford` / `pay` | 卡牌只声明费用数据 (D121 / D133 / D144)  |
-| 文案 | `generated` 访问器 + `richtext` 解析 + `render` | 卡牌只写 `Localized` / 引用生成数据 (D56 / D62 / D75)  |
-| 记录 | `records::Recorder` 极薄容器 | 各模块定义记录内容类型并 `push` (D222–D225)  |
+- 随机 / 选择
+  - 框架给的 (机制): `enumerate_random` / `enumerate_random_weighted` / `enumerate_select` + 精确分数
+  - 业务归谁: 各块自己 `parse.rs` 的选择列表与去重函数 (D25 / D26)
+- 触发调度
+  - 框架给的 (机制): `timeline::TriggerRegistry` + `dispatch` (只排序, 不执行)
+  - 业务归谁: 牌族 / 类型定义时机键并主动派发; 卡牌登记效果函数指针 (D185 / D186)
+- 结算插入
+  - 框架给的 (机制): `timeline::Resolution` 帧 + `cursor`
+  - 业务归谁: 效果层决定在哪插入什么 (D196)
+- 区 / 状态
+  - 框架给的 (机制): 各区自持状态 + `with_*` 纯函数; `state` 只组合
+  - 业务归谁: 各区自己 (D42 / D182 / D183)
+- 三级基础操作
+  - 框架给的 (机制): `rules/` 静态规则表 + `rules::ops` 纯函数
+  - 业务归谁: 具体卡牌按需调用; 不建中枢表 (D176–D179)
+- 支付
+  - 框架给的 (机制): 骰池 / 充能 / 秘传各自的 `can_afford` / `pay`
+  - 业务归谁: 卡牌只声明费用数据 (D121 / D133 / D144)
+- 文案
+  - 框架给的 (机制): `generated` 访问器 + `richtext` 解析 + `render`
+  - 业务归谁: 卡牌只写 `Localized` / 引用生成数据 (D56 / D62 / D75)
+- 记录
+  - 框架给的 (机制): `records::Recorder` 极薄容器
+  - 业务归谁: 各模块定义记录内容类型并 `push` (D222–D225)
 
 > [!WARNING]
 > 反例 (一律不许) : 中枢统计器, 中枢收集器, 内建行为表, 统一减费计算器, 属性统计表, 行为开关表, 内建 buff 表.
 
 ## 5. 时间与不确定性
 
-| 主题 | 口径 | 依据 |
-|---|---|---|
-| 结算顺序 | 同一时机内以 `结算顺序.md` 为唯一权威; 顺序常量只在 `rules::ops::order` 一份 | D197; `结算顺序.md` |
-| 插入式结算 | 帧 + `cursor`, 子结算做完回到插入点; 不是 LIFO 栈 | D196 |
-| 一步原子 | 步内按书写顺序, 禁止插入; 插入只能发生在步之间 | D204 |
-| 不确定性 | 不确定先不物化; 观测时展开成"分支 + 精确概率", 不再影响别处后折叠回 | D190 / D191 |
-| 零浮点 | 概率 / 权重 / 随机全部整数 (`Fraction` = `ExactNat128` 分子分母; `Rng` 对外只给 `u128`)  | D158–D160 |
+- 结算顺序
+  - 口径: 同一时机内以 `结算顺序.md` 为唯一权威; 顺序常量只在 `rules::ops::order` 一份
+  - 依据: D197; `结算顺序.md`
+- 插入式结算
+  - 口径: 帧 + `cursor`, 子结算做完回到插入点; 不是 LIFO 栈
+  - 依据: D196
+- 一步原子
+  - 口径: 步内按书写顺序, 禁止插入; 插入只能发生在步之间
+  - 依据: D204
+- 不确定性
+  - 口径: 不确定先不物化; 观测时展开成"分支 + 精确概率", 不再影响别处后折叠回
+  - 依据: D190 / D191
+- 零浮点
+  - 口径: 概率 / 权重 / 随机全部整数 (`Fraction` = `ExactNat128` 分子分母; `Rng` 对外只给 `u128`)
+  - 依据: D158–D160
 
 ## 6. 已知文档偏差
 
 > [!WARNING]
 > 以下旧文档与当前代码 / 决策不一致.本 Wiki 按代码写; 旧文档待维护者更新.
 
-| 旧文档 | 偏差 |
-|---|---|
-| `new/README.md` / `README.en.md` | 骰子"每颗 = 实体", 结算顺序"编译期解出", 类型树继承, dll / 两阶段加载, "core / engine / definitions 三个 crate", `Rc` 结构共享 |
-| `结构.md` / `分工计划.md` | 旧目录树与旧签名: f64 概率, 旧 `DefState` 字段, base 里的 `CardType` / `CardTag`, "卡牌代码不存文案" |
-| `definitions/src/lib.rs` | 模块文档仍说 resources / timeline / loader 后续加入; 实际已存在 |
-| `definitions/src/families/mod.rs` | 仍说 families'只放类型枚举'; 实际还有定义载体 / 区域 / 操作 |
-| `definitions/src/records/mod.rs` | 仍说 damage_chain / 各区记录"待接入"; 实际多个 `record.rs` 已用 `Recorder` |
-| `definitions/build.rs` | 手写 JSON 解析器 (离线零依赖) , 与 D74'改用 JSON 库'冲突 |
+- `new/README.md` / `README.en.md`: 骰子"每颗 = 实体", 结算顺序"编译期解出", 类型树继承, dll / 两阶段加载, "core / engine / definitions 三个 crate", `Rc` 结构共享
+- `结构.md` / `分工计划.md`: 旧目录树与旧签名: f64 概率, 旧 `DefState` 字段, base 里的 `CardType` / `CardTag`, "卡牌代码不存文案"
+- `definitions/src/lib.rs`: 模块文档仍说 resources / timeline / loader 后续加入; 实际已存在
+- `definitions/src/families/mod.rs`: 仍说 families'只放类型枚举'; 实际还有定义载体 / 区域 / 操作
+- `definitions/src/records/mod.rs`: 仍说 damage_chain / 各区记录"待接入"; 实际多个 `record.rs` 已用 `Recorder`
+- `definitions/build.rs`: 手写 JSON 解析器 (离线零依赖) , 与 D74'改用 JSON 库'冲突
 
 ## 7. 相关页面
 
-| 页面 | 内容 |
-|---|---|
-| [[Conventions]] | 设计约定速查 |
-| [[Crate-Engine]] / [[Crate-Richtext]] / [[Crate-Definitions]] / [[Crate-Cards]] / [[Crate-Simulation]] / [[Crate-Compute]] | 各 crate 详情 |
-| [[定义层-State]] / [[定义层-Flow]] / [[定义层-Keywords]] / [[定义层-Timeline]] | 运行时各层 |
+- [[Conventions]]: 设计约定速查
+- [[Crate-Engine]] / [[Crate-Richtext]] / [[Crate-Definitions]] / [[Crate-Cards]] / [[Crate-Simulation]] / [[Crate-Compute]]: 各 crate 详情
+- [[定义层-State]] / [[定义层-Flow]] / [[定义层-Keywords]] / [[定义层-Timeline]]: 运行时各层
+
+---
+
+## 小结
+
+六个 crate 的依赖是单向的, 一局对局的数据流是 state -> flow -> keywords/timeline -> records. 改动前先确认自己在哪一层, 再按该层的接口写.
 
 ---
 

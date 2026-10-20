@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Cryo DMG |
-| K code | K101 |
+> Keyword: Cryo DMG
+>
+> K code: K101
 
 ## Effect
 
@@ -27,3 +26,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Cryo DMG is the keyword K101.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

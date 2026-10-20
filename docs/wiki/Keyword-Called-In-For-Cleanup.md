@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | "Called In For Cleanup" |
-| K code | K2002 |
+> Keyword: "Called In For Cleanup"
+>
+> K code: K2002
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+"Called In For Cleanup" is the keyword K2002.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

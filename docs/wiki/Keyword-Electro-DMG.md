@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Electro DMG |
-| K code | K104 |
+> Keyword: Electro DMG
+>
+> K code: K104
 
 ## Effect
 
@@ -29,3 +28,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Electro DMG is the keyword K104.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

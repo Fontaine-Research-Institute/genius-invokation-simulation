@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Crimson Witch of Embers |
-| K code | K1013 |
+> Keyword: Crimson Witch of Embers
+>
+> K code: K1013
 
 ## Effect
 
@@ -26,3 +25,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Crimson Witch of Embers is the keyword K1013.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

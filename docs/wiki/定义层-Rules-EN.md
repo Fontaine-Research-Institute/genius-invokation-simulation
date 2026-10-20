@@ -1,4 +1,4 @@
-﻿# Definitions Layer: Rules
+# Definitions Layer: Rules
 
 > [[定义层-Rules|中文]] · English
 
@@ -6,37 +6,38 @@
 
 ---
 
+
 ## 1. Responsibility
 
 Unify the **basic operations** of the three layers (family / type / tag) into one static rule table; each row only declares mechanism, stages, filter roles, and evidence, while the concrete operations are pure functions under `rules/ops/`. This layer holds no state and creates no containers (D20).
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `Layer` / `RuleKind` / `Stage` / `QueryRole` / `RuleOp` | `crates/definitions/src/rules/mod.rs` | Layer; mechanism vs classification-only; active stages; filter roles; which group of basic operations |
-| `RuleRow` | same | One shape for all three layers: `layer/kind/ops/stages/query_roles/evidence/basis` + optional data (slots / numbers / opening hook / damage role / query policy, etc.) |
-| `BaseRule` | same | Unified accessors; only implementation = `RuleRow`; consumers depend on the trait only |
-| `Evidence` / `NumRule` / `OpeningSpec` / `DamageRole` / `RuleName` | same | Card id + one-line card text; rule number (Nat); opening hook; shield / reduction role; names from generated data or the single mapping |
-| Three-layer tables | `families.rs` / `types.rs` / `tags_action.rs` / `tags_character.rs` / `tags_summon_enemy.rs` | Each exposes `pub static ROWS: &[RuleRow]`; `rows()` concatenates family -> type -> tag |
-| Basic operations | `crates/definitions/src/rules/ops/*.rs` | 14 pure-function modules: `equip` / `support` / `damage` / `lifetime` / `opening` / `order` / `query` / `resonance` / `adventure` / `simulanka` / `arkhe` / `stage` / `food` / `arcane` |
+- ---: ---; ---
+- `Layer` / `RuleKind` / `Stage` / `QueryRole` / `RuleOp`: Layer; mechanism vs classification-only; active stages; filter roles; which group of basic operations (文件: `crates/definitions/src/rules/mod.rs`)
+- `RuleRow`: same; One shape for all three layers: `layer/kind/ops/stages/query_roles/evidence/basis` + optional data (slots / numbers / opening hook / damage role / query policy, etc.)
+- `BaseRule`: same; Unified accessors; only implementation = `RuleRow`; consumers depend on the trait only
+- `Evidence` / `NumRule` / `OpeningSpec` / `DamageRole` / `RuleName`: same; Card id + one-line card text; rule number (Nat); opening hook; shield / reduction role; names from generated data or the single mapping
+- Three-layer tables: Each exposes `pub static ROWS: &[RuleRow]`; `rows()` concatenates family -> type -> tag (文件: `families.rs` / `types.rs` / `tags_action.rs` / `tags_character.rs` / `tags_summon_enemy.rs`)
+- Basic operations: 14 pure-function modules: `equip` / `support` / `damage` / `lifetime` / `opening` / `order` / `query` / `resonance` / `adventure` / `simulanka` / `arkhe` / `stage` / `food` / `arcane` (文件: `crates/definitions/src/rules/ops/*.rs`)
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `rows()` / `all_rows()` | `rules/mod.rs` | Iterate the full table (family -> type -> tag) |
-| `row_of_tag` / `row_of_family` / `row_of_action_card_type` / `row_of_status_type` | same | Look up a row by tag / family / action-card type / status type |
-| `family_name(family)` | same | The single mapping for family display names |
-| `trait BaseRule` | same | `layer/name/kind/ops/stages/query_roles/evidence/basis/tag/slots/nums/opening/support_cap/damage/query_policy` |
-| `rules::ops::*` | `rules/ops/` | Pure-function modules mapping one-to-one to `RuleOp` |
+- ---: ---; ---
+- `rows()` / `all_rows()`: Iterate the full table (family -> type -> tag) (文件: `rules/mod.rs`)
+- `row_of_tag` / `row_of_family` / `row_of_action_card_type` / `row_of_status_type`: same; Look up a row by tag / family / action-card type / status type
+- `family_name(family)`: same; The single mapping for family display names
+- `trait BaseRule`: same; `layer/name/kind/ops/stages/query_roles/evidence/basis/tag/slots/nums/opening/support_cap/damage/query_policy`
+- `rules::ops::*`: Pure-function modules mapping one-to-one to `RuleOp` (文件: `rules/ops/`)
 
 ### Source
 
 > [!NOTE]
 > Real source excerpts for the rule table and ops (signatures and doc comments; function bodies omitted).
 
-**`crates/definitions/src/rules/mod.rs (Layer / RuleKind / Stage / QueryRole / RuleOp)`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/rules/mod.rs`
 
 ```rust
 
@@ -138,7 +139,9 @@ pub enum RuleOp {
 }
 ```
 
-**`crates/definitions/src/rules/mod.rs (RuleRow and BaseRule)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/mod.rs`
 
 ```rust
 /// **统一规则行**：三级共用同一形状。
@@ -227,16 +230,20 @@ pub trait BaseRule {
     }
 }
 ```
+
+The file's current public interface is shown above; bodies are omitted.
 #### ops function signatures
 
-**`crates/definitions/src/rules/ops/adventure.rs`**
+File: `crates/definitions/src/rules/ops/adventure.rs`
 
 ```rust
 /// 冒险动作（纯函数）：`existing_spot` = 己方是否已有冒险地点。
 pub fn resolve(existing_spot: bool) -> AdventureOutcome
 ```
 
-**`crates/definitions/src/rules/ops/arcane.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/arcane.rs`
 
 ```rust
 /// 是否「所有秘传都在起始手牌中」：牌组里的秘传数不超过起始手牌数时成立（规则书第 2 条）。
@@ -256,7 +263,9 @@ pub fn can_play(played_this_game: Nat, edict_available: bool) -> ArcanePlay
 pub fn consumes_edict() -> bool
 ```
 
-**`crates/definitions/src/rules/ops/arkhe.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/arkhe.rs`
 
 ```rust
 /// 相反极（荒 <-> 芒；关键字 #87 / #88）。
@@ -266,7 +275,9 @@ pub fn opposite(arkhe: Arkhe) -> Arkhe
 pub fn collides_with(self_arkhe: Arkhe, incoming: Arkhe) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/damage.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/damage.rs`
 
 ```rust
 /// 伤害修正（纯函数）：先护盾吸收，再减伤扣减；穿透伤害两者都不吃。
@@ -276,7 +287,9 @@ pub fn collides_with(self_arkhe: Arkhe, incoming: Arkhe) -> bool
 pub fn mitigate(damage: Nat, ty: DamageType, shield: Nat, reductions: &[Nat]) -> Mitigation
 ```
 
-**`crates/definitions/src/rules/ops/equip.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/equip.rs`
 
 ```rust
 /// 某个武器子类的槽位规则：每角色 1 件，且角色必须是该武器类型。
@@ -300,7 +313,9 @@ pub fn check_equip(
 ) -> EquipOutcome
 ```
 
-**`crates/definitions/src/rules/ops/food.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/food.rs`
 
 ```rust
 /// 该角色本回合已食用 eaten_this_round 次时的食用判定。
@@ -316,7 +331,9 @@ pub fn can_be_affected_by_food(satiated: bool) -> bool
 pub fn can_revive(revived_this_round: Nat) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/lifetime.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/lifetime.rs`
 
 ```rust
 /// 触发一次后的可用次数（减到 0 为止；调用方随后弃置）。
@@ -335,7 +352,9 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat
 pub fn ticks_in_end_phase() -> bool
 ```
 
-**`crates/definitions/src/rules/ops/opening.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/opening.rs`
 
 ```rust
 /// 游戏准备的执行顺序。
@@ -379,7 +398,9 @@ pub fn pregame_steps() -> [PregameStep; 3]
 pub fn is_opening_round(round: Nat) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/order.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/order.rs`
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -391,7 +412,9 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool
 pub fn same_source_uses_entry_order() -> bool
 ```
 
-**`crates/definitions/src/rules/ops/resonance.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/resonance.rs`
 
 ```rust
 /// 统计队伍里某元素的角色数量。
@@ -404,7 +427,9 @@ pub fn element_resonance_allows(team: &[Element], element: Element) -> bool
 pub fn country_resonance_allows(same_country_count: Nat) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/simulanka.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/simulanka.rs`
 
 ```rust
 /// 召唤物种类数。
@@ -414,7 +439,9 @@ pub fn summon_kind_count() -> Nat
 pub fn random_pick_scope() -> RandomPickScope
 ```
 
-**`crates/definitions/src/rules/ops/stage.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/stage.rs`
 
 ```rust
 /// 这次行动结算后是否轮到对方（规则书：战斗行动 -> 轮到对方；快速行动 -> 继续）。
@@ -434,7 +461,9 @@ pub fn timing_of_card_play(has_combat_action_tag: bool) -> Timing
 pub fn next_phase(phase: RoundPhase) -> RoundPhase
 ```
 
-**`crates/definitions/src/rules/ops/support.rs`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/rules/ops/support.rs`
 
 ```rust
 /// 进场判定（纯函数）。
@@ -443,6 +472,8 @@ pub fn support_enter(occupied: Nat) -> SupportEnter
 /// 离场操作形状（具体移除由支援区落点实现）。
 pub fn support_exit() -> SupportExit
 ```
+
+The file's current public interface is shown above; bodies are omitted.
 
 
 ## 4. Invariants and prohibitions
@@ -462,12 +493,10 @@ pub fn support_exit() -> SupportExit
 > Evidence priority: rulebook > authoritative keywords > card text; reference implementations are not read (D122).
 > When the rulebook conflicts with an older decision, the rulebook wins (e.g. duration now ticks at end phase).
 
-| Number | Conclusion |
-|---|---|
-| D20 | The framework provides interfaces only; check / result are pure functions with no state |
-| D122 | Organization and evidence sources of `rules/ops/` |
-| D108 | This layer does not interpret concrete state semantics, it only declares mechanisms |
-| D240 | Concrete card effects are not in this layer (they live in the cards crate) |
+- D20: The framework provides interfaces only; check / result are pure functions with no state
+- D122: Organization and evidence sources of `rules/ops/`
+- D108: This layer does not interpret concrete state semantics, it only declares mechanisms
+- D240: Concrete card effects are not in this layer (they live in the cards crate)
 
 ## 6. Common misuse
 
@@ -482,10 +511,8 @@ pub fn support_exit() -> SupportExit
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| `rules/mod.rs` | `table_covers_all_three_layers`, `tag_rows_cover_every_tag_except_automaton`, `every_row_has_evidence_or_basis`, `classification_rows_have_no_operations`, `mechanism_rows_declare_operations`, `every_rule_op_is_declared_by_some_row`, `lookups_work_for_families_and_types`, `numeric_rules_are_positive`, `query_policy_rows_match_query_module`, `opening_hooks_are_attached_to_expected_rows` |
-| `rules/ops/*.rs` | e.g. `equip.rs::matching_weapon_attaches_to_empty_slot`, `support.rs::support_zone_cap_is_four`, `lifetime.rs::duration_ticks_at_end_phase_only`, `order.rs::five_sources_are_in_rulebook_order`, `damage.rs::shield_absorbs_then_reduction_subtracts` |
+- `rules/mod.rs`: `table_covers_all_three_layers`, `tag_rows_cover_every_tag_except_automaton`, `every_row_has_evidence_or_basis`, `classification_rows_have_no_operations`, `mechanism_rows_declare_operations`, `every_rule_op_is_declared_by_some_row`, `lookups_work_for_families_and_types`, `numeric_rules_are_positive`, `query_policy_rows_match_query_module`, `opening_hooks_are_attached_to_expected_rows`
+- `rules/ops/*.rs`: e.g. `equip.rs::matching_weapon_attaches_to_empty_slot`, `support.rs::support_zone_cap_is_four`, `lifetime.rs::duration_ticks_at_end_phase_only`, `order.rs::five_sources_are_in_rulebook_order`, `damage.rs::shield_absorbs_then_reduction_subtracts`
 
 ## 8. Not yet wired and to be verified
 
@@ -494,6 +521,12 @@ pub fn support_exit() -> SupportExit
 - `留空.md#66`: two review items — the F7 timing call site and F10 end-phase ordering.
 - `留空.md#70` / `#71`: Z15 overflow handling and the summon "layers vs usage" convention need in-game verification.
 
+## Summary
+
+All three layers (family, type, tag) share one RuleRow table and the BaseRule accessors; mechanism rows declare ops while classification rows only declare filter roles. Concrete operations are stateless pure functions under rules/ops, and the table keeps them traversable and testable. Check existing RuleOp and ops modules before adding a rule; do not scatter special cases in code.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/rules/mod.rs:RuleRow)

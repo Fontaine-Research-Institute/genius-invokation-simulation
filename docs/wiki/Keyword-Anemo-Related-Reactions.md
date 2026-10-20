@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Anemo-Related Reactions |
-| K code | K215 |
+> Keyword: Anemo-Related Reactions
+>
+> K code: K215
 
 ## Effect
 
@@ -27,3 +26,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Anemo-Related Reactions is the keyword K215.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

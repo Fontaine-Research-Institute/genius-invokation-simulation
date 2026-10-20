@@ -6,39 +6,40 @@
 
 ---
 
+
 ## 1. Responsibility
 
 Fourteen elemental reaction identities + an effect table + pure-function effects: given a reaction event and a minimal position summary, output "this damage +N" and a list of low-level operations with exact probabilities. They do not settle anything themselves, do not sample, and do not touch attachments (handled by the damage entry point per D167). See inserted settlements in [[定义层-Timeline-EN]] and the record contract in [[定义层-Records-EN]].
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `ReactionIdentity` | `crates/definitions/src/families/character/attachment.rs` | Reaction identity trait; compare with `identity_address()`, never `&dyn` addresses |
-| The 14 identities | `crates/definitions/src/reactions/*.rs` | One ZST + static instance per file: Melt / Vaporize / Overloaded / Superconduct / Electro-Charged / Frozen / Swirl / Crystallize / Burning / Bloom / Quicken / Lunar-Charged / Lunar-Bloom / Lunar-Crystallize |
-| `CONDITIONS` | each reaction file | `[ReactionCondition; N]`: one entry per order of the same element pair (8 for Swirl / Crystallize) |
-| `table` | `reactions/table.rs` | `base_rules` / `rules` / `EFFECTS` / `effect_of` / `resolve` / `is_lunar` / `rule_matches` |
-| Effect types | `reactions/effect.rs` | `ReactionEffectResult { damage_bonus, branches }`, `ReactionBranch { ops, probability: Fraction }`, `EffectContext`, `Side` |
-| `EffectOp` | same | Low-level requests: `Damage` / `Status` / `Summon` / `ForceSwitch` / `AddCardToHand` / `HandCardStatus` |
-| `entities` | `reactions/entities.rs` | Entity ids generated / attached by reactions (Frozen 106, Shield 203, Dendro Core 116, Catalyzing Field 117, Burning Flame 115, Thundercloud 205, Moondrift 212, Moondrift Harmony 211) |
+- ---: ---; ---
+- `ReactionIdentity`: Reaction identity trait; compare with `identity_address()`, never `&dyn` addresses (文件: `crates/definitions/src/families/character/attachment.rs`)
+- The 14 identities: One ZST + static instance per file: Melt / Vaporize / Overloaded / Superconduct / Electro-Charged / Frozen / Swirl / Crystallize / Burning / Bloom / Quicken / Lunar-Charged / Lunar-Bloom / Lunar-Crystallize (文件: `crates/definitions/src/reactions/*.rs`)
+- `CONDITIONS`: each reaction file; `[ReactionCondition; N]`: one entry per order of the same element pair (8 for Swirl / Crystallize)
+- `table`: `base_rules` / `rules` / `EFFECTS` / `effect_of` / `resolve` / `is_lunar` / `rule_matches` (文件: `reactions/table.rs`)
+- Effect types: `ReactionEffectResult { damage_bonus, branches }`, `ReactionBranch { ops, probability: Fraction }`, `EffectContext`, `Side` (文件: `reactions/effect.rs`)
+- `EffectOp`: same; Low-level requests: `Damage` / `Status` / `Summon` / `ForceSwitch` / `AddCardToHand` / `HandCardStatus`
+- `entities`: Entity ids generated / attached by reactions (Frozen 106, Shield 203, Dendro Core 116, Catalyzing Field 117, Burning Flame 115, Thundercloud 205, Moondrift 212, Moondrift Harmony 211) (文件: `reactions/entities.rs`)
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `base_rules() -> Vec<ReactionRule>` | `reactions/table.rs` | The 11 base reaction rules |
-| `rules(overrides: LunarOverrides) -> Vec<ReactionRule>` | same | Enabled lunar rules first (they override base reactions) |
-| `effect_table() -> &'static [EffectEntry]` | same | 14 effect entries |
-| `effect_of(reaction)` | same | Look up the effect function pointer by identity data address |
-| `resolve(event, context) -> Option<ReactionEffectResult>` | same | Compute the effect of an already determined reaction |
-| `is_lunar(reaction)` / `rule_matches(rule, attachment, attack)` | same | Whether it is lunar; whether a rule condition matches |
+- ---: ---; ---
+- `base_rules() -> Vec<ReactionRule>`: The 11 base reaction rules (文件: `reactions/table.rs`)
+- `rules(overrides: LunarOverrides) -> Vec<ReactionRule>`: same; Enabled lunar rules first (they override base reactions)
+- `effect_table() -> &'static [EffectEntry]`: same; 14 effect entries
+- `effect_of(reaction)`: same; Look up the effect function pointer by identity data address
+- `resolve(event, context) -> Option<ReactionEffectResult>`: same; Compute the effect of an already determined reaction
+- `is_lunar(reaction)` / `rule_matches(rule, attachment, attack)`: same; Whether it is lunar; whether a rule condition matches
 
 ### Source
 
 > [!NOTE]
 > Real reaction-layer source excerpts (types / trait / table function signatures + doc comments; bodies omitted).
 
-**`crates/definitions/src/families/character/attachment.rs (ReactionIdentity and identity comparison)`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/families/character/attachment.rs`
 
 ```rust
 /// 反应身份（与 `StateIdentity` 同款，D95 / D96）：具体反应模块定义自己的零大小类型 +
@@ -75,7 +76,9 @@ pub fn same_reaction_identity(
 }
 ```
 
-**`crates/definitions/src/reactions/effect.rs (HandCardStatus / EffectOp / branch and result types)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/reactions/effect.rs`
 
 *Keyword codes in comments have been replaced with names; code lines are unchanged.*
 
@@ -189,7 +192,9 @@ pub struct ReactionEffectResult {
 }
 ```
 
-**`crates/definitions/src/reactions/effect.rs (ReactionEffectFn alias)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/reactions/effect.rs`
 
 ```rust
 /// 效果函数指针（D186：登记的是**执行函数指针**，不是效果数据 / trait object / 闭包）。
@@ -201,7 +206,9 @@ pub type ReactionEffectFn =
     fn(&crate::families::character::attachment::ReactionEvent, &EffectContext) -> ReactionEffectResult;
 ```
 
-**`crates/definitions/src/reactions/table.rs (EffectEntry and public function signatures)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/reactions/table.rs`
 
 ```rust
 /// 一条**效果登记项**：反应身份 + 执行函数指针（D186：登记函数指针，不登记效果数据）。
@@ -263,7 +270,9 @@ pub fn rule_matches(
 ) -> Option<crate::base::Element>
 ```
 
-**`crates/definitions/src/reactions/melt.rs (identity example: Melt)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/reactions/melt.rs`
 
 ```rust
 /// 反应身份（指针身份：具体反应模块的零大小类型 + 一份静态实例，D95 / D96）。
@@ -283,6 +292,8 @@ pub static MELT: Melt = Melt;
 pub static CONDITIONS: [ReactionCondition; 2] =
 ```
 
+The file's current public interface is shown above; bodies are omitted.
+
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
@@ -298,18 +309,17 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 > [!NOTE]
 > Behavior evidence comes only from the rulebook (elemental reactions · rules / effects) + card text + authoritative keywords; order follows `结算顺序.md` §3.
 
-| Reaction | Element pair (covered / attacking) | Effect summary |
-|---|---|---|
-| Melt | Cryo/Pyro (either order) | This damage +2 |
-| Vaporize | Hydro/Pyro | This damage +2 |
-| Overloaded | Electro/Pyro | This damage +2; force-switch to the next character if the target is active |
-| Superconduct | Electro/Cryo | This damage +1; 1 piercing DMG to all enemy characters other than the target |
-| Electro-Charged | Electro/Hydro | This damage +1; 1 piercing DMG to all enemy characters other than the target |
-| Frozen | Cryo/Hydro | This damage +1; attach [Frozen] (cannot use skills until end of round; removed with +2 damage when hit by Pyro or Physical DMG) |
-| Swirl | Anemo + Cryo/Hydro/Pyro/Electro | 1 DMG of that element to all enemy characters other than the target |
-| Crystallize | Geo + Cryo/Hydro/Pyro/Electro | This damage +1; 1 shield on our active character (stackable, up to 2) |
-| Burning / Bloom / Quicken | Pyro/Dendro, Hydro/Dendro, Electro/Dendro | This damage +1; create Burning Flame / Dendro Core / Catalyzing Field respectively |
-| Lunar-Charged / Lunar-Bloom / Lunar-Crystallize | Hydro/Electro, Hydro/Dendro, Hydro/Geo | Lunar reactions (see `reactions/lunar_*.rs`) |
+- ---: ---; ---
+- Melt: Cryo/Pyro (either order); This damage +2
+- Vaporize: Hydro/Pyro; This damage +2
+- Overloaded: Electro/Pyro; This damage +2; force-switch to the next character if the target is active
+- Superconduct: Electro/Cryo; This damage +1; 1 piercing DMG to all enemy characters other than the target
+- Electro-Charged: Electro/Hydro; This damage +1; 1 piercing DMG to all enemy characters other than the target
+- Frozen: Cryo/Hydro; This damage +1; attach [Frozen] (cannot use skills until end of round; removed with +2 damage when hit by Pyro or Physical DMG)
+- Swirl: Anemo + Cryo/Hydro/Pyro/Electro; 1 DMG of that element to all enemy characters other than the target
+- Crystallize: Geo + Cryo/Hydro/Pyro/Electro; This damage +1; 1 shield on our active character (stackable, up to 2)
+- Burning / Bloom / Quicken: Pyro/Dendro, Hydro/Dendro, Electro/Dendro; This damage +1; create Burning Flame / Dendro Core / Catalyzing Field respectively
+- Lunar-Charged / Lunar-Bloom / Lunar-Crystallize: Hydro/Electro, Hydro/Dendro, Hydro/Geo; Lunar reactions (see `reactions/lunar_*.rs`)
 
 - D132: reaction trigger conditions; D167: attachment consumption; D184: the damage-modifier chain / reaction execution is still wired by the caller.
 - D190 / D191: observation expansion + temporariness; D14 / D128 / D129: lunar overrides; keywords "Lunar-Charged" / "Lunar-Bloom" / "Lunar-Crystallize".
@@ -327,11 +337,9 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| Each reaction file | `melt.rs::melt_adds_two_damage_with_no_extra_ops`, `crystallize.rs::crystallize_adds_one_and_shields_the_source_active_character`, `frozen.rs::frozen_adds_one_and_applies_frozen_status_to_the_reacted_character`, `lunar_charged.rs::lunar_charged_expands_random_hand_into_uniform_branches` |
-| `reactions/mod.rs` | `melt_rule_plugs_into_the_existing_damage_entry`, `damage_entry_does_not_apply_the_bonus_yet` |
-| `reactions/table.rs` / `entities.rs` | `EXPECTED_BONUS` table (14 identities + bonus values); `entity_ids_are_the_rulebook_entities` |
+- Each reaction file: `melt.rs::melt_adds_two_damage_with_no_extra_ops`, `crystallize.rs::crystallize_adds_one_and_shields_the_source_active_character`, `frozen.rs::frozen_adds_one_and_applies_frozen_status_to_the_reacted_character`, `lunar_charged.rs::lunar_charged_expands_random_hand_into_uniform_branches`
+- `reactions/mod.rs`: `melt_rule_plugs_into_the_existing_damage_entry`, `damage_entry_does_not_apply_the_bonus_yet`
+- `reactions/table.rs` / `entities.rs`: `EXPECTED_BONUS` table (14 identities + bonus values); `entity_ids_are_the_rulebook_entities`
 
 ## 8. Not yet wired and to be verified
 
@@ -342,6 +350,12 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 - `留空.md#16`: reaction identities currently use the name-string data address; the plan is one static definition per reaction.
 - Crystallize's "up to 2" shield conflicts with status 203's "no upper limit"; currently capped at 2 (`crystallize::SHIELD_STACK_CAP`), pending in-game verification.
 
+## Summary
+
+The 14 reaction identities are determined by element pairs, and effect functions are pure, returning this-damage bonuses plus low-level operation branches. Random effects expand at the observation point into branches with exact probabilities; they neither sample nor write back state. table::resolve only returns effects; attachment consumption and actual execution belong to the damage entry point and executor.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/reactions/table.rs:resolve)

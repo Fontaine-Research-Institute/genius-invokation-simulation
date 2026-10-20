@@ -6,20 +6,20 @@
 
 ---
 
+
 ## 1. Responsibility
 
 The resources layer owns "things that get spent": the dice pool is pure counting (not an entity); it provides the three cost classes, `can_afford` / `pay`, on-demand expansion and query snapshots of folded groups; the "current elemental dice cost" of action cards lives in the sibling cost block. Id / element conventions are in [[定义层-Base-EN]].
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `DieFace` | `crates/definitions/src/resources/dice/mod.rs` | Eight die faces (seven elements + omni); `element` / `is_omni` / `from_element` |
-| `DicePool` | same | Three blocks: `omni` + `folded` (same-color groups with unknown color) + `known` (expanded concrete colors); fields private |
-| `FoldedGroup` | same | `size` + `color_mass: [ExactNat128; 7]` (true conditional probability mass) + `source`; same-source groups must expand together |
-| `DiceSnapshot` | same | Fixed query snapshot: `omni` / `known` / `folded` + `expanded` sampled for this query |
-| `CostComponent` / `CostDelta` | same | Three cost classes (specific element / same color / any) and cost deltas |
-| `CurrentCost` | `crates/definitions/src/families/action_card/areas/cost.rs` | Current cost of an action card = base cost + increases / decreases |
+- ---: ---; ---
+- `DieFace`: Eight die faces (seven elements + omni); `element` / `is_omni` / `from_element` (文件: `crates/definitions/src/resources/dice/mod.rs`)
+- `DicePool`: same; Three blocks: `omni` + `folded` (same-color groups with unknown color) + `known` (expanded concrete colors); fields private
+- `FoldedGroup`: same; `size` + `color_mass: [ExactNat128; 7]` (true conditional probability mass) + `source`; same-source groups must expand together
+- `DiceSnapshot`: same; Fixed query snapshot: `omni` / `known` / `folded` + `expanded` sampled for this query
+- `CostComponent` / `CostDelta`: same; Three cost classes (specific element / same color / any) and cost deltas
+- `CurrentCost`: Current cost of an action card = base cost + increases / decreases (文件: `crates/definitions/src/families/action_card/areas/cost.rs`)
 
 > [!NOTE]
 > The dice pool occupies no entity area and allocates no entity ids (D47); cap 16; no floating point — probability masses are `ExactNat128` / `Fraction`.
@@ -27,21 +27,22 @@ The resources layer owns "things that get spent": the dice pool is pure counting
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `DicePool::{empty, new, total, add, remove, convert}` | `resources/dice/mod.rs` | Construct / count / add / remove / convert; `add` and `new` truncate at cap 16 |
-| `DicePool::{expand_source, condition}` | same | Expand same-source groups together / condition on a predicate; both return branches + exact probabilities |
-| `DicePool::{can_afford, pay, all_dice}` | same | "Possibly enough" check; deterministic deduction; query snapshot |
-| `DicePool::{generate_random, generate}` | same | Random n dice / generated from an ordered content expression |
-| `validate_cost` / `apply_delta` | same | Validate a cost (panics on illegal combinations); apply one delta |
-| `CurrentCost::{new, base, deltas, current, total, with_delta, with_increase, with_decrease}` | `families/action_card/areas/cost.rs` | Pure data for the current cost |
+- ---: ---; ---
+- `DicePool::{empty, new, total, add, remove, convert}`: Construct / count / add / remove / convert; `add` and `new` truncate at cap 16 (文件: `resources/dice/mod.rs`)
+- `DicePool::{expand_source, condition}`: same; Expand same-source groups together / condition on a predicate; both return branches + exact probabilities
+- `DicePool::{can_afford, pay, all_dice}`: same; "Possibly enough" check; deterministic deduction; query snapshot
+- `DicePool::{generate_random, generate}`: same; Random n dice / generated from an ordered content expression
+- `validate_cost` / `apply_delta`: same; Validate a cost (panics on illegal combinations); apply one delta
+- `CurrentCost::{new, base, deltas, current, total, with_delta, with_increase, with_decrease}`: Pure data for the current cost (文件: `families/action_card/areas/cost.rs`)
 
 ### Source
 
 > [!NOTE]
 > Real source excerpts for the dice pool and costs (signatures and doc comments; bodies omitted).
 
-**`crates/definitions/src/resources/dice/mod.rs (FoldedGroup / DicePool / DiceSnapshot)`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/resources/dice/mod.rs`
 
 ```rust
 /// 一个颜色未知的**同色组**（D49 第 2 块）。
@@ -94,7 +95,9 @@ pub struct DiceSnapshot {
     pub expanded: Vec<(Element, Nat)>,
 }
 ```
-**`crates/definitions/src/resources/dice/mod.rs (public DicePool method signatures, with impl lines and doc comments)`**
+
+The file's current public interface is shown above; bodies are omitted.
+File: `crates/definitions/src/resources/dice/mod.rs`
 
 ```rust
 impl DicePool {
@@ -183,7 +186,9 @@ impl DicePool {
     pub fn generate(&self, content: &[DiceSlot], limited_to_basic: bool) -> Vec<(DicePool, Fraction)>
 }
 ```
-**`crates/definitions/src/families/action_card/areas/cost.rs (CurrentCost definition and method signatures)`**
+
+The file's current public interface is shown above; bodies are omitted.
+File: `crates/definitions/src/families/action_card/areas/cost.rs`
 
 ```rust
 
@@ -265,6 +270,8 @@ impl CurrentCost {
 }
 ```
 
+The file's current public interface is shown above; bodies are omitted.
+
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
@@ -282,15 +289,13 @@ impl CurrentCost {
 > [!NOTE]
 > Evidence priority: rulebook > authoritative keywords > card text > reference implementations. All numbers are in `决策日志.md`.
 
-| Number | Conclusion |
-|---|---|
-| D46 / D47 | Dice are counts, expanded on demand; cap 16; payment only deducts counts |
-| D48 / D49 | Non-omni dice are grouped by color; three-block representation + expansion rules |
-| D117 / D121 | Tuning = conversion (not gain); a target must be specified |
-| D139 / D140 / D141 / D148 | Generation takes n, optionally basic-only; ordered expressions; same-source folded groups |
-| D146 / D149 | Queries sample using the true conditional probability of the current position; snapshots keep folded groups |
-| D156 / D158 / D159 | Exact probability family; no floating point |
-| D168 / D169 | Three cost classes and deduction order ① -> ② -> ③ |
+- D46 / D47: Dice are counts, expanded on demand; cap 16; payment only deducts counts
+- D48 / D49: Non-omni dice are grouped by color; three-block representation + expansion rules
+- D117 / D121: Tuning = conversion (not gain); a target must be specified
+- D139 / D140 / D141 / D148: Generation takes n, optionally basic-only; ordered expressions; same-source folded groups
+- D146 / D149: Queries sample using the true conditional probability of the current position; snapshots keep folded groups
+- D156 / D158 / D159: Exact probability family; no floating point
+- D168 / D169: Three cost classes and deduction order ① -> ② -> ③
 
 ## 6. Common misuse
 
@@ -305,10 +310,8 @@ impl CurrentCost {
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| `resources/dice/mod.rs` | `add_stops_at_cap`, `constructor_normalizes_and_caps`, `can_afford_uses_omni_and_possible_folded`, `pay_is_deterministic_and_needs_same_color`, `all_dice_returns_owned_snapshot`, `expand_source_uses_stored_mass_not_uniform`, `condition_enumerates_hidden_joint_colors`, `delta_*` |
-| `resources/dice/parse.rs` | `random_two_basic_folds_into_count_vectors`, `content_slot_order_does_not_change_result`, `fold_branches_merges_equivalent_pools` |
+- `resources/dice/mod.rs`: `add_stops_at_cap`, `constructor_normalizes_and_caps`, `can_afford_uses_omni_and_possible_folded`, `pay_is_deterministic_and_needs_same_color`, `all_dice_returns_owned_snapshot`, `expand_source_uses_stored_mass_not_uniform`, `condition_enumerates_hidden_joint_colors`, `delta_*`
+- `resources/dice/parse.rs`: `random_two_basic_folds_into_count_vectors`, `content_slot_order_does_not_change_result`, `fold_branches_merges_equivalent_pools`
 
 ## 8. Not yet wired and to be verified
 
@@ -318,6 +321,12 @@ impl CurrentCost {
 - `留空.md#38`: whether source dice may be omni / same-face conversion is unspecified; currently unrestricted.
 - `留空.md#45` / `#58`: the current-cost table is not synchronized when new cards are drawn / reaction results are written back.
 
+## Summary
+
+The dice pool is three blocks of pure counts: omni, folded groups and expanded concrete colors; it is capped at 16 and occupies no entity area. can_afford only means possibly enough, while pay is a deterministic deduction that requires folded groups to be expanded first; probabilities are exact fractions and sampling happens only in all_dice. Costs use three classes and are deducted in the order ① ② ③.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/resources/dice/mod.rs:DicePool)

@@ -6,7 +6,7 @@
 
 ---
 
-## 1. 职责
+## 1. 职责 (这一层解决什么问题)
 
 本工作区的对外唯一入口 (门面 crate) : 只有 re-export, 没有逻辑.外部使用者只依赖它, 就能按统一路径拿到 engine / definitions / richtext (以及可选的 cards) .
 
@@ -15,27 +15,32 @@
 
 ## 2. 关键概念与类型
 
-| 概念 | 位置 | 说明 |
-|---|---|---|
-| 门面 crate | `src/lib.rs` | 全文只有 4 条 `pub use` |
-| 门面路径 | `gi_genius_invokation_simulation::{engine, definitions, richtext}` | 跨 crate 导入的统一路径 |
-| 可选卡牌 | `#[cfg(feature = "cards")] pub use gi_genius_invokation_cards as cards;` | 默认不编译, 不进入依赖图 (D243)  |
-| feature | `Cargo.toml`: `default = []`, `cards = ["dep:gi-genius-invokation-cards"]` | 需要具体卡牌时显式打开 |
+- 门面 crate
+  - 位置: `src/lib.rs`
+  - 说明: 全文只有 4 条 `pub use`
+- 门面路径
+  - 位置: `gi_genius_invokation_simulation::{engine, definitions, richtext}`
+  - 说明: 跨 crate 导入的统一路径
+- 可选卡牌
+  - 位置: `#[cfg(feature = "cards")] pub use gi_genius_invokation_cards as cards;`
+  - 说明: 默认不编译, 不进入依赖图 (D243)
+- feature
+  - 位置: `Cargo.toml`: `default = []`, `cards = ["dep:gi-genius-invokation-cards"]`
+  - 说明: 需要具体卡牌时显式打开
 
 依赖: engine, definitions, richtext 三个必需; cards 为可选依赖 (D243) .依赖方向: simulation 在最上层; cards 依赖 definitions / engine, 不依赖 simulation.
 
 ## 3. 公开入口
 
-| 使用方式 | 说明 |
-|---|---|
-| `simulation = { path = "crates/simulation" }` | 下游默认只依赖门面 |
-| `... features = ["cards"]` | 需要具体卡牌时显式打开 |
-| `use gi_genius_invokation_simulation::{engine, definitions, richtext};` | 跨 crate 类型的统一路径 |
+- `simulation = { path = "crates/simulation" }`: 下游默认只依赖门面
+- `... features = ["cards"]`: 需要具体卡牌时显式打开
+- `use gi_genius_invokation_simulation::{engine, definitions, richtext};`: 跨 crate 类型的统一路径
 
 ### 3.1 真实源码
-**门面 crate 全文 `src/lib.rs`**
 
-`new/crates/simulation/src/lib.rs:1-23`
+下面给出 门面 crate 全文 `src/lib.rs` 的实现:
+
+文件: crates/simulation/src/lib.rs:1-23
 
 ```rust
 //! `gi-genius-invokation-simulation`：本工作区的**对外唯一入口**（门面 crate）。
@@ -63,6 +68,9 @@ pub use gi_genius_invokation_cards as cards;
 
 ```
 
+以上是 门面 crate 全文 `src/lib.rs` 的定义; 具体行为以该文件为准.
+
+
 
 ## 4. 不变量与禁止
 
@@ -73,15 +81,13 @@ pub use gi_genius_invokation_cards as cards;
 - 外部路径统一: 跨 crate 类型一律经 `simulation::{engine, definitions, richtext}` 使用, 不直接依赖内部 crate.
 - feature 不改语义: 打开 `cards` 只增加 `cards` 路径, 不改变已有三个 re-export.
 
-## 5. 依据 (规则书与 D 编号) 
+## 5. 依据 (规则书条款 / 决策编号)
 
-| 主题 | 依据 |
-|---|---|
-| 全仓 crate 统一前缀 `gi-genius-invokation-*` | D78 |
-| 门面包名 = `gi-genius-invokation-simulation`; `crates/` 目录用短名 | D79 |
-| 具体卡牌拆到独立 crate (cards)  | D240 / D241 |
-| 模拟门面默认不含具体卡牌 (cards 可选)  | D243 |
-| 本 crate 无规则书映射 (门面不承载语义)  | — |
+- 全仓 crate 统一前缀 `gi-genius-invokation-*`: D78
+- 门面包名 = `gi-genius-invokation-simulation`; `crates/` 目录用短名: D79
+- 具体卡牌拆到独立 crate (cards): D240 / D241
+- 模拟门面默认不含具体卡牌 (cards 可选): D243
+- 本 crate 无规则书映射 (门面不承载语义): —
 
 ## 6. 常见误用
 
@@ -92,23 +98,29 @@ pub use gi_genius_invokation_cards as cards;
 - 忘了对具体卡牌打开 `--features cards`: 默认 `simulation::cards` 不存在 (编译期报错是预期) .
 - 以为默认 feature 会编译 cards: 不会 (有意) .
 
-## 7. 测试
+## 7. 测试在哪
 
 - 本 crate 没有测试 (门面契约 = 只有 re-export; `cargo test -p gi-genius-invokation-simulation -- --list` 当前 0 条) .
-- 正确性由编译保证: 
+正确性由编译保证:
 
 ```bash
 cargo build --offline -p gi-genius-invokation-simulation
 cargo build --offline -p gi-genius-invokation-simulation --features cards
 ```
 
+以上两条命令应编译通过.
+
 ## 8. 待接入与待实测
 
-| 编号 | 事项 |
-|---|---|
-| #24 / #25 | 卡牌多版本与加载期选版本 (D248–D251) 未实现; 将来"默认最新 / 加载后可单独指定"的入口预期落在加载 / 门面层 |
-| 无编号 | `solver` crate 尚未建 (`new/Cargo.toml` 注释) ; 将来作为独立 crate |
-| 无编号 | 文档站 (D239: GitHub Pages 为主) 与本 Wiki 的关系待维护者定; 本 crate 无文档代码 |
+- #24 / #25: 卡牌多版本与加载期选版本 (D248–D251) 未实现; 将来"默认最新 / 加载后可单独指定"的入口预期落在加载 / 门面层
+- 无编号: `solver` crate 尚未建 (`new/Cargo.toml` 注释) ; 将来作为独立 crate
+- 无编号: 文档站 (D239: GitHub Pages 为主) 与本 Wiki 的关系待维护者定; 本 crate 无文档代码
+
+---
+
+## 小结
+
+门面 crate 只有 re-export, 没有逻辑. 下游只依赖它, 需要具体卡牌时显式打开 cards feature.
 
 ---
 

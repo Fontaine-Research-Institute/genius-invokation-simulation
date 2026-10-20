@@ -6,40 +6,41 @@
 
 ---
 
+
 ## 1. Responsibility
 
 The generic **trigger / event scheduling mechanism**: it knows no concrete timing. It provides a registry of "timing key + condition function pointer + effect function pointer", ordered dispatch following the settlement order, and the frames / interruption / resumption of inserted settlements. This layer **only dispatches, never executes** (D185 / D186 / D194 / D196).
 
 ## 2. Key concepts and types
 
-| Concept | File | Notes |
-|---|---|---|
-| `Event` | `crates/definitions/src/timeline/event.rs` | Pure-data event (who / target / amount / element / source); no semantics interpreted |
-| `Trigger<K, E>` | `timeline/trigger.rs` | Timing key + `owner` + `EffectSource` + `entry` + `fn(&Event) -> bool` + effect function pointer |
-| `TriggerRegistry<K, E>` | same | An ordinary value (not a global singleton): `register` / `register_all` / `entries` / `clear` |
-| `dispatch` / `resolve` | `timeline/dispatch.rs` | Single-side / two-side dispatch; source kind -> entry -> stable registration order; returns `Pending`, never executes |
-| `Pending` / `Queued` | `dispatch.rs` / `suspend.rs` | Pending work = effect function pointer + event + owner / source_kind / entry; `Queued` is owned |
-| `Frame` / `Resolution` | `timeline/suspend.rs` | Settlement frame + cursor; `Resolution` supports inserted sub-settlements, step consumption, discard, read-only snapshot; not a LIFO stack |
+- ---: ---; ---
+- `Event`: Pure-data event (who / target / amount / element / source); no semantics interpreted (文件: `crates/definitions/src/timeline/event.rs`)
+- `Trigger<K, E>`: Timing key + `owner` + `EffectSource` + `entry` + `fn(&Event) -> bool` + effect function pointer (文件: `timeline/trigger.rs`)
+- `TriggerRegistry<K, E>`: same; An ordinary value (not a global singleton): `register` / `register_all` / `entries` / `clear`
+- `dispatch` / `resolve`: Single-side / two-side dispatch; source kind -> entry -> stable registration order; returns `Pending`, never executes (文件: `timeline/dispatch.rs`)
+- `Pending` / `Queued`: Pending work = effect function pointer + event + owner / source_kind / entry; `Queued` is owned (文件: `dispatch.rs` / `suspend.rs`)
+- `Frame` / `Resolution`: Settlement frame + cursor; `Resolution` supports inserted sub-settlements, step consumption, discard, read-only snapshot; not a LIFO stack (文件: `timeline/suspend.rs`)
 
 Timing keys are defined by the blocks that need them (e.g. `CharacterZoneTiming` / `SummonTiming` / `SupportTiming` / phase-broadcast enums); timeline provides no concrete timing enums.
 
 ## 3. Public entry points
 
-| Entry | File | Notes |
-|---|---|---|
-| `Trigger::{new, with_condition, applies}` | `timeline/trigger.rs` | `new` always matches; `with_condition` adds a predicate |
-| `TriggerRegistry::{new, entries, register, register_all, clear}` | same | The registry is an ordinary field in state |
-| `dispatch(registry, timing, event)` | `timeline/dispatch.rs` | Ordered single-side dispatch |
-| `resolve(current, other, timing, event)` | same | Current player's registry first; each side internally ordered |
-| `Resolution::{new, empty, insert, next_step, discard, snapshot}` | `timeline/suspend.rs` | Inserted settlement / interruption / resumption; `Frame` keeps the cursor |
-| `Pending::into_queued` | `timeline/dispatch.rs` | Turns a borrowed event into an owned `Queued` for frames |
+- ---: ---; ---
+- `Trigger::{new, with_condition, applies}`: `new` always matches; `with_condition` adds a predicate (文件: `timeline/trigger.rs`)
+- `TriggerRegistry::{new, entries, register, register_all, clear}`: same; The registry is an ordinary field in state
+- `dispatch(registry, timing, event)`: Ordered single-side dispatch (文件: `timeline/dispatch.rs`)
+- `resolve(current, other, timing, event)`: same; Current player's registry first; each side internally ordered
+- `Resolution::{new, empty, insert, next_step, discard, snapshot}`: Inserted settlement / interruption / resumption; `Frame` keeps the cursor (文件: `timeline/suspend.rs`)
+- `Pending::into_queued`: Turns a borrowed event into an owned `Queued` for frames (文件: `timeline/dispatch.rs`)
 
 ### Source
 
 > [!NOTE]
 > Real timeline source excerpts (types + public method signatures + doc comments; bodies omitted).
 
-**`crates/definitions/src/timeline/trigger.rs (Condition / Effect and Trigger / TriggerRegistry)`**
+The interfaces are listed per file; the file path is shown above each code block.
+
+File: `crates/definitions/src/timeline/trigger.rs`
 
 ```rust
 /// 触发条件：`fn(&Event) -> bool` 的函数指针（D186：函数指针，不是闭包 / trait object）。
@@ -147,7 +148,9 @@ pub struct TriggerRegistry<K, E = Effect> {
     pub fn clear(&mut self)
 ```
 
-**`crates/definitions/src/timeline/dispatch.rs (Pending / dispatch / resolve)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/timeline/dispatch.rs`
 
 ```rust
 /// 一条**待执行**（D186）：效果函数指针 + 触发它的事件，外加「该谁 / 按什么顺序」的标识。
@@ -196,7 +199,9 @@ where
 
 ```
 
-**`crates/definitions/src/timeline/suspend.rs (Queued / Frame / Resolution)`**
+The file's current public interface is shown above; bodies are omitted.
+
+File: `crates/definitions/src/timeline/suspend.rs`
 
 ```rust
 /// 一条 **owned 的待执行**：函数指针 + 事件 + 「谁 / 按什么顺序」标识。
@@ -308,6 +313,8 @@ pub struct Resolution<E> {
     pub fn snapshot(&self) -> ResolutionSnapshot
 ```
 
+The file's current public interface is shown above; bodies are omitted.
+
 ## 4. Invariants and prohibitions
 
 > [!IMPORTANT]
@@ -324,12 +331,10 @@ pub struct Resolution<E> {
 > [!NOTE]
 > The sole authority for settlement order is the workspace-root `结算顺序.md` (provisional); ordering constants reuse `rules::ops::order`.
 
-| Number | Conclusion |
-|---|---|
-| D185 | Timing keys are defined by the corresponding families/types, and blocks dispatch proactively |
-| D186 | Register execution function pointers, not effect data; dispatch does not execute |
-| D194 / D196 | Inserted settlements (new frames), interruption / resumption / discard, debug snapshot |
-| D258 | The generic `Resolution` and the reaction-specific frame type coexist (tech debt) |
+- D185: Timing keys are defined by the corresponding families/types, and blocks dispatch proactively
+- D186: Register execution function pointers, not effect data; dispatch does not execute
+- D194 / D196: Inserted settlements (new frames), interruption / resumption / discard, debug snapshot
+- D258: The generic `Resolution` and the reaction-specific frame type coexist (tech debt)
 
 Rulebook · other rules · settlement order: ① current player first; ② character card -> character equipment and status -> side combat status -> summon -> support; ③ same source by entry order; fully equal order uses stable sort.
 
@@ -346,17 +351,21 @@ Rulebook · other rules · settlement order: ① current player first; ② chara
 
 ## 7. Tests
 
-| File | Tests |
-|---|---|
-| `timeline/dispatch.rs` | `dispatch_only_matches_the_requested_timing`, `same_timing_multiple_sources_follow_rulebook_order`, `same_source_orders_by_entry_order`, `ties_keep_registration_order_and_are_stable`, `resolve_puts_current_player_effects_first_even_for_later_source_kinds`, `dispatch_does_not_execute_effects`, `same_card_two_instances_only_the_owner_responds` |
-| `timeline/trigger.rs` | `applies_requires_the_same_timing`, `register_all_copies_a_static_table`, `duplicate_registrations_are_not_deduplicated` |
-| `timeline/suspend.rs` | `inserted_sub_resolution_returns_to_the_insertion_point`, `nested_insertions_return_level_by_level`, `interruption_keeps_frames_and_cursor_then_resumes`, `truly_defeated_discards_frames`, `snapshot_exposes_current_frame_remaining_steps_and_cursor` |
+- `timeline/dispatch.rs`: `dispatch_only_matches_the_requested_timing`, `same_timing_multiple_sources_follow_rulebook_order`, `same_source_orders_by_entry_order`, `ties_keep_registration_order_and_are_stable`, `resolve_puts_current_player_effects_first_even_for_later_source_kinds`, `dispatch_does_not_execute_effects`, `same_card_two_instances_only_the_owner_responds`
+- `timeline/trigger.rs`: `applies_requires_the_same_timing`, `register_all_copies_a_static_table`, `duplicate_registrations_are_not_deduplicated`
+- `timeline/suspend.rs`: `inserted_sub_resolution_returns_to_the_insertion_point`, `nested_insertions_return_level_by_level`, `interruption_keeps_frames_and_cursor_then_resumes`, `truly_defeated_discards_frames`, `snapshot_exposes_current_frame_remaining_steps_and_cursor`
 
 ## 8. Not yet wired and to be verified
 
 - `留空.md#51`: `timeline::Resolution` (generic) and `keywords::reaction::ReactionFrames` (reaction-specific) have the same semantics but different types; later `Resolution` should be made generic over "frame data" and merged.
 - Whether each block defines all rulebook timings as timing keys and dispatches proactively: tracked per block and in `留空.md#15` / `#66`.
 
+## Summary
+
+Timeline provides mechanism only: blocks define timing keys, registries are ordinary values, and dispatch and resolve order without executing. Settlement order reuses rules::ops::order; inserted sub-settlements use new Resolution frames rather than a LIFO stack, interruption keeps frames and cursor, and only a real defeat discards them. Effect execution is always the caller's job.
+
 ---
+
+
 
 Last verified: 2026-10-19 (code: crates/definitions/src/timeline/dispatch.rs:dispatch)

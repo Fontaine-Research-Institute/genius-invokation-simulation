@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Fatui Ambusher |
-| K code | K1004 |
+> Keyword: Fatui Ambusher
+>
+> K code: K1004
 
 ## Effect
 
@@ -29,3 +28,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Fatui Ambusher is the keyword K1004.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

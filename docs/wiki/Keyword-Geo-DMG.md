@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Geo DMG |
-| K code | K106 |
+> Keyword: Geo DMG
+>
+> K code: K106
 
 ## Effect
 
@@ -29,3 +28,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Geo DMG is the keyword K106.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

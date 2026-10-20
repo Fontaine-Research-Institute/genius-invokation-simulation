@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Dendro DMG |
-| K code | K107 |
+> Keyword: Dendro DMG
+>
+> K code: K107
 
 ## Effect
 
@@ -28,3 +27,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Dendro DMG is the keyword K107.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

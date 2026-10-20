@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Guardian Vent: Volcano Kablam |
-| K code | K1039 |
+> Keyword: Guardian Vent: Volcano Kablam
+>
+> K code: K1039
 
 ## Effect
 
@@ -26,3 +25,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Guardian Vent: Volcano Kablam is the keyword K1039.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

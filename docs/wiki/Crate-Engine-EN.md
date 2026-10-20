@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Responsibility
+## 1. Responsibility (What This Layer Solves)
 
 The mechanism-primitive crate: it provides only the low-level pieces that carry no game semantics — numbers, ids, entities, area containers, randomness and choice, exact fractions, and statistics. It has zero dependencies by default; upper layers (`definitions` / `cards` / `simulation`) depend on it, and it depends on no business crate.
 
@@ -15,66 +15,85 @@ The mechanism-primitive crate: it provides only the low-level pieces that carry 
 
 ## 2. Key Concepts and Types
 
-| Concept | Location | Notes |
-|---|---|---|
-| Saturating numeric family | `src/nat.rs`: `Nat8/16/32/64/128`, default `Nat = Nat32` | add / sub / mul saturate (overflow stops at `MAX`, subtraction stops at `ZERO`, no panic); division by zero panics (D44 / D36 / D37) |
-| Exact numeric family | `src/nat.rs`: `ExactNat8/16/32/64/128`, default `ExactNat = ExactNat128` | add / sub / mul panic on overflow or underflow (D153); used by probabilities and fractions (D152 / D156) |
-| Arithmetic macros | `src/nat.rs`: `nadd!` / `nsub!` / `nmul!` / `ndiv!` | one set of names for both families; semantics follow the type (D155) |
-| Entity id | `src/id.rs`: `EntityId = Nat` | monotonic, never-reused serial number; the engine does not record areas (D42) |
-| List index | `src/id.rs`: `ActionId = u32` | "which item in a list"; never participates in numeric arithmetic |
-| Entity table | `src/entity.rs`: `EntityTable` | allocates ids only: `alloc` / `len` / `is_empty` |
-| Area containers | `src/area.rs`: `Area` (multi-entity), `SingleArea` (single entity = a variable) | no identity, no numbering, no registration; they are state field types (D42) |
-| Choice primitive | `src/select.rs`: `SelectionSource<S>` + `enumerate_select` | takes only "a list and a count", no `who` (D25); list shape belongs to each block's `parse.rs` (D26) |
-| Random primitive | `src/random.rs`: `DedupFn` / `enumerate_random` / `enumerate_random_weighted` | pure enumeration, does not consume the PRNG; branch probabilities are `Fraction` (D149 / D158) |
-| Exact fraction | `src/prob.rs`: `Fraction` / `total` / `normalize` / `pick_index` | numerator / denominator `ExactNat128`; auto-reduced; zero denominator panics |
-| Random source | `src/rng.rs`: `Rng` | SplitMix64; externally only `next_u128` / `next_below_u128` (rejection sampling, D160) |
-| Statistics | `src/stats.rs`: `Counter` / `Seq<T>` | plain value fields owned by areas, read-only outside (D181-D183) |
-| Solver interface | `src/rules.rs`: `GameRules<S>` / `GameResult<P>` / `ActionList` | compiled only with feature `rules` (D24); includes `BothLose` (D267) |
+- Saturating numeric family
+  - Location: `src/nat.rs`: `Nat8/16/32/64/128`, default `Nat = Nat32`
+  - Notes: add / sub / mul saturate (overflow stops at `MAX`, subtraction stops at `ZERO`, no panic); division by zero panics (D44 / D36 / D37)
+- Exact numeric family
+  - Location: `src/nat.rs`: `ExactNat8/16/32/64/128`, default `ExactNat = ExactNat128`
+  - Notes: add / sub / mul panic on overflow or underflow (D153); used by probabilities and fractions (D152 / D156)
+- Arithmetic macros
+  - Location: `src/nat.rs`: `nadd!` / `nsub!` / `nmul!` / `ndiv!`
+  - Notes: one set of names for both families; semantics follow the type (D155)
+- Entity id
+  - Location: `src/id.rs`: `EntityId = Nat`
+  - Notes: monotonic, never-reused serial number; the engine does not record areas (D42)
+- List index
+  - Location: `src/id.rs`: `ActionId = u32`
+  - Notes: "which item in a list"; never participates in numeric arithmetic
+- Entity table
+  - Location: `src/entity.rs`: `EntityTable`
+  - Notes: allocates ids only: `alloc` / `len` / `is_empty`
+- Area containers
+  - Location: `src/area.rs`: `Area` (multi-entity), `SingleArea` (single entity = a variable)
+  - Notes: no identity, no numbering, no registration; they are state field types (D42)
+- Choice primitive
+  - Location: `src/select.rs`: `SelectionSource<S>` + `enumerate_select`
+  - Notes: takes only "a list and a count", no `who` (D25); list shape belongs to each block's `parse.rs` (D26)
+- Random primitive
+  - Location: `src/random.rs`: `DedupFn` / `enumerate_random` / `enumerate_random_weighted`
+  - Notes: pure enumeration, does not consume the PRNG; branch probabilities are `Fraction` (D149 / D158)
+- Exact fraction
+  - Location: `src/prob.rs`: `Fraction` / `total` / `normalize` / `pick_index`
+  - Notes: numerator / denominator `ExactNat128`; auto-reduced; zero denominator panics
+- Random source
+  - Location: `src/rng.rs`: `Rng`
+  - Notes: SplitMix64; externally only `next_u128` / `next_below_u128` (rejection sampling, D160)
+- Statistics
+  - Location: `src/stats.rs`: `Counter` / `Seq<T>`
+  - Notes: plain value fields owned by areas, read-only outside (D181-D183)
+- Solver interface
+  - Location: `src/rules.rs`: `GameRules<S>` / `GameResult<P>` / `ActionList`
+  - Notes: compiled only with feature `rules` (D24); includes `BothLose` (D267)
 
 **Cargo features**
 
-| Feature | Meaning |
-|---|---|
-| default (empty) | zero external dependencies |
-| `rules` | compiles `src/rules.rs` (solver interface) |
-| `dedup` | enables probability dedup (fewer branches only; never changes the distribution) |
-| `opt-all` | all computation optimizations (currently `= ["dedup"]`) |
-| `dll` | mechanism dll loading (`dep:libloading`) — `src/load.rs` does not exist yet, so enabling it breaks the build |
+- default (empty): zero external dependencies
+- `rules`: compiles `src/rules.rs` (solver interface)
+- `dedup`: enables probability dedup (fewer branches only; never changes the distribution)
+- `opt-all`: all computation optimizations (currently `= ["dedup"]`)
+- `dll`: mechanism dll loading (`dep:libloading`) — `src/load.rs` does not exist yet, so enabling it breaks the build
 
 ## 3. Public Entry Points
 
 `src/lib.rs` re-exports `Area` / `SingleArea` / `EntityTable` / `ActionId` / `EntityId` / `Nat` / `enumerate_random` / `DedupFn` / `enumerate_select` / `SelectionSource`; other modules are used by path.
 
-| Entry point | Signature highlights |
-|---|---|
-| `Nat` / `ExactNat` | `ZERO` / `MAX` / `const fn new` / `get`; saturating or exact `add/sub/mul`; division by zero panics |
-| `EntityTable` | `new` / `alloc(&mut self) -> EntityId` / `len` / `is_empty` |
-| `Area` / `SingleArea` | `push` / `take_at` (swap_remove) / `remove` / `as_slice`; `get` / `set` / `clear` |
-| `SelectionSource<S>` | `len` / `is_empty` / `apply(&self, &S, usize) -> (S, Fraction)` |
-| `enumerate_select` | `(state, list, count: Nat) -> Vec<(S, Fraction)>` |
-| `enumerate_random` | `(state, list, repeatable, all_same, times, dedup) -> Vec<(S, Fraction)>` |
-| `enumerate_random_weighted` | adds `weights: Option<&[Fraction]>` |
-| `Fraction` | `new(num, den)` (zero denominator panics) / `exact_add` / `exact_mul` / `exact_div` / `cmp_value` |
-| `Rng` | `from_seed(u64)` / `next_u128()` / `next_below_u128(n)` (`n == 0` panics) |
-| `Counter` / `Seq<T>` | counter add / sub / clear; sequence push / get / iter / as_slice |
-| `GameRules<S>` | `type Player` + `to_move` / `terminal` / `actions` / `evaluate` (feature `rules`) |
+- `Nat` / `ExactNat`: `ZERO` / `MAX` / `const fn new` / `get`; saturating or exact `add/sub/mul`; division by zero panics
+- `EntityTable`: `new` / `alloc(&mut self) -> EntityId` / `len` / `is_empty`
+- `Area` / `SingleArea`: `push` / `take_at` (swap_remove) / `remove` / `as_slice`; `get` / `set` / `clear`
+- `SelectionSource<S>`: `len` / `is_empty` / `apply(&self, &S, usize) -> (S, Fraction)`
+- `enumerate_select`: `(state, list, count: Nat) -> Vec<(S, Fraction)>`
+- `enumerate_random`: `(state, list, repeatable, all_same, times, dedup) -> Vec<(S, Fraction)>`
+- `enumerate_random_weighted`: adds `weights: Option<&[Fraction]>`
+- `Fraction`: `new(num, den)` (zero denominator panics) / `exact_add` / `exact_mul` / `exact_div` / `cmp_value`
+- `Rng`: `from_seed(u64)` / `next_u128()` / `next_below_u128(n)` (`n == 0` panics)
+- `Counter` / `Seq<T>`: counter add / sub / clear; sequence push / get / iter / as_slice
+- `GameRules<S>`: `type Player` + `to_move` / `terminal` / `actions` / `evaluate` (feature `rules`)
 
 **Boundary behavior (hard-coded)**
 
-| Case | Result |
-|---|---|
-| `times == 0` / `list.len() == 0` | empty `Vec` |
-| `all_same == true` | pick one item once, all draws use it; result length = `list.len()` (takes priority over the next rule) |
-| `repeatable == false` and `times > list.len()` | empty `Vec` (no panic) |
-| `count == 1` (choice) | `list.len()` branches, each `1/len` exact |
-| `count > 1` (choice) | empty `Vec` (D25 undecided; no panic) |
-| weight length mismatch / total weight zero | empty `Vec` (no panic) |
-| fraction denominator 0 / division by zero / `next_below_u128(0)` | panic (a logic error, D44) |
+- `times == 0` / `list.len() == 0`: empty `Vec`
+- `all_same == true`: pick one item once, all draws use it; result length = `list.len()` (takes priority over the next rule)
+- `repeatable == false` and `times > list.len()`: empty `Vec` (no panic)
+- `count == 1` (choice): `list.len()` branches, each `1/len` exact
+- `count > 1` (choice): empty `Vec` (D25 undecided; no panic)
+- weight length mismatch / total weight zero: empty `Vec` (no panic)
+- fraction denominator 0 / division by zero / `next_below_u128(0)`: panic (a logic error, D44)
 
 ### 3.1 Real Source Excerpts
-**Nat family and its generation macro**
 
-`new/crates/engine/src/nat.rs:23-137`
+The implementation of Nat family and its generation macro follows:
+
+File: crates/engine/src/nat.rs:23-137
 
 ```rust
 /// 生成一个饱和数值类型（一族五个宽度；**默认用 `Nat`，不要直接手写这个宏的实例**）。
@@ -194,9 +213,12 @@ macro_rules! nat_type {
 }
 ```
 
-**Default number type `Nat`**
+The code above defines Nat family and its generation macro; see the file for the full implementation.
 
-`new/crates/engine/src/nat.rs:164-167`
+
+The implementation of Default number type `Nat` follows:
+
+File: crates/engine/src/nat.rs:164-167
 
 ```rust
 /// **默认数值类型**：就是 32 位的 `Nat32`（别名，同一类型）。
@@ -205,9 +227,12 @@ macro_rules! nat_type {
 pub type Nat = Nat32;
 ```
 
-**Shared arithmetic dispatch for both families**
+The code above defines Default number type `Nat`; see the file for the full implementation.
 
-`new/crates/engine/src/nat.rs:344-362`
+
+The implementation of Shared arithmetic dispatch for both families follows:
+
+File: crates/engine/src/nat.rs:344-362
 
 ```rust
 /// 两族共用的算术分派（D155）：宏 `nadd!` / `nsub!` / `nmul!` / `ndiv!` 统一展开到这里。
@@ -231,9 +256,12 @@ pub trait NatArith: Copy {
 }
 ```
 
-**Add macro `nadd!`**
+The code above defines Shared arithmetic dispatch for both families; see the file for the full implementation.
 
-`new/crates/engine/src/nat.rs:426-435`
+
+The implementation of Add macro `nadd!` follows:
+
+File: crates/engine/src/nat.rs:426-435
 
 ```rust
 /// 加法宏（**两族共用**，语义由类型决定，见 [`NatArith`]；D155）。
@@ -248,9 +276,12 @@ macro_rules! nadd {
 }
 ```
 
-**Division macro `ndiv!` (panics on zero)**
+The code above defines Add macro `nadd!`; see the file for the full implementation.
 
-`new/crates/engine/src/nat.rs:453-459`
+
+The implementation of Division macro `ndiv!` (panics on zero) follows:
+
+File: crates/engine/src/nat.rs:453-459
 
 ```rust
 /// 除法宏（**两族共用**：**除零 panic**，与 `Div` 运算符一致；加/减/乘的语义见 [`NatArith`]）。
@@ -262,18 +293,24 @@ macro_rules! ndiv {
 }
 ```
 
-**Entity identifier `EntityId`**
+The code above defines Division macro `ndiv!` (panics on zero); see the file for the full implementation.
 
-`new/crates/engine/src/id.rs:13-14`
+
+The implementation of Entity identifier `EntityId` follows:
+
+File: crates/engine/src/id.rs:13-14
 
 ```rust
 /// 实体 id：从 0 起、单调、不复用的流水号（由实体表发放）。
 pub type EntityId = Nat;
 ```
 
-**List index `ActionId`**
+The code above defines Entity identifier `EntityId`; see the file for the full implementation.
 
-`new/crates/engine/src/id.rs:16-20`
+
+The implementation of List index `ActionId` follows:
+
+File: crates/engine/src/id.rs:16-20
 
 ```rust
 /// 列表下标（**不是数值**）。
@@ -283,9 +320,12 @@ pub type EntityId = Nat;
 pub type ActionId = u32;
 ```
 
-**Entity table `EntityTable`**
+The code above defines List index `ActionId`; see the file for the full implementation.
 
-`new/crates/engine/src/entity.rs:10-15`
+
+The implementation of Entity table `EntityTable` follows:
+
+File: crates/engine/src/entity.rs:10-15
 
 ```rust
 /// 实体表：**只发号**（从 0 起、单调、不复用）。
@@ -296,9 +336,12 @@ pub struct EntityTable {
 }
 ```
 
-**`EntityTable` methods**
+The code above defines Entity table `EntityTable`; see the file for the full implementation.
 
-`new/crates/engine/src/entity.rs:17-41`
+
+The implementation of `EntityTable` methods follows:
+
+File: crates/engine/src/entity.rs:17-41
 
 ```rust
 impl EntityTable {
@@ -328,9 +371,12 @@ impl EntityTable {
 }
 ```
 
-**Multi-entity container `Area`**
+The code above defines `EntityTable` methods; see the file for the full implementation.
 
-`new/crates/engine/src/area.rs:12-18`
+
+The implementation of Multi-entity container `Area` follows:
+
+File: crates/engine/src/area.rs:12-18
 
 ```rust
 /// 多实体容器：只保证"放/取不频繁搬动 + 不设容量上限"。
@@ -342,9 +388,12 @@ pub struct Area {
 }
 ```
 
-**`Area` operations**
+The code above defines Multi-entity container `Area`; see the file for the full implementation.
 
-`new/crates/engine/src/area.rs:20-84`
+
+The implementation of `Area` operations follows:
+
+File: crates/engine/src/area.rs:20-84
 
 ```rust
 impl Area {
@@ -414,9 +463,12 @@ impl Area {
 }
 ```
 
-**Single-entity container `SingleArea`**
+The code above defines `Area` operations; see the file for the full implementation.
 
-`new/crates/engine/src/area.rs:86-92`
+
+The implementation of Single-entity container `SingleArea` follows:
+
+File: crates/engine/src/area.rs:86-92
 
 ```rust
 /// 单实体容器 = 一个"变量"：要么没有，要么只有一个实体。
@@ -428,9 +480,12 @@ pub struct SingleArea {
 }
 ```
 
-**`SingleArea` operations**
+The code above defines Single-entity container `SingleArea`; see the file for the full implementation.
 
-`new/crates/engine/src/area.rs:94-119`
+
+The implementation of `SingleArea` operations follows:
+
+File: crates/engine/src/area.rs:94-119
 
 ```rust
 impl SingleArea {
@@ -461,9 +516,12 @@ impl SingleArea {
 }
 ```
 
-**Selection list `SelectionSource`**
+The code above defines `SingleArea` operations; see the file for the full implementation.
 
-`new/crates/engine/src/select.rs:17-29`
+
+The implementation of Selection list `SelectionSource` follows:
+
+File: crates/engine/src/select.rs:17-29
 
 ```rust
 /// 定义层提供的「选择列表」：引擎只要求能数出多少项、以及「取第 i 项后状态变成什么」。
@@ -481,9 +539,12 @@ pub trait SelectionSource<S> {
 }
 ```
 
-**Choice primitive `enumerate_select`**
+The code above defines Selection list `SelectionSource`; see the file for the full implementation.
 
-`new/crates/engine/src/select.rs:31-70`
+
+The implementation of Choice primitive `enumerate_select` follows:
+
+File: crates/engine/src/select.rs:31-70
 
 ```rust
 /// ③-b 选择：**只收列表与数量，没有 who**（D25）。
@@ -528,9 +589,12 @@ where
 }
 ```
 
-**Dedup function pointer `DedupFn`**
+The code above defines Choice primitive `enumerate_select`; see the file for the full implementation.
 
-`new/crates/engine/src/random.rs:28-40`
+
+The implementation of Dedup function pointer `DedupFn` follows:
+
+File: crates/engine/src/random.rs:28-40
 
 ```rust
 /// 去重函数指针（D1：去重**在调用点声明**，引擎只收函数指针）。
@@ -548,9 +612,12 @@ where
 pub type DedupFn = fn(Vec<(usize, Fraction)>) -> Vec<(usize, Fraction)>;
 ```
 
-**Random primitive `enumerate_random`**
+The code above defines Dedup function pointer `DedupFn`; see the file for the full implementation.
 
-`new/crates/engine/src/random.rs:42-69`
+
+The implementation of Random primitive `enumerate_random` follows:
+
+File: crates/engine/src/random.rs:42-69
 
 ```rust
 /// ③-a 随机：是否可以重复选择某项 / 是否所有次数都选择同一项 / 选择次数。
@@ -583,9 +650,12 @@ where
 }
 ```
 
-**Weighted random `enumerate_random_weighted`**
+The code above defines Random primitive `enumerate_random`; see the file for the full implementation.
 
-`new/crates/engine/src/random.rs:71-169`
+
+The implementation of Weighted random `enumerate_random_weighted` follows:
+
+File: crates/engine/src/random.rs:71-169
 
 ```rust
 /// ③-a 随机（**可选分数列表**，D150）：在 [`enumerate_random`] 上多收一个权重列表。
@@ -689,9 +759,12 @@ where
 }
 ```
 
-**Exact fraction `Fraction`**
+The code above defines Weighted random `enumerate_random_weighted`; see the file for the full implementation.
 
-`new/crates/engine/src/prob.rs:54-62`
+
+The implementation of Exact fraction `Fraction` follows:
+
+File: crates/engine/src/prob.rs:54-62
 
 ```rust
 /// 分数：`num / den`（分子 / 分母，均 `ExactNat128`；D150 / D152 / D153 / D158）。
@@ -705,9 +778,12 @@ pub struct Fraction {
 }
 ```
 
-**`Fraction` construction and exact arithmetic**
+The code above defines Exact fraction `Fraction`; see the file for the full implementation.
 
-`new/crates/engine/src/prob.rs:64-144`
+
+The implementation of `Fraction` construction and exact arithmetic follows:
+
+File: crates/engine/src/prob.rs:64-144
 
 ```rust
 impl Fraction {
@@ -793,9 +869,12 @@ impl Fraction {
 }
 ```
 
-**Fraction sum `total`**
+The code above defines `Fraction` construction and exact arithmetic; see the file for the full implementation.
 
-`new/crates/engine/src/prob.rs:214-217`
+
+The implementation of Fraction sum `total` follows:
+
+File: crates/engine/src/prob.rs:214-217
 
 ```rust
 /// 一组分数的和（精确族累加，溢出一律 panic；空切片 -> [`Fraction::ZERO`]）。
@@ -804,9 +883,12 @@ pub fn total(fractions: &[Fraction]) -> Fraction {
 }
 ```
 
-**Fraction normalization `normalize`**
+The code above defines Fraction sum `total`; see the file for the full implementation.
 
-`new/crates/engine/src/prob.rs:219-237`
+
+The implementation of Fraction normalization `normalize` follows:
+
+File: crates/engine/src/prob.rs:219-237
 
 ```rust
 /// 一组分数的**归一化**（D150 / D156）：按各自占比变成**精确分数**（Σ = 1）。
@@ -830,9 +912,12 @@ pub fn normalize(fractions: &[Fraction]) -> Option<Vec<Fraction>> {
 }
 ```
 
-**Pick by fraction proportion `pick_index`**
+The code above defines Fraction normalization `normalize`; see the file for the full implementation.
 
-`new/crates/engine/src/prob.rs:239-265`
+
+The implementation of Pick by fraction proportion `pick_index` follows:
+
+File: crates/engine/src/prob.rs:239-265
 
 ```rust
 /// 按分数占比选一个下标：`unit` 是 `[0, 2^128)` 的均匀随机整数（由 [`crate::rng::Rng`] 取）。
@@ -864,9 +949,12 @@ pub fn pick_index(fractions: &[Fraction], unit: u128) -> Option<usize> {
 }
 ```
 
-**Random source `Rng`**
+The code above defines Pick by fraction proportion `pick_index`; see the file for the full implementation.
 
-`new/crates/engine/src/rng.rs:12-18`
+
+The implementation of Random source `Rng` follows:
+
+File: crates/engine/src/rng.rs:12-18
 
 ```rust
 /// 引擎的随机源（D149 / D151 / D160）：内部状态用 SplitMix64，对外只给 128 位随机整数。
@@ -878,9 +966,12 @@ pub struct Rng {
 }
 ```
 
-**`Rng` public methods**
+The code above defines Random source `Rng`; see the file for the full implementation.
 
-`new/crates/engine/src/rng.rs:20-56`
+
+The implementation of `Rng` public methods follows:
+
+File: crates/engine/src/rng.rs:20-56
 
 ```rust
 impl Rng {
@@ -922,9 +1013,12 @@ impl Rng {
 }
 ```
 
-**Counter `Counter`**
+The code above defines `Rng` public methods; see the file for the full implementation.
 
-`new/crates/engine/src/stats.rs:25-40`
+
+The implementation of Counter `Counter` follows:
+
+File: crates/engine/src/stats.rs:25-40
 
 ```rust
 /// 计数器：一个 [`Nat`] 的**饱和**增 / 减 / 清零 / 读。
@@ -945,9 +1039,12 @@ pub struct Counter {
 }
 ```
 
-**`Counter` operations**
+The code above defines Counter `Counter`; see the file for the full implementation.
 
-`new/crates/engine/src/stats.rs:42-77`
+
+The implementation of `Counter` operations follows:
+
+File: crates/engine/src/stats.rs:42-77
 
 ```rust
 impl Counter {
@@ -988,9 +1085,12 @@ impl Counter {
 }
 ```
 
-**Ordered repeatable sequence `Seq<T>`**
+The code above defines `Counter` operations; see the file for the full implementation.
 
-`new/crates/engine/src/stats.rs:93-106`
+
+The implementation of Ordered repeatable sequence `Seq<T>` follows:
+
+File: crates/engine/src/stats.rs:93-106
 
 ```rust
 /// 有序**可重复**序列：允许重复、保持插入顺序。
@@ -1009,9 +1109,12 @@ pub struct Seq<T> {
 }
 ```
 
-**`Seq<T>` operations**
+The code above defines Ordered repeatable sequence `Seq<T>`; see the file for the full implementation.
 
-`new/crates/engine/src/stats.rs:108-149`
+
+The implementation of `Seq<T>` operations follows:
+
+File: crates/engine/src/stats.rs:108-149
 
 ```rust
 impl<T: Clone> Seq<T> {
@@ -1058,9 +1161,12 @@ impl<T: Clone> Seq<T> {
 }
 ```
 
-**Solver interface `GameRules`**
+The code above defines `Seq<T>` operations; see the file for the full implementation.
 
-`new/crates/engine/src/rules.rs:18-37`
+
+The implementation of Solver interface `GameRules` follows:
+
+File: crates/engine/src/rules.rs:18-37
 
 ```rust
 /// 对局规则接口：求解器只通过这四个函数看局面。
@@ -1085,9 +1191,12 @@ pub trait GameRules<S> {
 }
 ```
 
-**Game result `GameResult`**
+The code above defines Solver interface `GameRules`; see the file for the full implementation.
 
-`new/crates/engine/src/rules.rs:39-54`
+
+The implementation of Game result `GameResult` follows:
+
+File: crates/engine/src/rules.rs:39-54
 
 ```rust
 /// 终局结果（`P` = 定义层给的「谁」）。
@@ -1108,6 +1217,9 @@ pub enum GameResult<P> {
 }
 ```
 
+The code above defines Game result `GameResult`; see the file for the full implementation.
+
+
 
 ## 4. Invariants and Prohibitions
 
@@ -1122,25 +1234,23 @@ pub enum GameResult<P> {
 - No new numeric types or arithmetic macros: the stats module explicitly does not extend the `Nat` family (D181).
 - No global mutable state, no interior mutability (stat containers are the same).
 
-## 5. Basis (Rulebook and D Numbers)
+## 5. Basis (Rulebook Clauses / Decision Numbers)
 
 The engine is a mechanism layer and does not read the rulebook; its behavior comes entirely from the decision log.
 
-| Topic | Basis |
-|---|---|
-| Dedup function pointer + feature switch | D1 / D3 |
-| Solver interface not compiled by default | D24 |
-| Choice has no `who`; list shape belongs to each `parse.rs` | D25 / D26 |
-| Sides are not numbered; two named instances; no `Side` | D29 / D34 |
-| `Nat` family / `Nat = Nat32` / registration for non-default widths | D36 / D37 |
-| Area = state variable; no area id; no ownership table | D42 |
-| Division by zero panics | D44 |
-| Randomness split (pure enumeration; RNG only for sampling) | D149 / D150 / D151 |
-| Exact fractions / exact family / type-dispatched macros | D152 / D153 / D155 / D156 |
-| Exact external API, zero f64 repo-wide, `u128` random source | D158 / D159 / D160 |
-| Stat primitives / area-owned / read-only outside | D181 / D182 / D183 |
-| `GameResult::BothLose` (mutual defeat) | D267 / D268 |
-| Boundary behavior table | `分工计划.md` section 4.2 |
+- Dedup function pointer + feature switch: D1 / D3
+- Solver interface not compiled by default: D24
+- Choice has no `who`; list shape belongs to each `parse.rs`: D25 / D26
+- Sides are not numbered; two named instances; no `Side`: D29 / D34
+- `Nat` family / `Nat = Nat32` / registration for non-default widths: D36 / D37
+- Area = state variable; no area id; no ownership table: D42
+- Division by zero panics: D44
+- Randomness split (pure enumeration; RNG only for sampling): D149 / D150 / D151
+- Exact fractions / exact family / type-dispatched macros: D152 / D153 / D155 / D156
+- Exact external API, zero f64 repo-wide, `u128` random source: D158 / D159 / D160
+- Stat primitives / area-owned / read-only outside: D181 / D182 / D183
+- `GameResult::BothLose` (mutual defeat): D267 / D268
+- Boundary behavior table: `分工计划.md` section 4.2
 
 ## 6. Common Misuse
 
@@ -1154,35 +1264,37 @@ The engine is a mechanism layer and does not read the rulebook; its behavior com
 - Assuming the `rules` module exists: it requires `--features rules`.
 - Enabling the `dll` feature: `load.rs` is missing, so the build fails.
 
-## 7. Tests
+## 7. Where the Tests Are
 
 - All tests: `cargo test --offline -p gi-genius-invokation-engine`, currently 184 (unit tests plus three integration files).
 - Representative cases (`file::module::test_name`):
 
-| Test | Coverage |
-|---|---|
-| `engine/src/nat.rs::nat::tests::add_saturates_on_overflow` | all five saturating widths |
-| `engine/src/nat.rs::nat::exact_nat_tests::exact_width_nat128::add_overflow_by_method_panics` | exact-family overflow panic |
-| `engine/src/prob.rs::prob::tests::normalize_gives_exact_proportions_summing_to_one` | exact normalization |
-| `engine/src/random.rs::random::tests::none_weights_is_bit_identical_to_plain_enumerate_random` | weighted equals unweighted |
-| `engine/src/random.rs::random::tests::dedup_fn_is_ignored_without_feature` | dedup-off distribution |
-| `engine/src/rng.rs::rng::tests::next_u64_matches_splitmix64_reference_vectors` | PRNG algorithm pinned |
-| `engine/tests/entity_area.rs::alloc_keeps_growing_and_never_reuses` | monotonic, non-reused entity ids |
-| `engine/tests/select.rs::count_two_is_empty_and_does_not_panic` | undecided multi-select returns empty |
+- `engine/src/nat.rs::nat::tests::add_saturates_on_overflow`: all five saturating widths
+- `engine/src/nat.rs::nat::exact_nat_tests::exact_width_nat128::add_overflow_by_method_panics`: exact-family overflow panic
+- `engine/src/prob.rs::prob::tests::normalize_gives_exact_proportions_summing_to_one`: exact normalization
+- `engine/src/random.rs::random::tests::none_weights_is_bit_identical_to_plain_enumerate_random`: weighted equals unweighted
+- `engine/src/random.rs::random::tests::dedup_fn_is_ignored_without_feature`: dedup-off distribution
+- `engine/src/rng.rs::rng::tests::next_u64_matches_splitmix64_reference_vectors`: PRNG algorithm pinned
+- `engine/tests/entity_area.rs::alloc_keeps_growing_and_never_reuses`: monotonic, non-reused entity ids
+- `engine/tests/select.rs::count_two_is_empty_and_does_not_panic`: undecided multi-select returns empty
 
 > [!NOTE]
 > `tools/check_*.py` scans only upper crates such as definitions, not engine (section 8.3).
 
 ## 8. Pending Work and Field Verification
 
-| No. | Item |
-|---|---|
-| #5 | Engine `DedupFn` has no context (folding currently happens as post-merge on the definitions side, D87) |
-| #13 | `GameRules::evaluate` returns unsigned `ExactNat128`; a solver needing negative evaluations would need an exact signed type |
-| #14 | Floating point is allowed only outside the core crates; `Fraction::to_f64` has been removed |
-| #43 | `GameRules::to_move` / `actions` / `evaluate` are still placeholders |
-| #44 | Whether the `definitions` `rules` feature is covered in CI — to be confirmed (`ci.yml` currently enables it via workspace features) |
-| no number | `src/load.rs` for feature `dll` does not exist, so enabling it breaks the build (recorded in D226; the CI comment states dll is not enabled) |
+- #5: Engine `DedupFn` has no context (folding currently happens as post-merge on the definitions side, D87)
+- #13: `GameRules::evaluate` returns unsigned `ExactNat128`; a solver needing negative evaluations would need an exact signed type
+- #14: Floating point is allowed only outside the core crates; `Fraction::to_f64` has been removed
+- #43: `GameRules::to_move` / `actions` / `evaluate` are still placeholders
+- #44: Whether the `definitions` `rules` feature is covered in CI — to be confirmed (`ci.yml` currently enables it via workspace features)
+- no number: `src/load.rs` for feature `dll` does not exist, so enabling it breaks the build (recorded in D226; the CI comment states dll is not enabled)
+
+---
+
+## Summary
+
+The engine provides mechanisms only and carries no game semantics. Probabilities and randomness are exact integers that upper layers compose.
 
 ---
 

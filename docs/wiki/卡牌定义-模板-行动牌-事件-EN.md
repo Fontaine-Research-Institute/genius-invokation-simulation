@@ -2,7 +2,7 @@
 
 > [[卡牌定义-模板-行动牌-事件|中文]] · English
 
-*Scope: writing template for action card · event; mirrors the character template [[卡牌定义-模板]] (Chinese reference).*
+*Scope: writing template for action card · event; mirrors the character template [[卡牌定义-模板-EN]].*
 
 > [!IMPORTANT]
 > General hard rules:
@@ -31,6 +31,8 @@
 >
 > Cost: 1 Hydro Elemental Die
 
+File: <file path>
+
 ```rust
 // Example Event definition code
 ```
@@ -39,6 +41,8 @@
 
 > <mode One description here>
 
+File: <file path>
+
 ```rust
 // Mode One implementation code
 ```
@@ -46,6 +50,8 @@
 ### Mode Two
 
 > <mode Two description here>
+
+File: <file path>
 
 ```rust
 // Mode Two implementation code
@@ -65,6 +71,10 @@
 > Card image path: `assets/action_card/<id>.jpg`; register each new image in `new/assets/SOURCES.md`.
 >
 > Do not use skill icons.
+
+## Summary
+
+The event template writes card-level metadata and definition code first, then one subsection per mode with its description and implementation. Omit zero costs and copy card-face text exactly.
 
 ---
 

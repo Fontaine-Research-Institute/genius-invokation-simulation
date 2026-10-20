@@ -1,4 +1,4 @@
-﻿# 定义层-Rules
+# 定义层-Rules
 
 > 中文 · [[定义层-Rules-EN|English]]
 
@@ -6,37 +6,36 @@
 
 ---
 
+
 ## 1. 职责
 
 把三级 (牌族 / 类型 / 标签) 的**基础操作**统一成一张静态规则表; 每行只声明机制, 阶段, 筛选角色与依据, 具体操作是 `rules/ops/` 下的纯函数.本层不持有状态, 不新建容器 (D20) .
 
 ## 2. 关键概念与类型
 
-| 概念 | 文件 | 说明 |
-|---|---|---|
-| `Layer` / `RuleKind` / `Stage` / `QueryRole` / `RuleOp` | `crates/definitions/src/rules/mod.rs` | 层级; 机制 vs 仅分类; 生效阶段; 被谁当筛选条件; 用到哪组基础操作 |
-| `RuleRow` | 同上 | 三级同一形状: `layer/kind/ops/stages/query_roles/evidence/basis` + 可选数据 (槽位 / 数字 / 开局钩子 / 伤害角色 / 查询策略等)  |
-| `BaseRule` | 同上 | 统一访问器, 唯一实现 = `RuleRow`; 消费者只依赖 trait |
-| `Evidence` / `NumRule` / `OpeningSpec` / `DamageRole` / `RuleName` | 同上 | 卡 id + 一句话卡文; 规则数字 (Nat) ; 开局钩子; 护盾 / 减伤角色; 行名从 generated 或唯一映射取 |
-| 三级表 | `families.rs` / `types.rs` / `tags_action.rs` / `tags_character.rs` / `tags_summon_enemy.rs` | 各自 `pub static ROWS: &[RuleRow]`; `rows()` 按牌族 -> 类型 -> 标签拼接 |
-| 基础操作 | `crates/definitions/src/rules/ops/*.rs` | 14 个纯函数模块: `equip` / `support` / `damage` / `lifetime` / `opening` / `order` / `query` / `resonance` / `adventure` / `simulanka` / `arkhe` / `stage` / `food` / `arcane` |
+- `Layer` / `RuleKind` / `Stage` / `QueryRole` / `RuleOp`: 层级; 机制 vs 仅分类; 生效阶段; 被谁当筛选条件; 用到哪组基础操作 (文件: `crates/definitions/src/rules/mod.rs`)
+- `RuleRow`: 三级同一形状: `layer/kind/ops/stages/query_roles/evidence/basis` + 可选数据 (槽位 / 数字 / 开局钩子 / 伤害角色 / 查询策略等) (文件: 同上)
+- `BaseRule`: 统一访问器, 唯一实现 = `RuleRow`; 消费者只依赖 trait (文件: 同上)
+- `Evidence` / `NumRule` / `OpeningSpec` / `DamageRole` / `RuleName`: 卡 id + 一句话卡文; 规则数字 (Nat) ; 开局钩子; 护盾 / 减伤角色; 行名从 generated 或唯一映射取 (文件: 同上)
+- 三级表: 各自 `pub static ROWS: &[RuleRow]`; `rows()` 按牌族 -> 类型 -> 标签拼接 (文件: `families.rs` / `types.rs` / `tags_action.rs` / `tags_character.rs` / `tags_summon_enemy.rs`)
+- 基础操作: 14 个纯函数模块: `equip` / `support` / `damage` / `lifetime` / `opening` / `order` / `query` / `resonance` / `adventure` / `simulanka` / `arkhe` / `stage` / `food` / `arcane` (文件: `crates/definitions/src/rules/ops/*.rs`)
 
 ## 3. 公开入口
 
-| 入口 | 文件 | 说明 |
-|---|---|---|
-| `rows()` / `all_rows()` | `rules/mod.rs` | 遍历全表 (牌族 -> 类型 -> 标签)  |
-| `row_of_tag` / `row_of_family` / `row_of_action_card_type` / `row_of_status_type` | 同上 | 按标签 / 牌族 / 行动牌类型 / 状态类型查行 |
-| `family_name(family)` | 同上 | 牌族显示名的唯一映射 |
-| `trait BaseRule` | 同上 | `layer/name/kind/ops/stages/query_roles/evidence/basis/tag/slots/nums/opening/support_cap/damage/query_policy` |
-| `rules::ops::*` | `rules/ops/` | 与 `RuleOp` 一一对应的纯函数模块 |
+- `rows()` / `all_rows()`: 遍历全表 (牌族 -> 类型 -> 标签) (文件: `rules/mod.rs`)
+- `row_of_tag` / `row_of_family` / `row_of_action_card_type` / `row_of_status_type`: 按标签 / 牌族 / 行动牌类型 / 状态类型查行 (文件: 同上)
+- `family_name(family)`: 牌族显示名的唯一映射 (文件: 同上)
+- `trait BaseRule`: `layer/name/kind/ops/stages/query_roles/evidence/basis/tag/slots/nums/opening/support_cap/damage/query_policy` (文件: 同上)
+- `rules::ops::*`: 与 `RuleOp` 一一对应的纯函数模块 (文件: `rules/ops/`)
 
-### 源码 
+### 源码
 
 > [!NOTE]
 > 以下为规则表与 ops 的真实源码摘录 (签名 + 文档注释; ops 函数体从略, 完整实现见各文件) .
 
-**`crates/definitions/src/rules/mod.rs(Layer / RuleKind / Stage / QueryRole / RuleOp)`**
+下面按文件给出接口, 每个代码块上方标出文件位置.
+
+文件: `crates/definitions/src/rules/mod.rs`
 
 ```rust
 
@@ -138,7 +137,9 @@ pub enum RuleOp {
 }
 ```
 
-**`crates/definitions/src/rules/mod.rs(RuleRow 与 BaseRule)`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/mod.rs`
 
 ```rust
 /// **统一规则行**：三级共用同一形状。
@@ -227,16 +228,20 @@ pub trait BaseRule {
     }
 }
 ```
+
+以上是该文件当前的公开接口, 函数体从略.
 #### ops 函数签名
 
-**`crates/definitions/src/rules/ops/adventure.rs`**
+文件: `crates/definitions/src/rules/ops/adventure.rs`
 
 ```rust
 /// 冒险动作（纯函数）：`existing_spot` = 己方是否已有冒险地点。
 pub fn resolve(existing_spot: bool) -> AdventureOutcome
 ```
 
-**`crates/definitions/src/rules/ops/arcane.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/arcane.rs`
 
 ```rust
 /// 是否「所有秘传都在起始手牌中」：牌组里的秘传数不超过起始手牌数时成立（规则书第 2 条）。
@@ -256,7 +261,9 @@ pub fn can_play(played_this_game: Nat, edict_available: bool) -> ArcanePlay
 pub fn consumes_edict() -> bool
 ```
 
-**`crates/definitions/src/rules/ops/arkhe.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/arkhe.rs`
 
 ```rust
 /// 相反极（荒 <-> 芒；关键字 #87 / #88）。
@@ -266,7 +273,9 @@ pub fn opposite(arkhe: Arkhe) -> Arkhe
 pub fn collides_with(self_arkhe: Arkhe, incoming: Arkhe) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/damage.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/damage.rs`
 
 ```rust
 /// 伤害修正（纯函数）：先护盾吸收，再减伤扣减；穿透伤害两者都不吃。
@@ -276,7 +285,9 @@ pub fn collides_with(self_arkhe: Arkhe, incoming: Arkhe) -> bool
 pub fn mitigate(damage: Nat, ty: DamageType, shield: Nat, reductions: &[Nat]) -> Mitigation
 ```
 
-**`crates/definitions/src/rules/ops/equip.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/equip.rs`
 
 ```rust
 /// 某个武器子类的槽位规则：每角色 1 件，且角色必须是该武器类型。
@@ -300,7 +311,9 @@ pub fn check_equip(
 ) -> EquipOutcome
 ```
 
-**`crates/definitions/src/rules/ops/food.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/food.rs`
 
 ```rust
 /// 该角色本回合已食用 eaten_this_round 次时的食用判定。
@@ -316,7 +329,9 @@ pub fn can_be_affected_by_food(satiated: bool) -> bool
 pub fn can_revive(revived_this_round: Nat) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/lifetime.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/lifetime.rs`
 
 ```rust
 /// 触发一次后的可用次数（减到 0 为止；调用方随后弃置）。
@@ -335,7 +350,9 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat
 pub fn ticks_in_end_phase() -> bool
 ```
 
-**`crates/definitions/src/rules/ops/opening.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/opening.rs`
 
 ```rust
 /// 游戏准备的执行顺序。
@@ -379,7 +396,9 @@ pub fn pregame_steps() -> [PregameStep; 3]
 pub fn is_opening_round(round: Nat) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/order.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/order.rs`
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -391,7 +410,9 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool
 pub fn same_source_uses_entry_order() -> bool
 ```
 
-**`crates/definitions/src/rules/ops/resonance.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/resonance.rs`
 
 ```rust
 /// 统计队伍里某元素的角色数量。
@@ -404,7 +425,9 @@ pub fn element_resonance_allows(team: &[Element], element: Element) -> bool
 pub fn country_resonance_allows(same_country_count: Nat) -> bool
 ```
 
-**`crates/definitions/src/rules/ops/simulanka.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/simulanka.rs`
 
 ```rust
 /// 召唤物种类数。
@@ -414,7 +437,9 @@ pub fn summon_kind_count() -> Nat
 pub fn random_pick_scope() -> RandomPickScope
 ```
 
-**`crates/definitions/src/rules/ops/stage.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/stage.rs`
 
 ```rust
 /// 这次行动结算后是否轮到对方（规则书：战斗行动 -> 轮到对方；快速行动 -> 继续）。
@@ -434,7 +459,9 @@ pub fn timing_of_card_play(has_combat_action_tag: bool) -> Timing
 pub fn next_phase(phase: RoundPhase) -> RoundPhase
 ```
 
-**`crates/definitions/src/rules/ops/support.rs`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/rules/ops/support.rs`
 
 ```rust
 /// 进场判定（纯函数）。
@@ -443,6 +470,8 @@ pub fn support_enter(occupied: Nat) -> SupportEnter
 /// 离场操作形状（具体移除由支援区落点实现）。
 pub fn support_exit() -> SupportExit
 ```
+
+以上是该文件当前的公开接口, 函数体从略.
 
 
 ## 4. 不变量与禁止
@@ -456,18 +485,16 @@ pub fn support_exit() -> SupportExit
 - 行名不另存: 标签 / 类型取自 generated 文本指针; 牌族名只走 `family_name`.
 - 新机制先查既有 `RuleOp` / 纯函数模块, 不要绕开表散落特例.
 
-## 5. 依据 (规则书与 D 编号) 
+## 5. 依据 (规则书与 D 编号)
 
 > [!NOTE]
 > 依据优先级: 规则书 > 权威关键字 > 卡面文本; 不读参考实现 (D122) .
 > 规则书与旧决策冲突时以规则书为准 (如持续回合已改为结束阶段) .
 
-| 编号 | 结论 |
-|---|---|
-| D20 | 框架只给接口; 判定 / 结果用纯函数, 不持有状态 |
-| D122 | `rules/ops/` 的组织方式与依据来源 |
-| D108 | 本层不解释具体状态语义, 只声明机制 |
-| D240 | 具体卡牌效果不在本层 (在 cards crate)  |
+- D20: 框架只给接口; 判定 / 结果用纯函数, 不持有状态
+- D122: `rules/ops/` 的组织方式与依据来源
+- D108: 本层不解释具体状态语义, 只声明机制
+- D240: 具体卡牌效果不在本层 (在 cards crate)
 
 ## 6. 常见误用
 
@@ -482,10 +509,8 @@ pub fn support_exit() -> SupportExit
 
 ## 7. 测试
 
-| 文件 | 测试 |
-|---|---|
-| `rules/mod.rs` | `table_covers_all_three_layers`, `tag_rows_cover_every_tag_except_automaton`, `every_row_has_evidence_or_basis`, `classification_rows_have_no_operations`, `mechanism_rows_declare_operations`, `every_rule_op_is_declared_by_some_row`, `lookups_work_for_families_and_types`, `numeric_rules_are_positive`, `query_policy_rows_match_query_module`, `opening_hooks_are_attached_to_expected_rows` |
-| `rules/ops/*.rs` | 如 `equip.rs::matching_weapon_attaches_to_empty_slot`, `support.rs::support_zone_cap_is_four`, `lifetime.rs::duration_ticks_at_end_phase_only`, `order.rs::five_sources_are_in_rulebook_order`, `damage.rs::shield_absorbs_then_reduction_subtracts` |
+- `rules/mod.rs`: `table_covers_all_three_layers`, `tag_rows_cover_every_tag_except_automaton`, `every_row_has_evidence_or_basis`, `classification_rows_have_no_operations`, `mechanism_rows_declare_operations`, `every_rule_op_is_declared_by_some_row`, `lookups_work_for_families_and_types`, `numeric_rules_are_positive`, `query_policy_rows_match_query_module`, `opening_hooks_are_attached_to_expected_rows`
+- `rules/ops/*.rs`: 如 `equip.rs::matching_weapon_attaches_to_empty_slot`, `support.rs::support_zone_cap_is_four`, `lifetime.rs::duration_ticks_at_end_phase_only`, `order.rs::five_sources_are_in_rulebook_order`, `damage.rs::shield_absorbs_then_reduction_subtracts`
 
 ## 8. 待接入与待实测
 
@@ -494,6 +519,12 @@ pub fn support_exit() -> SupportExit
 - `留空.md#66`: F7 时机调用点 / F10 结束阶段顺序两处待复核.
 - `留空.md#70` / `#71`: Z15 超限处理方式, 召唤物"层数 vs 可用次数"口径待实测.
 
+## 小结
+
+三级 (牌族, 类型, 标签) 共用一张 RuleRow 表与 BaseRule 访问器; 机制行声明 ops, 分类行只声明筛选角色. 具体操作是 rules/ops 下不持有状态的纯函数, 表负责可遍历与可测试. 新增规则先查既有 RuleOp 与 ops 模块, 不要在代码里散落特例.
+
 ---
 
-最后核对: 2026-10-19 (代码: crates/definitions/src/rules/mod.rs:RuleRow) 
+
+
+最后核对: 2026-10-19 (代码: crates/definitions/src/rules/mod.rs:RuleRow)

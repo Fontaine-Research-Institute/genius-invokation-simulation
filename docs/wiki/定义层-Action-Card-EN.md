@@ -14,11 +14,15 @@ The action card family: **definition carriers** (type / text / base cost / play 
 
 ### 2.1 Definitions (`def.rs` / `mod.rs`)
 
-| Type | File | Notes |
-|---|---|---|
-| `ActionCardType` | `action_card/mod.rs` | `Support` / `Equipment` / `Event`; classification only, no numeric semantics |
-| `ActionCardDef<Tags>` | `action_card/def.rs` | `id` / `card_type` / four-language name and description / `tags` / `cost: &'static [CostComponent]` (base cost) / `play_condition: PlayConditionFn` |
-| `PlayCondition` / `PlayConditionFn` | `action_card/def.rs` | `Ok` / `Rejected(&'static str)`; function pointer `fn(&DefState, ViewSide) -> PlayCondition` (D217 / D186) |
+- **`ActionCardType`**
+  - File: `action_card/mod.rs`
+  - Notes: `Support` / `Equipment` / `Event`; classification only, no numeric semantics
+- **`ActionCardDef<Tags>`**
+  - File: `action_card/def.rs`
+  - Notes: `id` / `card_type` / four-language name and description / `tags` / `cost: &'static [CostComponent]` (base cost) / `play_condition: PlayConditionFn`
+- **`PlayCondition` / `PlayConditionFn`**
+  - File: `action_card/def.rs`
+  - Notes: `Ok` / `Rejected(&'static str)`; function pointer `fn(&DefState, ViewSide) -> PlayCondition` (D217 / D186)
 
 > [!IMPORTANT]
 > The play condition runs **before the affordability check** (D217): a rejection changes nothing; only after passing do payment, leaving hand, placement and dispatch happen.
@@ -57,14 +61,36 @@ HandCardStateTiming { StateAdded, StateRemoved }
 
 Six hand-card statuses (D116; Electric Shock–Invalidation):
 
-| K code | Name | Identity | Form | Definition |
-|---|---|---|---|---|
-| Electric Shock | Electric Shock | `ELECTRIC_SHOCK` | boolean | `families/character/damage_chain/statuses.rs` (legacy entry) |
-| Cost Increase | Cost Increase | `HAND_COST_INCREASE` | layered (to be verified) | `families/action_card/areas/hand_state.rs` |
-| Cost Reduction | Cost Reduction | `COST_REDUCTION` | layered | `families/character/damage_chain/statuses.rs` (legacy entry) |
-| Empowerment | Empowerment | `HAND_EMPOWERMENT` | boolean | `areas/hand_state.rs` |
-| Untunable | Untunable | `HAND_UNTUNABLE` | boolean | `areas/hand_state.rs` |
-| Invalidation | Invalidation | `HAND_INVALIDATION` | boolean | `areas/hand_state.rs` |
+- **Electric Shock**
+  - Name: Electric Shock
+  - Identity: `ELECTRIC_SHOCK`
+  - Form: boolean
+  - Definition: `families/character/damage_chain/statuses.rs` (legacy entry)
+- **Cost Increase**
+  - Name: Cost Increase
+  - Identity: `HAND_COST_INCREASE`
+  - Form: layered (to be verified)
+  - Definition: `families/action_card/areas/hand_state.rs`
+- **Cost Reduction**
+  - Name: Cost Reduction
+  - Identity: `COST_REDUCTION`
+  - Form: layered
+  - Definition: `families/character/damage_chain/statuses.rs` (legacy entry)
+- **Empowerment**
+  - Name: Empowerment
+  - Identity: `HAND_EMPOWERMENT`
+  - Form: boolean
+  - Definition: `areas/hand_state.rs`
+- **Untunable**
+  - Name: Untunable
+  - Identity: `HAND_UNTUNABLE`
+  - Form: boolean
+  - Definition: `areas/hand_state.rs`
+- **Invalidation**
+  - Name: Invalidation
+  - Identity: `HAND_INVALIDATION`
+  - Form: boolean
+  - Definition: `areas/hand_state.rs`
 
 - Enum `reactions::effect::HandCardStatus` (6 variants with `ALL` / `k_code` / `from_k_code`); bridge `hand_status_identity(HandCardStatus) -> &'static dyn StateIdentity` and the reverse `hand_status_of_identity` live in `damage_chain/statuses.rs` (Z13).
 - Add / remove reuse `StateList` (boolean idempotent, layers add) and dispatch `StateAdded` / `StateRemoved`; `remove_card(entity)` clears a card's states when it leaves the hand.
@@ -118,7 +144,9 @@ ARCANE_EDICT                                     // state identity (boolean; 秘
 
 ### 3.1 Definition carriers
 
-**`ActionCardDef`** — `crates/definitions/src/families/action_card/def.rs`
+
+First, the definition of `ActionCardDef`; its declaration follows.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
 /// 一张**行动牌**的定义（纯数据；D217）。
@@ -144,7 +172,11 @@ pub struct ActionCardDef<Tags> {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/action_card/def.rs`
+The snippet above gives the public shape of `ActionCardDef`; its implementation lives in the same file.
+
+
+First, the definition of `new`; its declaration follows.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
     /// 建一份行动牌定义（常量 / 测试用；7 个参数，不再拆构造器）。
@@ -169,7 +201,11 @@ pub struct ActionCardDef<Tags> {
     }
 ```
 
-**`check_play`** — `crates/definitions/src/families/action_card/def.rs`
+The snippet above gives the public shape of `new`; its implementation lives in the same file.
+
+
+First, the definition of `check_play`; its declaration follows.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
     /// **问一次打出条件**（D217）：把本定义的函数指针套用到「局面 + 视角方」上。
@@ -180,7 +216,11 @@ pub struct ActionCardDef<Tags> {
     }
 ```
 
-**`PlayCondition`** — `crates/definitions/src/families/action_card/def.rs`
+The snippet above gives the public shape of `check_play`; its implementation lives in the same file.
+
+
+First, the definition of `PlayCondition`; its declaration follows.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
 /// **一次打出条件的结论**（D217）。
@@ -196,7 +236,11 @@ pub enum PlayCondition {
 }
 ```
 
-**`PlayConditionFn`** — `crates/definitions/src/families/action_card/def.rs`
+The snippet above gives the public shape of `PlayCondition`; its implementation lives in the same file.
+
+
+First, the definition of `PlayConditionFn`; its declaration follows.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
 /// **打出条件函数**（D217 / D186）：吃一局状态 + 视角方，返回结论。
@@ -204,33 +248,15 @@ pub enum PlayCondition {
 /// 用**函数指针**（不是闭包）：签名里没有可变引用，也没有捕获环境 ——
 /// 条件**改不了任何状态**、也不依赖调用顺序（纯函数由签名保证）。
 pub type PlayConditionFn = fn(&DefState, ViewSide) -> PlayCondition;
-
-/// 一张**行动牌**的定义（纯数据；D217）。
-///
-/// 泛型参数 `Tags` 是标签集合（形态本轮未定，见 `lib.rs`；没有标签用 `()`）。
-/// 一份定义可以写成 `static` 常量：`new` 与全部访问器都是 `const fn`。
-#[derive(Clone, Copy, Debug)]
-pub struct ActionCardDef<Tags> {
-    /// 行动牌的卡 id（行动牌牌族 id 区域内唯一）。
-    id: CardId,
-    /// 类型（支援 / 装备 / 事件，D51）；决定落位落点。
-    card_type: ActionCardType,
-    /// 4 语名字（本块只填中文，D120）。
-    name: Localized,
-    /// 4 语描述（本块只填中文，D120）。
-    description: Localized,
-    /// 标签集合（D54：标签是零大小类型；集合形态本轮未定）。
-    tags: Tags,
-    /// **基础费用**（静态切片；费用修正链未接，见「待接入」）。
-    cost: &'static [CostComponent],
-    /// **打出条件**（D217）：尝试打出时、**比较是否付得起之前**调用。
-    play_condition: PlayConditionFn,
-}
 ```
+
+The snippet above gives the public shape of `PlayConditionFn`; its implementation lives in the same file.
 
 ### 3.2 Support zone
 
-**`SupportValue`** — `crates/definitions/src/families/action_card/areas/support.rs`
+
+First, the definition of `SupportValue`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// 支援牌的「值」（分工计划 §4.4.15）：三选一、互斥。
@@ -245,7 +271,11 @@ pub enum SupportValue {
 }
 ```
 
-**`SupportDuration`** — `crates/definitions/src/families/action_card/areas/support.rs`
+The snippet above gives the public shape of `SupportValue`; its implementation lives in the same file.
+
+
+First, the definition of `SupportDuration`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// 支援牌的**持续回合表达**（Z14：显式区分「有限回合」与「整局」）。
@@ -262,7 +292,11 @@ pub enum SupportDuration {
 }
 ```
 
-**`SupportEntry`** — `crates/definitions/src/families/action_card/areas/support.rs`
+The snippet above gives the public shape of `SupportDuration`; its implementation lives in the same file.
+
+
+First, the definition of `SupportEntry`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// 一张支援牌：卡 id（= 行动牌 id，唯一）+ 实体号 + 值 + 持续回合。
@@ -283,7 +317,11 @@ pub struct SupportEntry {
 }
 ```
 
-**`support_duration_of`** — `crates/definitions/src/families/action_card/areas/support.rs`
+The snippet above gives the public shape of `SupportEntry`; its implementation lives in the same file.
+
+
+First, the definition of `support_duration_of`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
     /// 某张支援牌的**显式持续回合表达**（Z14；不在区里 -> None）。
@@ -292,7 +330,11 @@ pub struct SupportEntry {
     }
 ```
 
-**`SupportZone`** — `crates/definitions/src/families/action_card/areas/support.rs`
+The snippet above gives the public shape of `support_duration_of`; its implementation lives in the same file.
+
+
+First, the definition of `SupportZone`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// **支援区**：最多 4 张，按排列顺序（= 进场先后）。
@@ -308,7 +350,11 @@ pub struct SupportZone {
 }
 ```
 
-**`add_with_triggers`** — `crates/definitions/src/families/action_card/areas/support.rs`
+The snippet above gives the public shape of `SupportZone`; its implementation lives in the same file.
+
+
+First, the definition of `add_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
     /// **加一张支援牌**（规则书·游戏区域 III）：未满 -> 直接进；满 4 -> **选择弃置一张**（多分支）。
@@ -326,7 +372,11 @@ pub struct SupportZone {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/areas/support.rs）
 ```
 
-**`tick_end_phase_with_triggers`** — `crates/definitions/src/families/action_card/areas/support.rs`
+The snippet above gives the public shape of `add_with_triggers`; its implementation lives in the same file.
+
+
+First, the definition of `tick_end_phase_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
     /// 把 `entity` 移出（纯函数内部用；统计 +1 弃置）。
@@ -349,9 +399,13 @@ pub struct SupportZone {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/areas/support.rs）
 ```
 
+The snippet above gives the public shape of `tick_end_phase_with_triggers`; its implementation lives in the same file.
+
 ### 3.3 Hand and hand-card states
 
-**`HandState`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+
+First, the definition of `HandState`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
 /// 手牌区：一个多实体容器（元素 = 实体号 + 卡 id 一对），**无序、上限 10**。
@@ -368,7 +422,11 @@ pub struct HandState {
 }
 ```
 
-**`add`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+The snippet above gives the public shape of `HandState`; its implementation lives in the same file.
+
+
+First, the definition of `add`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
     /// 把一张**已存在**的卡牌实体加入手牌；返回 (新状态, 是否加入)。
@@ -392,7 +450,11 @@ pub struct HandState {
     }
 ```
 
-**`discard`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+The snippet above gives the public shape of `add`; its implementation lives in the same file.
+
+
+First, the definition of `discard`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
     /// 从手牌**舍弃**一张牌（移除，没有弃牌堆）。
@@ -411,7 +473,11 @@ pub struct HandState {
     }
 ```
 
-**`draw_opening`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+The snippet above gives the public shape of `discard`; its implementation lives in the same file.
+
+
+First, the definition of `draw_opening`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
     /// **起手**（D17 / D90）：先按「秘传」标签向牌库抓，再补足到 OPENING_SIZE 张。
@@ -438,7 +504,11 @@ pub struct HandState {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/zones/hand/mod.rs）
 ```
 
-**`HandCardStates`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+The snippet above gives the public shape of `draw_opening`; its implementation lives in the same file.
+
+
+First, the definition of `HandCardStates`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
 /// **手牌卡状态表**：手牌实体 -> 状态列表。
@@ -454,7 +524,11 @@ pub struct HandCardStates {
 }
 ```
 
-**`add_state_with_triggers`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+The snippet above gives the public shape of `HandCardStates`; its implementation lives in the same file.
+
+
+First, the definition of `add_state_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
     /// 给一张手牌卡**加状态**（纯函数；不改入参）+ 派发「状态加上」。
@@ -472,7 +546,11 @@ pub struct HandCardStates {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/areas/hand_state.rs）
 ```
 
-**`remove_card`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+The snippet above gives the public shape of `add_state_with_triggers`; its implementation lives in the same file.
+
+
+First, the definition of `remove_card`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
     /// 一张手牌卡**离开手牌**：把它身上的状态整体清掉（卡片进出**手牌区**是手牌区的事实，
@@ -490,7 +568,11 @@ pub struct HandCardStates {
     }
 ```
 
-**`ExtraHandCardStatus`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+The snippet above gives the public shape of `remove_card`; its implementation lives in the same file.
+
+
+First, the definition of `ExtraHandCardStatus`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
 /// 本文件补的 4 个手牌状态（费用增加 / 赋能 / 不可调和 / 无效化）。
@@ -507,41 +589,22 @@ pub enum ExtraHandCardStatus {
 }
 ```
 
-**`HAND_COST_INCREASE`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+The snippet above gives the public shape of `ExtraHandCardStatus`; its implementation lives in the same file.
+
+
+First, the definition of `HAND_COST_INCREASE`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
 /// 「费用增加」静态身份实例。
 pub static HAND_COST_INCREASE: HandCostIncrease = HandCostIncrease(&HAND_COST_INCREASE_TEXT);
-/// 「赋能」静态身份实例。
-pub static HAND_EMPOWERMENT: HandEmpowerment = HandEmpowerment(&HAND_EMPOWERMENT_TEXT);
-/// 「不可调和」静态身份实例。
-pub static HAND_UNTUNABLE: HandUntunable = HandUntunable(&HAND_UNTUNABLE_TEXT);
-/// 「无效化」静态身份实例。
-pub static HAND_INVALIDATION: HandInvalidation = HandInvalidation(&HAND_INVALIDATION_TEXT);
-
-macro_rules! impl_hand_status_identity {
-    ($identity:ident, $value:expr, $form:expr) => {
-        impl StateIdentity for $identity {
-            fn text(&self) -> &'static StateText {
-                self.0
-            }
-
-            fn form(&self) -> StateForm {
-                $form
-            }
-        }
-
-        impl $identity {
-            /// 把自身当状态身份指针用（D95 / D96）。
-            pub fn identity(&'static self) -> &'static dyn StateIdentity {
-                $value
-            }
-        }
-    };
-}
 ```
 
-**`hand_status_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `HAND_COST_INCREASE`; its implementation lives in the same file.
+
+
+First, the definition of `hand_status_identity`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 手牌状态枚举 -> 状态身份（月感电 / 月绽放用；电击–无效化 共 6 种）。
@@ -557,7 +620,11 @@ pub fn hand_status_identity(status: HandCardStatus) -> &'static dyn StateIdentit
 }
 ```
 
-**`hand_status_of_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `hand_status_identity`; its implementation lives in the same file.
+
+
+First, the definition of `hand_status_of_identity`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 状态身份 -> 手牌状态枚举（反向查询；不是这 6 种之一 -> None）。
@@ -569,9 +636,13 @@ pub fn hand_status_of_identity(identity: &'static dyn StateIdentity) -> Option<H
 }
 ```
 
+The snippet above gives the public shape of `hand_status_of_identity`; its implementation lives in the same file.
+
 ### 3.4 Pile and queries
 
-**`PileState`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+
+First, the definition of `PileState`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
 /// 牌库区：**位置为键的 entries + 段视图 + 公共状态列表**（D93/D105）。
@@ -599,7 +670,11 @@ pub struct PileState {
 }
 ```
 
-**`put_bottom`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+The snippet above gives the public shape of `PileState`; its implementation lives in the same file.
+
+
+First, the definition of `put_bottom`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// **置底**：把这张牌移到牌库最下面。
@@ -619,7 +694,11 @@ pub struct PileState {
     }
 ```
 
-**`put_bottom_many`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+The snippet above gives the public shape of `put_bottom`; its implementation lives in the same file.
+
+
+First, the definition of `put_bottom_many`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// **通用「把若干新牌放牌组底」**（D209）：放几张、按什么顺序放都由调用方指定。
@@ -642,7 +721,11 @@ pub struct PileState {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/zones/pile/mod.rs）
 ```
 
-**`draw_top`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+The snippet above gives the public shape of `put_bottom_many`; its implementation lives in the same file.
+
+
+First, the definition of `draw_top`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// 按类型 / 标签抽最上面一张；matches 是调用方注入的谓词（拿 CardId 查类型 / 标签，D20/D26）。
@@ -657,7 +740,11 @@ pub struct PileState {
     }
 ```
 
-**`draw_many`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+The snippet above gives the public shape of `draw_top`; its implementation lives in the same file.
+
+
+First, the definition of `draw_many`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// 抓 **n 张**（不够则少给）；返回折叠后的分支列表（D83/D84/D85）。
@@ -671,7 +758,11 @@ pub struct PileState {
     }
 ```
 
-**`add_pending_mark`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+The snippet above gives the public shape of `draw_many`; its implementation lives in the same file.
+
+
+First, the definition of `add_pending_mark`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// 记录一批「待赋状态的位置」（D188）：**不物化到牌上**，只存位置列表。
@@ -702,7 +793,11 @@ pub struct PileState {
     }
 ```
 
-**`CardMeta`** — `crates/definitions/src/families/action_card/zones/query.rs`
+The snippet above gives the public shape of `add_pending_mark`; its implementation lives in the same file.
+
+
+First, the definition of `CardMeta`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/query.rs
 
 ```rust
 /// 查询需要的**卡牌元数据接口**（调用方实现，框架不建注册表；D20 / D101）。
@@ -725,7 +820,11 @@ pub trait CardMeta {
 }
 ```
 
-**`cards_in_initial_deck`** — `crates/definitions/src/families/action_card/zones/query.rs`
+The snippet above gives the public shape of `CardMeta`; its implementation lives in the same file.
+
+
+First, the definition of `cards_in_initial_deck`; its declaration follows.
+文件: crates/definitions/src/families/action_card/zones/query.rs
 
 ```rust
 /// **初始牌组**里：类型 = `ty`（`None` = 不限）、标签含 `tag`（`None` = 不限）的卡。
@@ -750,9 +849,13 @@ pub fn cards_in_initial_deck(
 }
 ```
 
+The snippet above gives the public shape of `cards_in_initial_deck`; its implementation lives in the same file.
+
 ### 3.5 Current cost
 
-**`CurrentCost`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+
+First, the definition of `CurrentCost`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
 /// 一次行动的**当前元素骰费用**：基础费用 + 已叠加的加费 / 减费。
@@ -767,7 +870,11 @@ pub struct CurrentCost {
 }
 ```
 
-**`with_delta`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+The snippet above gives the public shape of `CurrentCost`; its implementation lives in the same file.
+
+
+First, the definition of `with_delta`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
     /// 叠加一次加费 / 减费，返回新的当前费用（不改入参）。
@@ -783,7 +890,11 @@ pub struct CurrentCost {
     }
 ```
 
-**`with_increase`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+The snippet above gives the public shape of `with_delta`; its implementation lives in the same file.
+
+
+First, the definition of `with_increase`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
     /// 加费 `amount`（D178：0 费时新建 ② 同色）。
@@ -792,7 +903,11 @@ pub struct CurrentCost {
     }
 ```
 
-**`with_decrease`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+The snippet above gives the public shape of `with_increase`; its implementation lives in the same file.
+
+
+First, the definition of `with_decrease`; its declaration follows.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
     /// 减费 `amount`（D170：① -> ② -> ③ 依次减，剩余作废）。
@@ -801,9 +916,13 @@ pub struct CurrentCost {
     }
 ```
 
+The snippet above gives the public shape of `with_decrease`; its implementation lives in the same file.
+
 ### 3.6 Arcane edict
 
-**`ArcaneEdictStatus`** — `crates/definitions/src/families/status/arcane_edict.rs`
+
+First, the definition of `ArcaneEdictStatus`; its declaration follows.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
 /// 「秘传揭令」状态的身份类型（没有独立卡牌数据 -> 不建 StatusDef；身份 = 静态文本地址）。
@@ -824,24 +943,22 @@ impl StateIdentity for ArcaneEdictStatus {
 }
 ```
 
-**`ARCANE_EDICT`** — `crates/definitions/src/families/status/arcane_edict.rs`
+The snippet above gives the public shape of `ArcaneEdictStatus`; its implementation lives in the same file.
+
+
+First, the definition of `ARCANE_EDICT`; its declaration follows.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
 /// 「秘传揭令」的状态身份（布尔形态：存在即代表有）。
 pub static ARCANE_EDICT: ArcaneEdictStatus = ArcaneEdictStatus;
-
-impl StateIdentity for ArcaneEdictStatus {
-    fn text(&self) -> &'static StateText {
-        &ARCANE_EDICT_TEXT
-    }
-
-    fn form(&self) -> StateForm {
-        StateForm::Boolean
-    }
-}
 ```
 
-**`ArcaneEdict`** — `crates/definitions/src/families/status/arcane_edict.rs`
+The snippet above gives the public shape of `ARCANE_EDICT`; its implementation lives in the same file.
+
+
+First, the definition of `ArcaneEdict`; its declaration follows.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
 /// 每位牌手一份的**秘传揭令容器**（使用机会 + 已打出张数）。
@@ -854,7 +971,11 @@ pub struct ArcaneEdict {
 }
 ```
 
-**`can_play`** — `crates/definitions/src/families/status/arcane_edict.rs`
+The snippet above gives the public shape of `ArcaneEdict`; its implementation lives in the same file.
+
+
+First, the definition of `can_play`; its declaration follows.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
     /// 现在能不能打出秘传（复用规则层的判定顺序：先看已打出张数，再看揭令）。
@@ -863,7 +984,11 @@ pub struct ArcaneEdict {
     }
 ```
 
-**`record_play`** — `crates/definitions/src/families/status/arcane_edict.rs`
+The snippet above gives the public shape of `can_play`; its implementation lives in the same file.
+
+
+First, the definition of `record_play`; its declaration follows.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
     /// 打出秘传：允许时记录「已打出 +1」并按 秘传揭令 消耗揭令；不允许 -> None（状态不变）。
@@ -882,12 +1007,16 @@ pub struct ArcaneEdict {
     }
 ```
 
+The snippet above gives the public shape of `record_play`; its implementation lives in the same file.
+
 ### 3.7 Keyword and rules-ops interfaces referenced by this page
 
 > [!NOTE]
 > Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied as-is).
 
-**`apply_delta`** — `crates/definitions/src/resources/dice/mod.rs`
+
+First, the definition of `apply_delta`; its declaration follows.
+文件: crates/definitions/src/resources/dice/mod.rs
 
 ```rust
 /// 对费用做加减（D170/D172/D178）：顺序**写死**为 ① SpecificElement → ② SameColor → ③ AnyColor。
@@ -907,7 +1036,11 @@ pub fn apply_delta(cost: &[CostComponent], delta: CostDelta) -> Vec<CostComponen
 }
 ```
 
-**`CostDelta`** — `crates/definitions/src/resources/dice/mod.rs`
+The snippet above gives the public shape of `apply_delta`; its implementation lives in the same file.
+
+
+First, the definition of `CostDelta`; its declaration follows.
+文件: crates/definitions/src/resources/dice/mod.rs
 
 ```rust
 /// 费用增减（D170/D172）。
@@ -926,14 +1059,22 @@ pub enum CostDelta {
 }
 ```
 
-**`SUPPORT_CAP`** — `crates/definitions/src/rules/ops/support.rs`
+The snippet above gives the public shape of `CostDelta`; its implementation lives in the same file.
+
+
+First, the definition of `SUPPORT_CAP`; its declaration follows.
+文件: crates/definitions/src/rules/ops/support.rs
 
 ```rust
 /// 一方支援区上限（分工计划 §4.4.15 已定）。
 pub const SUPPORT_CAP: Nat = Nat::new(4);
 ```
 
-**`support_enter`** — `crates/definitions/src/rules/ops/support.rs`
+The snippet above gives the public shape of `SUPPORT_CAP`; its implementation lives in the same file.
+
+
+First, the definition of `support_enter`; its declaration follows.
+文件: crates/definitions/src/rules/ops/support.rs
 
 ```rust
 /// 进场判定（纯函数）。
@@ -946,7 +1087,11 @@ pub fn support_enter(occupied: Nat) -> SupportEnter {
 }
 ```
 
-**`can_play`** — `crates/definitions/src/rules/ops/arcane.rs`
+The snippet above gives the public shape of `support_enter`; its implementation lives in the same file.
+
+
+First, the definition of `can_play`; its declaration follows.
+文件: crates/definitions/src/rules/ops/arcane.rs
 
 ```rust
 /// 打出判定：played_this_game = 本局该牌手已打出的秘传张数，
@@ -962,7 +1107,11 @@ pub fn can_play(played_this_game: Nat, edict_available: bool) -> ArcanePlay {
 }
 ```
 
-**`consumes_edict`** — `crates/definitions/src/rules/ops/arcane.rs`
+The snippet above gives the public shape of `can_play`; its implementation lives in the same file.
+
+
+First, the definition of `consumes_edict`; its declaration follows.
+文件: crates/definitions/src/rules/ops/arcane.rs
 
 ```rust
 /// 打出后是否消耗秘传揭令（关键字 #70：会消耗）。
@@ -971,7 +1120,11 @@ pub fn consumes_edict() -> bool {
 }
 ```
 
-**`duration_after_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `consumes_edict`; its implementation lives in the same file.
+
+
+First, the definition of `duration_after_end_phase`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 经过一个结束阶段后的持续回合（减到 0 为止）。
@@ -979,6 +1132,8 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
     nsub!(duration, DURATION_PER_END_PHASE)
 }
 ```
+
+The snippet above gives the public shape of `duration_after_end_phase`; its implementation lives in the same file.
 
 ## 4. Invariants and prohibitions
 
@@ -1001,18 +1156,16 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 
 ## 5. Basis (rulebook and D-numbers)
 
-| Topic | Basis |
-|---|---|
-| Support cap 4 / choose one to discard when full / settle in entry order | Rulebook "Game Zones III"; 留空.md #67 / #93 |
-| Hand cap 10 / only hand action cards may be played or tuned | Rulebook "Game Zones VI" |
-| Opening hand 5, Arcane Legend guaranteed | Rulebook "Game Preparation" + D17 / D90 |
-| Pile position marks / draw folding / discard and put-bottom semantics | D52 / D80 / D82 / D83 / D84 / D86 / D89 / D93 / D94 / D97 / D98 |
-| Deferred expansion (do not materialize unobserved randomness) | D188 / D189 / D190 / D191 |
-| Queries: `CardMeta` injection, three excluded categories, per-segment grouping | D20 / D101 |
-| Current cost = base + increases/decreases; increase/decrease order | D11 / D168 / D169 / D170 / D172 / D178 |
-| Play condition before payment | D217 |
-| One arcane edict per player | Rulebook "Special Entry: Arcane Legend" + Arcane Edict; D264; 留空.md #68 / #98 / #99 |
-| Six hand-card state identities | D116; Electric Shock–Invalidation; 留空.md #10 / #106 / #115 |
+- Support cap 4 / choose one to discard when full / settle in entry order: Rulebook "Game Zones III"; 留空.md #67 / #93
+- Hand cap 10 / only hand action cards may be played or tuned: Rulebook "Game Zones VI"
+- Opening hand 5, Arcane Legend guaranteed: Rulebook "Game Preparation" + D17 / D90
+- Pile position marks / draw folding / discard and put-bottom semantics: D52 / D80 / D82 / D83 / D84 / D86 / D89 / D93 / D94 / D97 / D98
+- Deferred expansion (do not materialize unobserved randomness): D188 / D189 / D190 / D191
+- Queries: `CardMeta` injection, three excluded categories, per-segment grouping: D20 / D101
+- Current cost = base + increases/decreases; increase/decrease order: D11 / D168 / D169 / D170 / D172 / D178
+- Play condition before payment: D217
+- One arcane edict per player: Rulebook "Special Entry: Arcane Legend" + Arcane Edict; D264; 留空.md #68 / #98 / #99
+- Six hand-card state identities: D116; Electric Shock–Invalidation; 留空.md #10 / #106 / #115
 
 ### 5.1 Documentation vs code mismatches (for review)
 
@@ -1038,16 +1191,14 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 
 ## 7. Tests
 
-| File | Representative tests |
-|---|---|
-| `action_card/def.rs` | `check_play_binds_the_viewer_side`, `check_play_is_a_pure_read_only_function`, `cost_is_a_borrowed_static_slice_not_a_copy` |
-| `areas/support.rs` | `full_zone_gives_one_branch_per_discard_candidate`, `full_zone_branches_dispatch_discard_then_enter`, `end_phase_duration_ticks_and_depleted_support_is_discarded`, `whole_game_duration_skips_tick_and_round_duration_still_ticks` |
-| `areas/hand_state.rs` | `add_state_creates_entry_and_merges_by_state_list_rules`, `extra_hand_status_identities_have_names_forms_and_queries`, `remove_state_and_card` |
-| `areas/cost.rs` | `increase_on_zero_cost_creates_same_color`, `decrease_drains_specific_then_same_color_then_any`, `deltas_are_replayable_and_ordered` |
-| `zones/hand/mod.rs` | `add_fills_up_to_ten_then_rejects`, `opening_hand_draws_five_then_runs_out`, `opening_hand_prefers_arcane_cards` |
-| `zones/pile/mod.rs` | `draw_many_unmarked_folds_to_combinations`, `draw_many_marks_fold_by_combination_d98`, `pending_marks_expand_when_drawn`, `states_follow_insert_and_discard` |
-| `zones/query.rs` | `query_all_excludes_non_discoverable_three_tags`, `multi_segment_query_maps_segment_by_segment`, `filter_by_tag_matches_any_of_card_tags_by_pointer` |
-| `families/status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict` |
+- `action_card/def.rs`: `check_play_binds_the_viewer_side`, `check_play_is_a_pure_read_only_function`, `cost_is_a_borrowed_static_slice_not_a_copy`
+- `areas/support.rs`: `full_zone_gives_one_branch_per_discard_candidate`, `full_zone_branches_dispatch_discard_then_enter`, `end_phase_duration_ticks_and_depleted_support_is_discarded`, `whole_game_duration_skips_tick_and_round_duration_still_ticks`
+- `areas/hand_state.rs`: `add_state_creates_entry_and_merges_by_state_list_rules`, `extra_hand_status_identities_have_names_forms_and_queries`, `remove_state_and_card`
+- `areas/cost.rs`: `increase_on_zero_cost_creates_same_color`, `decrease_drains_specific_then_same_color_then_any`, `deltas_are_replayable_and_ordered`
+- `zones/hand/mod.rs`: `add_fills_up_to_ten_then_rejects`, `opening_hand_draws_five_then_runs_out`, `opening_hand_prefers_arcane_cards`
+- `zones/pile/mod.rs`: `draw_many_unmarked_folds_to_combinations`, `draw_many_marks_fold_by_combination_d98`, `pending_marks_expand_when_drawn`, `states_follow_insert_and_discard`
+- `zones/query.rs`: `query_all_excludes_non_discoverable_three_tags`, `multi_segment_query_maps_segment_by_segment`, `filter_by_tag_matches_any_of_card_tags_by_pointer`
+- `families/status/arcane_edict.rs`: `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict`
 
 ## 8. Pending and to be verified
 
@@ -1061,5 +1212,10 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 - **Elemental transmutation** and other action-card hooks: 留空.md #108 (dice roll wired, opening flow not).
 - **Revive food**: 留空.md #109 / #119 (combined with satiety in [[定义层-Character-EN]] and `flow/revive.rs`).
 
+## Summary
+
+The action card family provides only the definition carrier and five carriers (hand, pile, support zone, hand-card states, current cost); concrete cards live elsewhere.
+Every zone operation is a pure function and the cost algorithm reuses the dice layer's apply_delta; the play condition is checked before affordability.
+The arcane edict is a per-player container, not a status card.
 ---
 Last verified: 2026-10-19 (code: `crates/definitions/src/families/action_card/areas/support.rs::SupportZone::add_with_triggers`)

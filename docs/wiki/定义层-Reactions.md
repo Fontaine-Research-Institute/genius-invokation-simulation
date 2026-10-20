@@ -6,39 +6,38 @@
 
 ---
 
+
 ## 1. 职责
 
 14 个元素反应身份 + 效果表 + 纯函数效果: 输入反应事件与最小局面摘要, 输出"本伤害 +N"与带精确概率的底层操作清单; 不自己结算, 不采样, 不碰附着 (附着消耗由伤害入口按 D167 处理) .插入式结算见 [[定义层-Timeline]], 记录契约见 [[定义层-Records]].
 
 ## 2. 关键概念与类型
 
-| 概念 | 文件 | 说明 |
-|---|---|---|
-| `ReactionIdentity` | `crates/definitions/src/families/character/attachment.rs` | 反应身份 trait; 比较用 `identity_address()`, 不能比 `&dyn` 地址 |
-| 14 个身份 | `crates/definitions/src/reactions/*.rs` | 每文件一个 ZST + 静态实例: 融化 / 蒸发 / 超载 / 超导 / 感电 / 冻结 / 扩散 / 结晶 / 燃烧 / 绽放 / 原激化 / 月感电 / 月绽放 / 月结晶 |
-| `CONDITIONS` | 各反应文件 | `[ReactionCondition; N]`: 同一对元素的两种先后各一条 (扩散 / 结晶 8 条)  |
-| `table` | `reactions/table.rs` | `base_rules` / `rules` / `EFFECTS` / `effect_of` / `resolve` / `is_lunar` / `rule_matches` |
-| 效果类型 | `reactions/effect.rs` | `ReactionEffectResult { damage_bonus, branches }`, `ReactionBranch { ops, probability: Fraction }`, `EffectContext`, `Side` |
-| `EffectOp` | 同上 | 底层操作请求: `Damage` / `Status` / `Summon` / `ForceSwitch` / `AddCardToHand` / `HandCardStatus` |
-| `entities` | `reactions/entities.rs` | 反应生成 / 附属的实体 id (冻结 106, 护盾 203, 草原核 116, 激化领域 117, 燃烧烈焰 115, 雷暴云 205, 月笼 212, 月笼协奏 211)  |
+- `ReactionIdentity`: 反应身份 trait; 比较用 `identity_address()`, 不能比 `&dyn` 地址 (文件: `crates/definitions/src/families/character/attachment.rs`)
+- 14 个身份: 每文件一个 ZST + 静态实例: 融化 / 蒸发 / 超载 / 超导 / 感电 / 冻结 / 扩散 / 结晶 / 燃烧 / 绽放 / 原激化 / 月感电 / 月绽放 / 月结晶 (文件: `crates/definitions/src/reactions/*.rs`)
+- `CONDITIONS`: `[ReactionCondition; N]`: 同一对元素的两种先后各一条 (扩散 / 结晶 8 条) (文件: 各反应文件)
+- `table`: `base_rules` / `rules` / `EFFECTS` / `effect_of` / `resolve` / `is_lunar` / `rule_matches` (文件: `reactions/table.rs`)
+- 效果类型: `ReactionEffectResult { damage_bonus, branches }`, `ReactionBranch { ops, probability: Fraction }`, `EffectContext`, `Side` (文件: `reactions/effect.rs`)
+- `EffectOp`: 底层操作请求: `Damage` / `Status` / `Summon` / `ForceSwitch` / `AddCardToHand` / `HandCardStatus` (文件: 同上)
+- `entities`: 反应生成 / 附属的实体 id (冻结 106, 护盾 203, 草原核 116, 激化领域 117, 燃烧烈焰 115, 雷暴云 205, 月笼 212, 月笼协奏 211) (文件: `reactions/entities.rs`)
 
 ## 3. 公开入口
 
-| 入口 | 文件 | 说明 |
-|---|---|---|
-| `base_rules() -> Vec<ReactionRule>` | `reactions/table.rs` | 11 条基础反应规则 |
-| `rules(overrides: LunarOverrides) -> Vec<ReactionRule>` | 同上 | 启用的月反应规则在前 (覆写基础反应)  |
-| `effect_table() -> &'static [EffectEntry]` | 同上 | 14 条效果登记项 |
-| `effect_of(reaction)` | 同上 | 按身份数据地址查效果函数指针 |
-| `resolve(event, context) -> Option<ReactionEffectResult>` | 同上 | 对一次已判定反应求效果 |
-| `is_lunar(reaction)` / `rule_matches(rule, attachment, attack)` | 同上 | 是否月反应; 规则条件是否命中 |
+- `base_rules() -> Vec<ReactionRule>`: 11 条基础反应规则 (文件: `reactions/table.rs`)
+- `rules(overrides: LunarOverrides) -> Vec<ReactionRule>`: 启用的月反应规则在前 (覆写基础反应) (文件: 同上)
+- `effect_table() -> &'static [EffectEntry]`: 14 条效果登记项 (文件: 同上)
+- `effect_of(reaction)`: 按身份数据地址查效果函数指针 (文件: 同上)
+- `resolve(event, context) -> Option<ReactionEffectResult>`: 对一次已判定反应求效果 (文件: 同上)
+- `is_lunar(reaction)` / `rule_matches(rule, attachment, attack)`: 是否月反应; 规则条件是否命中 (文件: 同上)
 
-### 源码 
+### 源码
 
 > [!NOTE]
 > 以下为反应层的真实源码摘录 (类型 / trait / 表函数签名 + 文档注释; 函数体从略) .
 
-**`crates/definitions/src/families/character/attachment.rs(ReactionIdentity 与身份比较)`**
+下面按文件给出接口, 每个代码块上方标出文件位置.
+
+文件: `crates/definitions/src/families/character/attachment.rs`
 
 ```rust
 /// 反应身份（与 `StateIdentity` 同款，D95 / D96）：具体反应模块定义自己的零大小类型 +
@@ -75,7 +74,9 @@ pub fn same_reaction_identity(
 }
 ```
 
-**`crates/definitions/src/reactions/effect.rs(HandCardStatus / EffectOp / 分支与结果类型)`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/reactions/effect.rs`
 
 *注释中的关键字代码已替换为名称, 代码行未改*
 
@@ -189,7 +190,9 @@ pub struct ReactionEffectResult {
 }
 ```
 
-**`crates/definitions/src/reactions/effect.rs(ReactionEffectFn 别名)`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/reactions/effect.rs`
 
 ```rust
 /// 效果函数指针（D186：登记的是**执行函数指针**，不是效果数据 / trait object / 闭包）。
@@ -201,7 +204,9 @@ pub type ReactionEffectFn =
     fn(&crate::families::character::attachment::ReactionEvent, &EffectContext) -> ReactionEffectResult;
 ```
 
-**`crates/definitions/src/reactions/table.rs(EffectEntry 与公开函数签名)`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/reactions/table.rs`
 
 ```rust
 /// 一条**效果登记项**：反应身份 + 执行函数指针（D186：登记函数指针，不登记效果数据）。
@@ -263,7 +268,9 @@ pub fn rule_matches(
 ) -> Option<crate::base::Element>
 ```
 
-**`crates/definitions/src/reactions/melt.rs(反应身份示例: 融化)`**
+以上是该文件当前的公开接口, 函数体从略.
+
+文件: `crates/definitions/src/reactions/melt.rs`
 
 ```rust
 /// 反应身份（指针身份：具体反应模块的零大小类型 + 一份静态实例，D95 / D96）。
@@ -283,6 +290,8 @@ pub static MELT: Melt = Melt;
 pub static CONDITIONS: [ReactionCondition; 2] =
 ```
 
+以上是该文件当前的公开接口, 函数体从略.
+
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
@@ -293,23 +302,22 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 - 月反应覆写是反应部分级替换: 启用时月反应规则排在基础规则前, 原效果完全不执行 (D14 / D128 / D129) ; 不要加角色级启用字段.
 - 身份比较一律 `same_reaction_identity` / `identity_address`.
 
-## 5. 依据 (规则书与 D 编号) 
+## 5. 依据 (规则书与 D 编号)
 
 > [!NOTE]
 > 行为依据只读规则书 (元素反应·规则 / 效果) + 卡面 + 权威关键字; 顺序依据 `结算顺序.md` §三.
 
-| 反应 | 元素对 (已覆盖 / 本次攻击)  | 效果摘要 |
-|---|---|---|
-| 融化 | 冰/火 (任一先后)  | 本伤害 +2 |
-| 蒸发 | 水/火 | 本伤害 +2 |
-| 超载 | 雷/火 | 本伤害 +2; 目标为出战角色时强制切换下一个角色 |
-| 超导 | 雷/冰 | 本伤害 +1; 目标以外所有敌方角色 1 点穿透伤害 |
-| 感电 | 雷/水 | 本伤害 +1; 目标以外所有敌方角色 1 点穿透伤害 |
-| 冻结 | 冰/水 | 本伤害 +1; 附属[冻结] (无法使用技能, 持续到回合结束; 受火/物理 +2 并移除)  |
-| 扩散 | 风 + 冰/水/火/雷 | 目标以外所有敌方角色 1 点该元素伤害 |
-| 结晶 | 岩 + 冰/水/火/雷 | 本伤害 +1; 我方出战角色 1 点护盾 (可叠加, 最多 2 点)  |
-| 燃烧 / 绽放 / 原激化 | 火/草, 水/草, 雷/草 | 本伤害 +1; 分别生成燃烧烈焰 / 草原核 / 激化领域 |
-| 月感电 / 月绽放 / 月结晶 | 水/雷, 水/草, 水/岩 | 月反应 (见 `reactions/lunar_*.rs`)  |
+- ---: ---; ---
+- 融化: 冰/火 (任一先后); 本伤害 +2
+- 蒸发: 水/火; 本伤害 +2
+- 超载: 雷/火; 本伤害 +2; 目标为出战角色时强制切换下一个角色
+- 超导: 雷/冰; 本伤害 +1; 目标以外所有敌方角色 1 点穿透伤害
+- 感电: 雷/水; 本伤害 +1; 目标以外所有敌方角色 1 点穿透伤害
+- 冻结: 冰/水; 本伤害 +1; 附属[冻结] (无法使用技能, 持续到回合结束; 受火/物理 +2 并移除)
+- 扩散: 风 + 冰/水/火/雷; 目标以外所有敌方角色 1 点该元素伤害
+- 结晶: 岩 + 冰/水/火/雷; 本伤害 +1; 我方出战角色 1 点护盾 (可叠加, 最多 2 点)
+- 燃烧 / 绽放 / 原激化: 火/草, 水/草, 雷/草; 本伤害 +1; 分别生成燃烧烈焰 / 草原核 / 激化领域
+- 月感电 / 月绽放 / 月结晶: 水/雷, 水/草, 水/岩; 月反应 (见 `reactions/lunar_*.rs`)
 
 - D132: 反应触发条件 (同对元素两种先后) ; D167: 附着消耗; D184: 伤害修正链 / 反应效果执行仍由调用方接.
 - D190 / D191: 观测展开 + 临时性; D14 / D128 / D129: 月反应覆写; 关键字"月感电"/"月绽放"/"月结晶".
@@ -327,11 +335,9 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 
 ## 7. 测试
 
-| 文件 | 测试 |
-|---|---|
-| 各反应文件 | `melt.rs::melt_adds_two_damage_with_no_extra_ops`, `crystallize.rs::crystallize_adds_one_and_shields_the_source_active_character`, `frozen.rs::frozen_adds_one_and_applies_frozen_status_to_the_reacted_character`, `lunar_charged.rs::lunar_charged_expands_random_hand_into_uniform_branches` |
-| `reactions/mod.rs` | `melt_rule_plugs_into_the_existing_damage_entry`, `damage_entry_does_not_apply_the_bonus_yet` |
-| `reactions/table.rs` / `entities.rs` | `EXPECTED_BONUS` 清单 (14 身份 + 加伤值) ; `entity_ids_are_the_rulebook_entities` |
+- 各反应文件: `melt.rs::melt_adds_two_damage_with_no_extra_ops`, `crystallize.rs::crystallize_adds_one_and_shields_the_source_active_character`, `frozen.rs::frozen_adds_one_and_applies_frozen_status_to_the_reacted_character`, `lunar_charged.rs::lunar_charged_expands_random_hand_into_uniform_branches`
+- `reactions/mod.rs`: `melt_rule_plugs_into_the_existing_damage_entry`, `damage_entry_does_not_apply_the_bonus_yet`
+- `reactions/table.rs` / `entities.rs`: `EXPECTED_BONUS` 清单 (14 身份 + 加伤值) ; `entity_ids_are_the_rulebook_entities`
 
 ## 8. 待接入与待实测
 
@@ -342,6 +348,12 @@ pub static CONDITIONS: [ReactionCondition; 2] =
 - `留空.md#16`: 反应身份目前用名字字符串数据地址, 计划改成每反应一份静态定义数据.
 - 结晶护盾"最多 2 点"与状态 203'没有上限'冲突暂按封顶 2 点 (`crystallize::SHIELD_STACK_CAP`) , 待实测.
 
+## 小结
+
+14 个反应身份按元素对判定, 效果函数是纯函数, 返回本伤害加值与底层操作分支. 随机效果在观测点展开为分支加精确概率, 不采样也不写回状态. 反应表 resolve 只给效果; 附着消耗与实际执行由伤害入口和执行器完成.
+
 ---
 
-最后核对: 2026-10-19 (代码: crates/definitions/src/reactions/table.rs:resolve) 
+
+
+最后核对: 2026-10-19 (代码: crates/definitions/src/reactions/table.rs:resolve)

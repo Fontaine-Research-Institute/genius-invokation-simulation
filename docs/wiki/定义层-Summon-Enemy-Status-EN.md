@@ -14,12 +14,18 @@ Three families without a type tree: **summons** (definition + summon zone), **en
 
 ### 2.1 Summons (`summon/`)
 
-| Type | File | Notes |
-|---|---|---|
-| `SummonDef<Tags>` | `summon/def.rs` | `id` / `name` / `description` / `effect_kind: SummonEffectKind` / `effect_points: Nat` / `default_uses: Option<Nat>` / `tags`; `entry(summon) -> SummonEntry` is a pure transfer |
-| `SummonEffectKind` | `summon/def.rs` | Minimal set: `Damage` / `Heal` / `Status` / `Other` (no structured data field; inferred, to be reviewed) |
-| `SummonEntry` | `summon/zones/mod.rs` | `summon` (entity) / `card` (card id) / `uses: Option<Nat>` / `points: Option<Nat>` / `effect_kind: Option<SummonEffectKind>` |
-| `SummonZone` | `summon/zones/mod.rs` | `entries` (order = summon order) + `stats`; `SUMMON_CAP = 4` |
+- **`SummonDef<Tags>`**
+  - File: `summon/def.rs`
+  - Notes: `id` / `name` / `description` / `effect_kind: SummonEffectKind` / `effect_points: Nat` / `default_uses: Option<Nat>` / `tags`; `entry(summon) -> SummonEntry` is a pure transfer
+- **`SummonEffectKind`**
+  - File: `summon/def.rs`
+  - Notes: Minimal set: `Damage` / `Heal` / `Status` / `Other` (no structured data field; inferred, to be reviewed)
+- **`SummonEntry`**
+  - File: `summon/zones/mod.rs`
+  - Notes: `summon` (entity) / `card` (card id) / `uses: Option<Nat>` / `points: Option<Nat>` / `effect_kind: Option<SummonEffectKind>`
+- **`SummonZone`**
+  - File: `summon/zones/mod.rs`
+  - Notes: `entries` (order = summon order) + `stats`; `SUMMON_CAP = 4`
 
 Summon-zone rules:
 
@@ -43,12 +49,18 @@ Summon-zone rules:
 
 ### 2.3 Statuses (`status/`)
 
-| Type | File | Notes |
-|---|---|---|
-| `StatusType` | `status/mod.rs` | `CharacterStatus` / `CombatStatus`; **both types share one status id region** (D51) and are told apart by type |
-| `StatusDef<Tags>` | `status/def.rs` | `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>` (None = boolean) / `duration: Option<Nat>` / `tags`; `form()` is derived from `default_layers` |
-| Formal identities (5) | `status/known.rs` | 203 combat shield / 134 character shield / 106 frozen / 116 dendro core / 117 catalyzing field; each identity holds a `&'static StatusDef` (pointer-sized, **not a ZST**: ZST static addresses can coincide, D200) |
-| `ArcaneEdict` + `ARCANE_EDICT` | `status/arcane_edict.rs` | Arcane edict (Arcane Edict): **no status card row → no fabricated StatusDef**; only a state identity (boolean) plus a per-player usage container |
+- **`StatusType`**
+  - File: `status/mod.rs`
+  - Notes: `CharacterStatus` / `CombatStatus`; **both types share one status id region** (D51) and are told apart by type
+- **`StatusDef<Tags>`**
+  - File: `status/def.rs`
+  - Notes: `id` / `status_type` / `text: StateText` / `default_layers: Option<Nat>` (None = boolean) / `duration: Option<Nat>` / `tags`; `form()` is derived from `default_layers`
+- **Formal identities (5)**
+  - File: `status/known.rs`
+  - Notes: 203 combat shield / 134 character shield / 106 frozen / 116 dendro core / 117 catalyzing field; each identity holds a `&'static StatusDef` (pointer-sized, **not a ZST**: ZST static addresses can coincide, D200)
+- **`ArcaneEdict` + `ARCANE_EDICT`**
+  - File: `status/arcane_edict.rs`
+  - Notes: Arcane edict (Arcane Edict): **no status card row → no fabricated StatusDef**; only a state identity (boolean) plus a per-player usage container
 
 Status types and bearing (D51 / D105 / D201):
 
@@ -64,16 +76,46 @@ the status family has no zone: StatusDef is definition data, identity = static p
 
 ### 2.4 Key state identities (cross-file)
 
-| Status | Identity | Form | Data / basis | Definition |
-|---|---|---|---|---|
-| Frozen | `FROZEN` | boolean (duration 1, to be reviewed) | status 106; S6.6 "cannot use skills" | `families/status/known.rs` |
-| Stun | `STUN` | boolean | Stunned + data 100001 | `families/character/skill_flow/forbidden.rs` (shared identity) |
-| Petrified | `PETRIFIED` | boolean | data 116033 / 176033 (two entries, same effect) | same |
-| Satiety | `SATIATED` | boolean | data 303300; S8.1 | `families/character/satiated.rs` (shared identity) |
-| Shield (combat / character) | `SHIELD_COMBAT` / `SHIELD_CHARACTER` | layered | status 203 / 134 | `families/status/known.rs` |
-| Dendro core / catalyzing field | `DENDRO_CORE` / `CATALYZING_FIELD` | layered (usage) | status 116 / 117 | `families/status/known.rs` |
-| Damage negation | `DAMAGE_NEGATION` | layered | rulebook special entry; no standalone card | `families/character/damage_chain/statuses.rs` (shared identity) |
-| Damage immunity | `DAMAGE_IMMUNITY` | boolean | Piercing DMG + card text "immune to all DMG"; no standalone card | same (shared identity) |
+- **Frozen**
+  - Identity: `FROZEN`
+  - Form: boolean (duration 1, to be reviewed)
+  - Data / basis: status 106; S6.6 "cannot use skills"
+  - Definition: `families/status/known.rs`
+- **Stun**
+  - Identity: `STUN`
+  - Form: boolean
+  - Data / basis: Stunned + data 100001
+  - Definition: `families/character/skill_flow/forbidden.rs` (shared identity)
+- **Petrified**
+  - Identity: `PETRIFIED`
+  - Form: boolean
+  - Data / basis: data 116033 / 176033 (two entries, same effect)
+  - Definition: same
+- **Satiety**
+  - Identity: `SATIATED`
+  - Form: boolean
+  - Data / basis: data 303300; S8.1
+  - Definition: `families/character/satiated.rs` (shared identity)
+- **Shield (combat / character)**
+  - Identity: `SHIELD_COMBAT` / `SHIELD_CHARACTER`
+  - Form: layered
+  - Data / basis: status 203 / 134
+  - Definition: `families/status/known.rs`
+- **Dendro core / catalyzing field**
+  - Identity: `DENDRO_CORE` / `CATALYZING_FIELD`
+  - Form: layered (usage)
+  - Data / basis: status 116 / 117
+  - Definition: `families/status/known.rs`
+- **Damage negation**
+  - Identity: `DAMAGE_NEGATION`
+  - Form: layered
+  - Data / basis: rulebook special entry; no standalone card
+  - Definition: `families/character/damage_chain/statuses.rs` (shared identity)
+- **Damage immunity**
+  - Identity: `DAMAGE_IMMUNITY`
+  - Form: boolean
+  - Data / basis: Piercing DMG + card text "immune to all DMG"; no standalone card
+  - Definition: same (shared identity)
 
 Bridge table (`families/character/damage_chain/statuses.rs`):
 
@@ -98,7 +140,9 @@ Bridge table (`families/character/damage_chain/statuses.rs`):
 
 ### 3.1 Summon definitions
 
-**`SummonEffectKind`** — `crates/definitions/src/families/summon/def.rs`
+
+First, the definition of `SummonEffectKind`; its declaration follows.
+文件: crates/definitions/src/families/summon/def.rs
 
 ```rust
 /// 召唤物的**效果类型**（最小集合：伤害 / 治疗 / 状态 / 其它）。
@@ -121,7 +165,11 @@ pub enum SummonEffectKind {
 }
 ```
 
-**`SummonDef`** — `crates/definitions/src/families/summon/def.rs`
+The snippet above gives the public shape of `SummonEffectKind`; its implementation lives in the same file.
+
+
+First, the definition of `SummonDef`; its declaration follows.
+文件: crates/definitions/src/families/summon/def.rs
 
 ```rust
 /// 一个**召唤物**的定义（纯数据）。
@@ -146,7 +194,11 @@ pub struct SummonDef<Tags> {
 }
 ```
 
-**`entry`** — `crates/definitions/src/families/summon/def.rs`
+The snippet above gives the public shape of `SummonDef`; its implementation lives in the same file.
+
+
+First, the definition of `entry`; its declaration follows.
+文件: crates/definitions/src/families/summon/def.rs
 
 ```rust
     /// 用这份定义造召唤物区条目（实体 + 卡 id + 可用次数 + 效果量 + 效果类型）。
@@ -160,16 +212,24 @@ pub struct SummonDef<Tags> {
     }
 ```
 
+The snippet above gives the public shape of `entry`; its implementation lives in the same file.
+
 ### 3.2 Summon zone
 
-**`SUMMON_CAP`** — `crates/definitions/src/families/summon/zones/mod.rs`
+
+First, the definition of `SUMMON_CAP`; its declaration follows.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
 /// 一方召唤物区上限：4（规则书·游戏区域 IV）。
 pub const SUMMON_CAP: Nat = Nat::new(4);
 ```
 
-**`SummonEntry`** — `crates/definitions/src/families/summon/zones/mod.rs`
+The snippet above gives the public shape of `SUMMON_CAP`; its implementation lives in the same file.
+
+
+First, the definition of `SummonEntry`; its declaration follows.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
 /// 一个召唤物：召唤物实体 + 召唤物卡 id + 计量（可用次数 / 效果量 / 效果类型标识）。
@@ -192,7 +252,11 @@ pub struct SummonEntry {
 }
 ```
 
-**`SummonZone`** — `crates/definitions/src/families/summon/zones/mod.rs`
+The snippet above gives the public shape of `SummonEntry`; its implementation lives in the same file.
+
+
+First, the definition of `SummonZone`; its declaration follows.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
 /// **召唤物区**：最多 4 个召唤物，按召唤先后排列。
@@ -208,7 +272,11 @@ pub struct SummonZone {
 }
 ```
 
-**`summon_with_triggers`** — `crates/definitions/src/families/summon/zones/mod.rs`
+The snippet above gives the public shape of `SummonZone`; its implementation lives in the same file.
+
+
+First, the definition of `summon_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
     /// **召唤 / 生成**（规则书·游戏区域 IV）+ 派发「生成 / 合并」。
@@ -227,7 +295,11 @@ pub struct SummonZone {
     // ...（其余实现从略；见 crates/definitions/src/families/summon/zones/mod.rs）
 ```
 
-**`tick_with_triggers`** — `crates/definitions/src/families/summon/zones/mod.rs`
+The snippet above gives the public shape of `summon_with_triggers`; its implementation lives in the same file.
+
+
+First, the definition of `tick_with_triggers`; its declaration follows.
+文件: crates/definitions/src/families/summon/zones/mod.rs
 
 ```rust
     /// **触发一次**（规则书·特殊词条 可用次数）：可用次数 -1；耗尽则立刻弃置。
@@ -247,9 +319,13 @@ pub struct SummonZone {
     // ...（其余实现从略；见 crates/definitions/src/families/summon/zones/mod.rs）
 ```
 
+The snippet above gives the public shape of `tick_with_triggers`; its implementation lives in the same file.
+
 ### 3.3 Enemy cards
 
-**`EnemyDef`** — `crates/definitions/src/families/enemy/def.rs`
+
+First, the definition of `EnemyDef`; its declaration follows.
+文件: crates/definitions/src/families/enemy/def.rs
 
 ```rust
 /// 一张**敌人牌**的定义（纯数据）。
@@ -272,7 +348,11 @@ pub struct EnemyDef<Tags> {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/enemy/def.rs`
+The snippet above gives the public shape of `EnemyDef`; its implementation lives in the same file.
+
+
+First, the definition of `new`; its declaration follows.
+文件: crates/definitions/src/families/enemy/def.rs
 
 ```rust
     /// 建一张敌人牌定义（常量 / 测试用）。
@@ -295,7 +375,11 @@ pub struct EnemyDef<Tags> {
     }
 ```
 
-**`has_skills`** — `crates/definitions/src/families/enemy/def.rs`
+The snippet above gives the public shape of `new`; its implementation lives in the same file.
+
+
+First, the definition of `has_skills`; its declaration follows.
+文件: crates/definitions/src/families/enemy/def.rs
 
 ```rust
     /// 是否有技能（数据里每个敌人都有技能，但定义层不假设至少一个）。
@@ -304,9 +388,13 @@ pub struct EnemyDef<Tags> {
     }
 ```
 
+The snippet above gives the public shape of `has_skills`; its implementation lives in the same file.
+
 ### 3.4 Status definitions
 
-**`StatusType`** — `crates/definitions/src/families/status/mod.rs`
+
+First, the definition of `StatusType`; its declaration follows.
+文件: crates/definitions/src/families/status/mod.rs
 
 ```rust
 /// 状态的类型（L2）：角色状态 / 出战状态。
@@ -319,7 +407,11 @@ pub enum StatusType {
 }
 ```
 
-**`StatusDef`** — `crates/definitions/src/families/status/def.rs`
+The snippet above gives the public shape of `StatusType`; its implementation lives in the same file.
+
+
+First, the definition of `StatusDef`; its declaration follows.
+文件: crates/definitions/src/families/status/def.rs
 
 ```rust
 /// 一张**状态牌**的定义（纯数据；身份由 `known.rs` 的具体类型给）。
@@ -347,7 +439,11 @@ pub struct StatusDef<Tags> {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/status/def.rs`
+The snippet above gives the public shape of `StatusDef`; its implementation lives in the same file.
+
+
+First, the definition of `new`; its declaration follows.
+文件: crates/definitions/src/families/status/def.rs
 
 ```rust
     /// 建一份状态定义（常量 / 测试用；6 个参数，不再拆构造器）。
@@ -370,7 +466,11 @@ pub struct StatusDef<Tags> {
     }
 ```
 
-**`form`** — `crates/definitions/src/families/status/def.rs`
+The snippet above gives the public shape of `new`; its implementation lives in the same file.
+
+
+First, the definition of `form`; its declaration follows.
+文件: crates/definitions/src/families/status/def.rs
 
 ```rust
     /// 状态的形态（D104）：`default_layers` 为 `None` -> 布尔；`Some` -> 层数。
@@ -384,7 +484,11 @@ pub struct StatusDef<Tags> {
     }
 ```
 
-**`status_identity`** — `crates/definitions/src/families/status/known.rs`
+The snippet above gives the public shape of `form`; its implementation lives in the same file.
+
+
+First, the definition of `status_identity`; its declaration follows.
+文件: crates/definitions/src/families/status/known.rs
 
 ```rust
 /// 声明一个状态的「身份类型 + 身份静态实例」。
@@ -397,7 +501,11 @@ macro_rules! status_identity {
     // ...（其余实现从略；见 crates/definitions/src/families/status/known.rs）
 ```
 
-**`SHIELD_COMBAT_DEF`** — `crates/definitions/src/families/status/known.rs`
+The snippet above gives the public shape of `status_identity`; its implementation lives in the same file.
+
+
+First, the definition of `SHIELD_COMBAT_DEF`; its declaration follows.
+文件: crates/definitions/src/families/status/known.rs
 
 ```rust
 /// 出战状态「护盾」（id 203）的定义。
@@ -423,7 +531,11 @@ pub static SHIELD_COMBAT_DEF: StatusDef<Shield> = StatusDef::new(
 );
 ```
 
-**`FROZEN_DEF`** — `crates/definitions/src/families/status/known.rs`
+The snippet above gives the public shape of `SHIELD_COMBAT_DEF`; its implementation lives in the same file.
+
+
+First, the definition of `FROZEN_DEF`; its declaration follows.
+文件: crates/definitions/src/families/status/known.rs
 
 ```rust
 /// 角色状态「冻结」（id 106）的定义。
@@ -451,9 +563,13 @@ pub static FROZEN_DEF: StatusDef<()> = StatusDef::new(
 );
 ```
 
+The snippet above gives the public shape of `FROZEN_DEF`; its implementation lives in the same file.
+
 ### 3.5 Status identity bridge
 
-**`StatusEntity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+
+First, the definition of `StatusEntity`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 一条「卡 id -> 状态身份」登记。
@@ -466,7 +582,11 @@ pub struct StatusEntity {
 }
 ```
 
-**`STATUS_ENTITIES`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `StatusEntity`; its implementation lives in the same file.
+
+
+First, the definition of `STATUS_ENTITIES`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 反应会附属 / 生成的状态**静态登记表**（顺序 = 规则书条目顺序，不参与判定）。
@@ -486,7 +606,11 @@ pub const STATUS_ENTITIES: [StatusEntity; 8] = [
 ];
 ```
 
-**`status_of_card`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `STATUS_ENTITIES`; its implementation lives in the same file.
+
+
+First, the definition of `status_of_card`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 按卡 id 查状态身份（没登记 -> `None`）。
@@ -498,7 +622,11 @@ pub fn status_of_card(card: CardId) -> Option<&'static dyn StateIdentity> {
 }
 ```
 
-**`same_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `status_of_card`; its implementation lives in the same file.
+
+
+First, the definition of `same_identity`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 两个状态身份是否**同一份身份**（比较 `identity_address()` = 指向定义数据的地址；见模块文档）。
@@ -507,7 +635,11 @@ pub fn same_identity(left: &'static dyn StateIdentity, right: &'static dyn State
 }
 ```
 
-**`identity_in`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `same_identity`; its implementation lives in the same file.
+
+
+First, the definition of `identity_in`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 这条身份是否在给定的身份集合里（按地址比较）。
@@ -521,7 +653,11 @@ pub fn identity_in(
 }
 ```
 
-**`SHIELD_STATUSES`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+The snippet above gives the public shape of `identity_in`; its implementation lives in the same file.
+
+
+First, the definition of `SHIELD_STATUSES`; its declaration follows.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 算作**护盾**的全部状态身份（出战状态 203 + 角色状态 134）。
@@ -531,19 +667,27 @@ pub fn identity_in(
 pub const SHIELD_STATUSES: &[&'static dyn StateIdentity] = &[&SHIELD_COMBAT, &SHIELD_CHARACTER];
 ```
 
+The snippet above gives the public shape of `SHIELD_STATUSES`; its implementation lives in the same file.
+
 ### 3.6 Rules-ops interfaces referenced by this page
 
 > [!NOTE]
 > Real source of the keyword-layer / rules-ops functions referenced by this page (signatures and doc comments copied as-is).
 
-**`USES_PER_TRIGGER`** — `crates/definitions/src/rules/ops/lifetime.rs`
+
+First, the definition of `USES_PER_TRIGGER`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 每次触发消耗的可用次数（规则书：1 次）。
 pub const USES_PER_TRIGGER: Nat = Nat::new(1);
 ```
 
-**`uses_after_trigger`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `USES_PER_TRIGGER`; its implementation lives in the same file.
+
+
+First, the definition of `uses_after_trigger`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 触发一次后的可用次数（减到 0 为止；调用方随后弃置）。
@@ -552,7 +696,11 @@ pub fn uses_after_trigger(uses: Nat) -> Nat {
 }
 ```
 
-**`is_depleted`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `uses_after_trigger`; its implementation lives in the same file.
+
+
+First, the definition of `is_depleted`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 是否耗尽（= 0 -> 立刻弃置）。
@@ -561,14 +709,22 @@ pub fn is_depleted(value: Nat) -> bool {
 }
 ```
 
-**`DURATION_PER_END_PHASE`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `is_depleted`; its implementation lives in the same file.
+
+
+First, the definition of `DURATION_PER_END_PHASE`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 每个结束阶段扣减的持续回合（规则书：1）。
 pub const DURATION_PER_END_PHASE: Nat = Nat::new(1);
 ```
 
-**`duration_after_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `DURATION_PER_END_PHASE`; its implementation lives in the same file.
+
+
+First, the definition of `duration_after_end_phase`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 经过一个结束阶段后的持续回合（减到 0 为止）。
@@ -577,7 +733,11 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 }
 ```
 
-**`ticks_in_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+The snippet above gives the public shape of `duration_after_end_phase`; its implementation lives in the same file.
+
+
+First, the definition of `ticks_in_end_phase`; its declaration follows.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 持续回合的递减发生在**结束阶段**（不是回合开始、也不是行动阶段开始）。
@@ -588,6 +748,8 @@ pub fn ticks_in_end_phase() -> bool {
     true
 }
 ```
+
+The snippet above gives the public shape of `ticks_in_end_phase`; its implementation lives in the same file.
 
 ## 4. Invariants and prohibitions
 
@@ -609,17 +771,15 @@ pub fn ticks_in_end_phase() -> bool {
 
 ## 5. Basis (rulebook and D-numbers)
 
-| Topic | Basis |
-|---|---|
-| Summon cap 4 / cannot create when full / settle in entry order | Rulebook "Game Zones IV" |
-| Usage decrements per trigger, discard when depleted | Rulebook special entry "Usage"; D12 |
-| Duration -1 per End Phase | Rulebook special entry "Duration (Rounds)"; code follows the rulebook, D13's older wording is superseded |
-| Same-name summon merge | Plan §4.4.15 (Lead ruling) |
-| Two status types share one id region | D51; rulebook "Game Zones II" |
-| Shared status list / boolean presence / pointer identity | D95 / D96 / D104 / D105 / D108 / D110 / D200 |
-| One arcane edict per player | Rulebook special entry "Arcane Legend" + Arcane Edict; D264; 留空.md #68 / #98 / #99 |
-| Satiety / frozen / stun / petrified | S8.1 / S6.6 / Stunned / Technique / S8.4; 留空.md #31 / #79 / #80 / #82 |
-| Enemy cards | data `tcgenemycards`; runtime bearing not designed (pending) |
+- Summon cap 4 / cannot create when full / settle in entry order: Rulebook "Game Zones IV"
+- Usage decrements per trigger, discard when depleted: Rulebook special entry "Usage"; D12
+- Duration -1 per End Phase: Rulebook special entry "Duration (Rounds)"; code follows the rulebook, D13's older wording is superseded
+- Same-name summon merge: Plan §4.4.15 (Lead ruling)
+- Two status types share one id region: D51; rulebook "Game Zones II"
+- Shared status list / boolean presence / pointer identity: D95 / D96 / D104 / D105 / D108 / D110 / D200
+- One arcane edict per player: Rulebook special entry "Arcane Legend" + Arcane Edict; D264; 留空.md #68 / #98 / #99
+- Satiety / frozen / stun / petrified: S8.1 / S6.6 / Stunned / Technique / S8.4; 留空.md #31 / #79 / #80 / #82
+- Enemy cards: data `tcgenemycards`; runtime bearing not designed (pending)
 
 ### 5.1 Documentation vs code mismatches (for review)
 
@@ -646,16 +806,14 @@ pub fn ticks_in_end_phase() -> bool {
 
 ## 7. Tests
 
-| File | Representative tests |
-|---|---|
-| `summon/def.rs` | `summon_def_carries_id_text_kind_points_uses_and_tags`, `entry_carries_the_def_measurements_into_the_zone_entry` |
-| `summon/zones/mod.rs` | `cap_is_four_and_fifth_is_rejected_without_state_change`, `same_card_merges_uses_points_and_keeps_kind_newest`, `merge_keeps_position_and_works_when_full`, `tick_decrements_uses_and_discards_at_zero` |
-| `enemy/def.rs` | `enemy_def_carries_id_name_description_hp_tags_and_skills`, `enemy_def_reuses_skill_defs_in_data_order` |
-| `status/def.rs` | `status_def_carries_id_type_text_layers_duration_and_tags`, `form_is_derived_from_default_layers_only` |
-| `status/known.rs` | `known_status_defs_use_the_data_ids_and_types`, `identities_are_distinct_static_instances_with_one_text_copy` |
-| `status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict` |
-| `families/character/damage_chain/statuses.rs` | `keyword_and_card_statuses_are_registered_by_their_data_ids` (bridge entries 100001 / 116033 / 303300) |
-| `families/character/satiated.rs` | `satiated_identity_comes_from_the_status_data`, `food_effect_grants_satiated_once_and_blocks_food_targeting` |
+- `summon/def.rs`: `summon_def_carries_id_text_kind_points_uses_and_tags`, `entry_carries_the_def_measurements_into_the_zone_entry`
+- `summon/zones/mod.rs`: `cap_is_four_and_fifth_is_rejected_without_state_change`, `same_card_merges_uses_points_and_keeps_kind_newest`, `merge_keeps_position_and_works_when_full`, `tick_decrements_uses_and_discards_at_zero`
+- `enemy/def.rs`: `enemy_def_carries_id_name_description_hp_tags_and_skills`, `enemy_def_reuses_skill_defs_in_data_order`
+- `status/def.rs`: `status_def_carries_id_type_text_layers_duration_and_tags`, `form_is_derived_from_default_layers_only`
+- `status/known.rs`: `known_status_defs_use_the_data_ids_and_types`, `identities_are_distinct_static_instances_with_one_text_copy`
+- `status/arcane_edict.rs`: `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict`
+- `families/character/damage_chain/statuses.rs`: `keyword_and_card_statuses_are_registered_by_their_data_ids` (bridge entries 100001 / 116033 / 303300)
+- `families/character/satiated.rs`: `satiated_identity_comes_from_the_status_data`, `food_effect_grants_satiated_once_and_blocks_food_targeting`
 
 ## 8. Pending and to be verified
 
@@ -669,5 +827,10 @@ pub fn ticks_in_end_phase() -> bool {
 - **Elemental transmutation**: #108 / #118.
 - **Duration vs D13**: code follows the rulebook (End Phase); D13's older wording is superseded — the decision log should get a correction entry.
 
+## Summary
+
+Of the summon, enemy and status families, only summons and statuses have carriers; enemies have definitions only in this round.
+Summon cap is 4, same-name merging keeps the position and takes the maximum; usage decrements per trigger while duration decrements per End Phase.
+A status identity is a pointer to definition data; semantic interpretation belongs to the damage chain and flow layers, not here.
 ---
 Last verified: 2026-10-19 (code: `crates/definitions/src/rules/ops/lifetime.rs::duration_after_end_phase`)

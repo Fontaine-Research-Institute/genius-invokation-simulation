@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Clusterbloom Arrow |
-| K code | K1008 |
+> Keyword: Clusterbloom Arrow
+>
+> K code: K1008
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Clusterbloom Arrow is the keyword K1008.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

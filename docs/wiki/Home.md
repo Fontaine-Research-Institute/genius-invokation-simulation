@@ -1,4 +1,4 @@
-# 七圣召唤模拟 · 开发 Wiki
+# 七圣召唤模拟器 · 开发 Wiki
 
 > 中文 · [[Home-EN|English]]
 
@@ -8,13 +8,11 @@
 
 ## 1. 仓库是什么
 
-| 项 | 内容 |
-|---|---|
-| 项目 | 粉丝自制的<七圣召唤> (Genius Invokation TCG) 模拟: 规则引擎, 对局模拟, 精确概率求解, Rust 实现 |
-| 许可与声明 | Apache-2.0; 与 HoYoverse / miHoYo 无关联; 仓库不含官方美术 / 音频 / 模型 / 卡图 |
-| crate 组成 | `engine` (机制原语) , `richtext` (富文本解析) , `definitions` (游戏定义层) , `cards` (具体卡牌) , `simulation` (对外门面) , `compute` (算力 bin)  |
-| 当前进度 | 定义层基础部分已收口 (D265 / D266 / D270) ; 具体卡牌只有爱诺样板 (`cards/character/aino`) , 效果体仍是占位 |
-| 求解器 | `solver` 尚未建 (见 `new/Cargo.toml` 注释)  |
+- 项目: 粉丝自制的<七圣召唤> (Genius Invokation TCG) 模拟: 规则引擎, 对局模拟, 精确概率求解, Rust 实现
+- 许可与声明: Apache-2.0; 与 HoYoverse / miHoYo 无关联; 仓库不含官方美术 / 音频 / 模型 / 卡图
+- crate 组成: `engine` (机制原语) , `richtext` (富文本解析) , `definitions` (游戏定义层) , `cards` (具体卡牌) , `simulation` (对外门面) , `compute` (算力 bin)
+- 当前进度: 定义层基础部分已收口 (D265 / D266 / D270) ; 具体卡牌只有爱诺样板 (`cards/character/aino`) , 效果体仍是占位
+- 求解器: `solver` 尚未建 (见 `new/Cargo.toml` 注释)
 
 ### 1.1 四条核心坚持 (`new/README.md` 与 D20) 
 
@@ -31,12 +29,12 @@
 
 ## 2. 怎么读这套文档
 
-| 顺序 | 页面 | 用途 |
-|---|---|---|
-| 1 | [[Architecture]] | crate 依赖方向, 一局对局的数据流, "框架只给接口"怎么落地 |
-| 2 | [[Conventions]] | 设计约定速查: 身份, 数据唯一, 纯函数, 零浮点, Nat 与 ExactNat, 一步, 记录 |
-| 3 | [[Crate-Engine]] → [[Crate-Richtext]] → [[Crate-Definitions]] → [[Crate-Cards]] | 按层读 crate |
-| 4 | 定义层各页 | 需要具体模块时再进 |
+阅读顺序如下:
+
+- 第 1 步: [[Architecture]] -- crate 依赖方向, 一局对局的数据流, "框架只给接口"怎么落地
+- 第 2 步: [[Conventions]] -- 设计约定速查: 身份, 数据唯一, 纯函数, 零浮点, Nat 与 ExactNat, 一步, 记录
+- 第 3 步: [[Crate-Engine]] -> [[Crate-Richtext]] -> [[Crate-Definitions]] -> [[Crate-Cards]] -- 按层读 crate
+- 第 4 步: 定义层各页 -- 需要具体模块时再进
 
 ### 2.1 依据与记录
 
@@ -49,12 +47,16 @@
 
 ## 3. 验证命令
 
+验证命令如下:
+
 ```bash
 cd new
 cargo test --offline --workspace
 cargo clippy --offline --workspace --all-targets -- -D warnings
 python tools/run-compute.py --list
 ```
+
+以上命令应全部通过.
 
 > [!NOTE]
 > 本机一律离线 (`--offline`) .CI (`new/.github/workflows/ci.yml`) 用 `--locked`, 并额外跑三个源文本扫描脚本 (只提示, 不阻断) .
@@ -66,76 +68,62 @@ python tools/run-compute.py --list
 
 ### 4.1 入门
 
-| 页面 | 内容 |
-|---|---|
-| [[Home]] | 本页 |
-| [[Architecture]] | 依赖方向, 数据流, 设计哲学的落地方式 |
-| [[Conventions]] | 设计约定速查 |
+- [[Home]]: 本页
+- [[Architecture]]: 依赖方向, 数据流, 设计哲学的落地方式
+- [[Conventions]]: 设计约定速查
 
 ### 4.2 基础 crate
 
-| 页面 | 内容 |
-|---|---|
-| [[Crate-Engine]] | 数值 / 实体与区 / 随机与选择 / 分数 |
-| [[Crate-Richtext]] | 富文本解析与渲染 |
-| [[Crate-Definitions]] | 游戏定义层 (除具体卡牌外)  |
-| [[Crate-Simulation]] | 对外门面 |
-| [[Crate-Cards]] | 具体卡牌 |
-| [[Crate-Compute]] | 算力任务 |
+- [[Crate-Engine]]: 数值 / 实体与区 / 随机与选择 / 分数
+- [[Crate-Richtext]]: 富文本解析与渲染
+- [[Crate-Definitions]]: 游戏定义层 (除具体卡牌外)
+- [[Crate-Simulation]]: 对外门面
+- [[Crate-Cards]]: 具体卡牌
+- [[Crate-Compute]]: 算力任务
 
 ### 4.3 定义层 · 基础设施
 
-| 页面 | 内容 |
-|---|---|
-| [[定义层-Base]] | 元素 / 牌族 / 编号 / 视角 |
-| [[定义层-Resources]] | 骰子与费用 |
-| [[定义层-Rules]] | 三级统一规则表与 ops |
-| [[定义层-Tags]] | 标签体系 |
-| [[定义层-Timeline]] | 时机键, 触发器, 插入式结算 |
-| [[定义层-Reactions]] | 元素反应与效果执行 |
-| [[定义层-Records]] | 记录 API |
-| [[定义层-Source-Version-Generated]] | 源码嵌入, 版本, 生成数据 |
+- [[定义层-Base]]: 元素 / 牌族 / 编号 / 视角
+- [[定义层-Resources]]: 骰子与费用
+- [[定义层-Rules]]: 三级统一规则表与 ops
+- [[定义层-Tags]]: 标签体系
+- [[定义层-Timeline]]: 时机键, 触发器, 插入式结算
+- [[定义层-Reactions]]: 元素反应与效果执行
+- [[定义层-Records]]: 记录 API
+- [[定义层-Source-Version-Generated]]: 源码嵌入, 版本, 生成数据
 
 ### 4.4 定义层 · 运行时
 
-| 页面 | 内容 |
-|---|---|
-| [[定义层-State]] | 对局状态, 区域承载, 终局判定 |
-| [[定义层-State-Flows]] | 区流程纯函数 |
-| [[定义层-Flow]] | 端到端流程 (技能 / 打牌 / 回合)  |
-| [[定义层-Keywords]] | 关键字层与"一步" |
+- [[定义层-State]]: 对局状态, 区域承载, 终局判定
+- [[定义层-State-Flows]]: 区流程纯函数
+- [[定义层-Flow]]: 端到端流程 (技能 / 打牌 / 回合)
+- [[定义层-Keywords]]: 关键字层与"一步"
 
 ### 4.5 定义层 · 牌族
 
-| 页面 | 内容 |
-|---|---|
-| [[定义层-Families]] | 五牌族总览 |
-| [[定义层-Character]] | 角色牌族 |
-| [[定义层-Action-Card]] | 行动牌 |
-| [[定义层-Summon-Enemy-Status]] | 召唤物 / 敌人 / 状态 |
+- [[定义层-Families]]: 五牌族总览
+- [[定义层-Character]]: 角色牌族
+- [[定义层-Action-Card]]: 行动牌
+- [[定义层-Summon-Enemy-Status]]: 召唤物 / 敌人 / 状态
 
 ### 卡牌定义
 
-| 页面 | 内容 |
-|---|---|
-| [[卡牌定义]] | 栏目说明, 模板, 已研究卡列表 |
-| [[卡牌定义-爱诺]] | 爱诺: 完整代码 + 逐段解释为什么这么写 |
-| [[卡牌定义-芙宁娜]] | 芙宁娜: 天赋, 万众瞩目, 形态切换的设计研究 (未实现)  |
-| [[卡牌定义-模板]] | 新增卡牌定义页的模板 |
+- [[卡牌定义]]: 栏目说明, 模板, 已研究卡列表
+- [[卡牌定义-爱诺]]: 爱诺: 完整代码 + 逐段解释为什么这么写
+- [[卡牌定义-芙宁娜]]: 芙宁娜: 天赋, 万众瞩目, 形态切换的设计研究 (未实现)
+- [[卡牌定义-模板]]: 新增卡牌定义页的模板
 
 ---
 
 ## 5. 按任务找入口
 
-| 想做什么 | 先看 |
-|---|---|
-| 改数值原语, 实体与区, 随机与选择, 分数 | [[Crate-Engine]] |
-| 改文本解析, 加占位符白名单 | [[Crate-Richtext]] |
-| 加一张具体卡 | [[Crate-Cards]] + [[定义层-Character]] / [[定义层-Action-Card]] |
-| 改一局怎么走 (技能 / 打牌 / 切人 / 回合)  | [[定义层-Flow]] + [[定义层-State-Flows]] |
-| 加关键字函数或"一步" | [[定义层-Keywords]] |
-| 加触发时机或结算插入 | [[定义层-Timeline]] (配合 `结算顺序.md`)  |
-| 加一个算力任务 | [[Crate-Compute]] |
+- 改数值原语, 实体与区, 随机与选择, 分数: [[Crate-Engine]]
+- 改文本解析, 加占位符白名单: [[Crate-Richtext]]
+- 加一张具体卡: [[Crate-Cards]] + [[定义层-Character]] / [[定义层-Action-Card]]
+- 改一局怎么走 (技能 / 打牌 / 切人 / 回合): [[定义层-Flow]] + [[定义层-State-Flows]]
+- 加关键字函数或"一步": [[定义层-Keywords]]
+- 加触发时机或结算插入: [[定义层-Timeline]] (配合 `结算顺序.md`)
+- 加一个算力任务: [[Crate-Compute]]
 
 ---
 
@@ -147,6 +135,12 @@ python tools/run-compute.py --list
 - 样式规范: 标题带序号, 表格带对齐行, 关键提醒用 GitHub 警告块 (`[!NOTE]` / `[!IMPORTANT]` / `[!WARNING]`) , **不使用表情符号**.
 - 页面引用官方素材图片时, 图片下方必须原样写这两行 (见 `ASSETS.md` §三) : `图片来源：米哈游《原神》官方素材，版权归 miHoYo / HoYoverse 所有。<br>Image source: official Genshin Impact artwork by HoYoverse. All rights belong to miHoYo / HoYoverse.`.
 - 本 Wiki 写的是**代码现状**.与旧文档 (`new/README.md`, `结构.md`, `分工计划.md`) 冲突时, 以**代码 + 决策日志**为准; 已知偏差见 [[Architecture]] 末节.
+
+---
+
+## 小结
+
+这套文档按 engine -> richtext -> definitions -> cards 的顺序读, 每页都尽量给出真实源码与依据. 读完后应能对着代码走通一局对局的主要数据流.
 
 ---
 

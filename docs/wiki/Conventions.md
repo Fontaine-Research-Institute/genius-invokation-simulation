@@ -17,12 +17,10 @@
 
 **落点**
 
-| 内容 | 位置 |
-|---|---|
-| 标签类型 + `data()` | `definitions/src/tags/action_card/support/location.rs` |
-| 标签数据唯一一份 | `definitions/src/generated/mod.rs` 的 `TAGS` (一个标签一个字段)  |
-| 状态身份 | `definitions/src/status/def.rs`, `status/state.rs` 的 `identity_address()` |
-| 反应身份 | `definitions/src/reactions/mod.rs` (`ReactionIdentity::identity_address()`)  |
+- 标签类型 + `data()`: `definitions/src/tags/action_card/support/location.rs`
+- 标签数据唯一一份: `definitions/src/generated/mod.rs` 的 `TAGS` (一个标签一个字段)
+- 状态身份: `definitions/src/status/def.rs`, `status/state.rs` 的 `identity_address()`
+- 反应身份: `definitions/src/reactions/mod.rs` (`ReactionIdentity::identity_address()`)
 
 > [!WARNING]
 > 零大小静态实例的地址可能相同, 直接对 ZST 做 `ptr::addr_eq` / `ptr::eq` 会把不同身份判成同一个 (D200 实测) .
@@ -65,12 +63,18 @@
 
 ## 5. Nat 与 ExactNat
 
-| 要求 | 说明 | 依据 |
-|---|---|---|
-| 业务数值默认 `Nat` = `Nat32` (饱和)  | 别的宽度 (`Nat8/16/64/128`) 只有特意设计才用, 且必须登记到 `不入库/nat-宽度统计.md` | D37 |
-| 概率相关用 `ExactNat` = `ExactNat128` (精确)  | 加 / 减 / 乘上溢或下溢都 panic | D153 / D156 |
-| 算术宏两族共用 | `nadd!` / `nsub!` / `nmul!` / `ndiv!`, 语义由类型决定 | D155 |
-| 禁止裸整型与手写裸 `+ - * /` | `definitions` / `cards` 有 `#![deny(clippy::arithmetic_side_effects)]`, 另有三个扫描脚本 | §8.3 |
+- 业务数值默认 `Nat` = `Nat32` (饱和)
+  - 说明: 别的宽度 (`Nat8/16/64/128`) 只有特意设计才用, 且必须登记到 `不入库/nat-宽度统计.md`
+  - 依据: D37
+- 概率相关用 `ExactNat` = `ExactNat128` (精确)
+  - 说明: 加 / 减 / 乘上溢或下溢都 panic
+  - 依据: D153 / D156
+- 算术宏两族共用
+  - 说明: `nadd!` / `nsub!` / `nmul!` / `ndiv!`, 语义由类型决定
+  - 依据: D155
+- 禁止裸整型与手写裸 `+ - * /`
+  - 说明: `definitions` / `cards` 有 `#![deny(clippy::arithmetic_side_effects)]`, 另有三个扫描脚本
+  - 依据: §8.3
 
 > [!WARNING]
 > 反例: `let hp: u32 = 10;`, `let n = 2 + 3;`, 用饱和 `Nat` 算概率, 随便引入 `Nat64` 而不登记.
@@ -157,21 +161,19 @@
 
 ## 12. 相关页面
 
-| 页面 | 内容 |
-|---|---|
-| [[Architecture]] | 依赖方向, 数据流, 已知文档偏差 |
-| [[Crate-Engine]] | 数值 / 分数 / 随机原语 |
-| [[定义层-Keywords]] | 一步与关键字函数 |
-| [[定义层-Timeline]] | 触发注册与插入式结算 |
-| [[定义层-Records]] | 记录器实现 |
+- [[Architecture]]: 依赖方向, 数据流, 已知文档偏差
+- [[Crate-Engine]]: 数值 / 分数 / 随机原语
+- [[定义层-Keywords]]: 一步与关键字函数
+- [[定义层-Timeline]]: 触发注册与插入式结算
+- [[定义层-Records]]: 记录器实现
 
 ---
 
 ## 13. 真实源码摘录 (逐条对应上文) 
 
-**标签类型 (§1) **
+下面给出 标签类型 (§1) 的实现:
 
-`new/crates/definitions/src/tags/action_card/support/location.rs:8-10`
+文件: crates/definitions/src/tags/action_card/support/location.rs:8-10
 
 ```rust
 /// 「场地」：支援牌中的场地牌。
@@ -179,9 +181,12 @@
 pub struct Location;
 ```
 
-**标签数据入口 `data()` (§1 / §2) **
+以上是 标签类型 (§1) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/tags/action_card/support/location.rs:12-15`
+
+下面给出 标签数据入口 `data()` (§1 / §2) 的实现:
+
+文件: crates/definitions/src/tags/action_card/support/location.rs:12-15
 
 ```rust
 /// 本标签的静态文本（D67：数据唯一一份在 generated::TAGS；这里只给字段引用，不写字面量）。
@@ -190,9 +195,12 @@ pub fn data() -> &'static crate::generated::TagText {
 }
 ```
 
-**状态身份 trait (§1) **
+以上是 标签数据入口 `data()` (§1 / §2) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/families/action_card/status/state.rs:43-78`
+
+下面给出 状态身份 trait (§1) 的实现:
+
+文件: crates/definitions/src/families/action_card/status/state.rs:43-78
 
 ```rust
 /// 状态身份（D95/D96/D110）：具体状态模块定义自己的零大小类型 + 一份静态实例；
@@ -233,9 +241,12 @@ pub trait StateIdentity: 'static + std::fmt::Debug {
 }
 ```
 
-**身份地址 `identity_address()` (§1) **
+以上是 状态身份 trait (§1) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/families/action_card/status/state.rs:55-66`
+
+下面给出 身份地址 `identity_address()` (§1) 的实现:
+
+文件: crates/definitions/src/families/action_card/status/state.rs:55-66
 
 ```rust
     /// **身份地址** = 指向该身份**定义数据**的指针（D57 / D58 口径）。
@@ -252,9 +263,12 @@ pub trait StateIdentity: 'static + std::fmt::Debug {
     }
 ```
 
-**业务/概率共用的算术宏 (§4 / §5 / §6) **
+以上是 身份地址 `identity_address()` (§1) 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/nat.rs:426-435`
+
+下面给出 业务/概率共用的算术宏 (§4 / §5 / §6) 的实现:
+
+文件: crates/engine/src/nat.rs:426-435
 
 ```rust
 /// 加法宏（**两族共用**，语义由类型决定，见 [`NatArith`]；D155）。
@@ -269,9 +283,12 @@ macro_rules! nadd {
 }
 ```
 
-**分数构造 (§4) **
+以上是 业务/概率共用的算术宏 (§4 / §5 / §6) 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/prob.rs:77-86`
+
+下面给出 分数构造 (§4) 的实现:
+
+文件: crates/engine/src/prob.rs:77-86
 
 ```rust
     /// 构造 `num / den`（**不约分**；需要规范化时用加 / 乘 / 除的结果）。
@@ -286,9 +303,12 @@ macro_rules! nadd {
     }
 ```
 
-**一步 `Step` (§7) **
+以上是 分数构造 (§4) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/step.rs:44-48`
+
+下面给出 一步 `Step` (§7) 的实现:
+
+文件: crates/definitions/src/keywords/step.rs:44-48
 
 ```rust
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
@@ -298,9 +318,12 @@ pub struct Step {
 }
 ```
 
-**触发登记项 `Trigger` (§8) **
+以上是 一步 `Step` (§7) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/trigger.rs:44-67`
+
+下面给出 触发登记项 `Trigger` (§8) 的实现:
+
+文件: crates/definitions/src/timeline/trigger.rs:44-67
 
 ```rust
 /// 一条**触发登记项**（纯数据；`K` / `E` 都是 `Copy` 时整体 `Copy`）。
@@ -329,9 +352,12 @@ pub struct Trigger<K, E = Effect> {
 }
 ```
 
-**记录条目 `Record<T>` (§9) **
+以上是 触发登记项 `Trigger` (§8) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:34-41`
+
+下面给出 记录条目 `Record<T>` (§9) 的实现:
+
+文件: crates/definitions/src/records/mod.rs:34-41
 
 ```rust
 /// 一条记录：**属于哪一步** + 任意内容（内容类型由使用方定义）。
@@ -344,9 +370,12 @@ pub struct Record<T> {
 }
 ```
 
-**记录写入 `Recorder::push` (§9) **
+以上是 记录条目 `Record<T>` (§9) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:88-91`
+
+下面给出 记录写入 `Recorder::push` (§9) 的实现:
+
+文件: crates/definitions/src/records/mod.rs:88-91
 
 ```rust
     /// **唯一写入入口**：把一条内容记到某一步。
@@ -355,9 +384,12 @@ pub struct Record<T> {
     }
 ```
 
-**费用组件 `CostComponent` (§2 / §5) **
+以上是 记录写入 `Recorder::push` (§9) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/resources/dice/mod.rs:157-168`
+
+下面给出 费用组件 `CostComponent` (§2 / §5) 的实现:
+
+文件: crates/definitions/src/resources/dice/mod.rs:157-168
 
 ```rust
 /// 花费 / 消耗的一位（D168：只有三类，枚举顺序 = 加费/减费优先级）。
@@ -374,9 +406,12 @@ pub enum CostComponent {
 }
 ```
 
-**关键字函数 `cause_damage` (§8) **
+以上是 费用组件 `CostComponent` (§2 / §5) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/keyword.rs:241-292`
+
+下面给出 关键字函数 `cause_damage` (§8) 的实现:
+
+文件: crates/definitions/src/keywords/keyword.rs:241-292
 
 ```rust
 /// **造成伤害**：对选择器解析出的每个角色走伤修链（加伤 -> 护盾 -> 减伤 -> 扣血 / 附着 / 反应）。
@@ -433,9 +468,12 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**结算顺序常量 (§11) **
+以上是 关键字函数 `cause_damage` (§8) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/ops/order.rs:29-36`
+
+下面给出 结算顺序常量 (§11) 的实现:
+
+文件: crates/definitions/src/rules/ops/order.rs:29-36
 
 ```rust
 /// 同一牌手内、不同来源类别的结算顺序（规则书第 2 条）。
@@ -448,9 +486,12 @@ pub const SOURCE_ORDER: [EffectSource; 5] = [
 ];
 ```
 
-**顺序判定 `resolves_before` (§11) **
+以上是 结算顺序常量 (§11) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/ops/order.rs:38-59`
+
+下面给出 顺序判定 `resolves_before` (§11) 的实现:
+
+文件: crates/definitions/src/rules/ops/order.rs:38-59
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -477,6 +518,15 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 }
 ```
 
+以上是 顺序判定 `resolves_before` (§11) 的定义; 具体行为以该文件为准.
+
+
+
+---
+
+## 小结
+
+所有约定围绕同一件事: 身份用指针, 数据只有一份, 入口是纯函数. 写代码前对一遍本页, 可以避免大多数返工.
 
 ---
 

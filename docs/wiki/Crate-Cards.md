@@ -6,7 +6,7 @@
 
 ---
 
-## 1. 职责
+## 1. 职责 (这一层解决什么问题)
 
 具体卡牌层: 只放"这张卡具体是什么"——每张卡自己的数据 (id / 标签 / 生命 / 充能 / 技能 / 文案) 与效果逻辑.卡牌的资源与形状定义留在 `definitions` (D240 / D241) ; 单向依赖 `definitions` / `engine`, 不反向.
 
@@ -15,61 +15,85 @@
 
 ## 2. 关键概念与类型
 
-| 概念 | 位置 | 说明 |
-|---|---|---|
-| crate 根 | `src/lib.rs` | `pub mod cards; pub mod source;` + `#![deny(clippy::arithmetic_side_effects)]` |
-| 具体卡牌树 | `src/cards/` | 目录结构平移自原 `definitions/src/cards/`; 目前只有 `character/aino/` |
-| 牌族入口 | `src/cards/character/mod.rs` | 每张卡一个自建目录 (D163) ; 没有集中注册表 (注册机制待建)  |
-| 第一张样板卡 | `src/cards/character/aino/mod.rs` | 爱诺 (角色牌 1216) : `ID` / `MAX_HP = 10` / `MAX_ENERGY = 2` / 标签元组 `(Hydro, Claymore, NodKrai)` / 4 个 `SkillDef` / `AINO: CharacterDef<Tags>` |
-| 版本同步 | 同文件: `card_game_version!(6, 2);` | 生成 `GAME_VERSION: GameVersion` (D244–D246) ; 新版本没调整只改数字 |
-| 源码自声明 | 同文件: `card_source!(path: ["character", "aino"]);` | 生成 `pub static SOURCE: SourceFile` (源文件内容 + 编译期解析的 use 依赖; D214–D216)  |
-| 卡牌源码表 | `src/source/mod.rs` | `SOURCE_FILES` (手写清单) , `source_files()` / `source_of(path)` / `source_files_under(prefix)` |
-| 源码机制 | `definitions/src/source/mod.rs` | `card_source!` / `module_source!`, `SourceFile` / `SourceOwner`, 依赖解析器留在 definitions (D242)  |
-| 效果体 | 同 Aino 文件 | 4 个 `fn ..._effect()` 目前是 `todo!("缺：…")` 占位 (文件里逐条列出缺哪些接口)  |
+- crate 根
+  - 位置: `src/lib.rs`
+  - 说明: `pub mod cards; pub mod source;` + `#![deny(clippy::arithmetic_side_effects)]`
+- 具体卡牌树
+  - 位置: `src/cards/`
+  - 说明: 目录结构平移自原 `definitions/src/cards/`; 目前只有 `character/aino/`
+- 牌族入口
+  - 位置: `src/cards/character/mod.rs`
+  - 说明: 每张卡一个自建目录 (D163) ; 没有集中注册表 (注册机制待建)
+- 第一张样板卡
+  - 位置: `src/cards/character/aino/mod.rs`
+  - 说明: 爱诺 (角色牌) : `ID` / `MAX_HP = 10` / `MAX_ENERGY = 2` / 标签元组 `(Hydro, Claymore, NodKrai)` / 4 个 `SkillDef` / `AINO: CharacterDef<Tags>`
+- 版本同步
+  - 位置: 同文件: `card_game_version!(6, 2);`
+  - 说明: 生成 `GAME_VERSION: GameVersion` (D244–D246) ; 新版本没调整只改数字
+- 源码自声明
+  - 位置: 同文件: `card_source!(path: ["character", "aino"]);`
+  - 说明: 生成 `pub static SOURCE: SourceFile` (源文件内容 + 编译期解析的 use 依赖; D214–D216)
+- 卡牌源码表
+  - 位置: `src/source/mod.rs`
+  - 说明: `SOURCE_FILES` (手写清单) , `source_files()` / `source_of(path)` / `source_files_under(prefix)`
+- 源码机制
+  - 位置: `definitions/src/source/mod.rs`
+  - 说明: `card_source!` / `module_source!`, `SourceFile` / `SourceOwner`, 依赖解析器留在 definitions (D242)
+- 效果体
+  - 位置: 同 Aino 文件
+  - 说明: 4 个 `fn ..._effect()` 目前是 `todo!("缺: …")` 占位 (文件里逐条列出缺哪些接口)
 
 标签集合形态本轮未定; 样板用类型级零大小元组 `type Tags = (Hydro, Claymore, NodKrai)` + `const TAGS: Tags` (D54: 标签就是类型本身) .
 
 ## 3. 公开入口
 
-| 入口 | 说明 |
-|---|---|
-| `cards::cards::character::aino::{ID, MAX_HP, MAX_ENERGY, Tags, TAGS, SKILL_*, AINO, SOURCE}` | 样板卡的全部常量与定义 |
-| `cards::source::{SOURCE_FILES, source_files, source_of, source_files_under}` | 卡牌源码表查询 |
-| `cards::source::{SourceOwner, DependencyKind}` | 再导出 definitions 的源码机制类型 |
-| `definitions::card_source!` / `card_game_version!` | 卡牌文件用的宏 (机制在 definitions, D242)  |
+- `cards::cards::character::aino::{ID, MAX_HP, MAX_ENERGY, Tags, TAGS, SKILL_*, AINO, SOURCE}`: 样板卡的全部常量与定义
+- `cards::source::{SOURCE_FILES, source_files, source_of, source_files_under}`: 卡牌源码表查询
+- `cards::source::{SourceOwner, DependencyKind}`: 再导出 definitions 的源码机制类型
+- `definitions::card_source!` / `card_game_version!`: 卡牌文件用的宏 (机制在 definitions, D242)
 
 > [!NOTE]
 > 卡牌定义用 `static` (需要稳定地址) ; 技能定义 `SkillDef` 含 id / 名字 / 描述 / `kind` / `cost` / `effect` 函数指针.
 
 ### 3.1 真实源码
-**卡牌 id `ID`**
 
-`new/crates/cards/src/cards/character/aino/mod.rs:30-31`
+下面给出 卡牌 id `ID` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:30-31
 
 ```rust
 /// 爱诺的卡牌 id（角色牌族）。
 pub const ID: CardId = CardId::new(1216);
 ```
 
-**版本声明 `card_game_version!`**
+以上是 卡牌 id `ID` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/cards/character/aino/mod.rs:42`
+
+下面给出 版本声明 `card_game_version!` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:42
 
 ```rust
 gi_genius_invokation_definitions::card_game_version!(6, 2);
 ```
 
-**源码声明 `card_source!`**
+以上是 版本声明 `card_game_version!` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/cards/character/aino/mod.rs:54`
+
+下面给出 源码声明 `card_source!` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:54
 
 ```rust
 gi_genius_invokation_definitions::card_source!(path: ["character", "aino"]);
 ```
 
-**标签元组 `Tags`**
+以上是 源码声明 `card_source!` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/cards/character/aino/mod.rs:62-65`
+
+下面给出 标签元组 `Tags` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:62-65
 
 ```rust
 /// 标签集合（**类型级零大小元组**）：水元素 / 双手剑 / 挪德卡莱。
@@ -78,18 +102,24 @@ gi_genius_invokation_definitions::card_source!(path: ["character", "aino"]);
 pub type Tags = (Hydro, Claymore, NodKrai);
 ```
 
-**标签常量 `TAGS`**
+以上是 标签元组 `Tags` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/cards/character/aino/mod.rs:67-68`
+
+下面给出 标签常量 `TAGS` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:67-68
 
 ```rust
 /// 标签集合的常量值（三个零大小标签；运行期不存在）。
 pub const TAGS: Tags = (Hydro, Claymore, NodKrai);
 ```
 
-**技能定义 `SKILL_12161`**
+以上是 标签常量 `TAGS` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/cards/character/aino/mod.rs:138-152`
+
+下面给出 技能定义 `SKILL_12161` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:138-152
 
 ```rust
 /// 技能 12161 敲打修理法（普通攻击）。
@@ -109,9 +139,12 @@ pub static SKILL_12161: SkillDef = SkillDef {
 };
 ```
 
-**角色牌定义 `AINO`**
+以上是 技能定义 `SKILL_12161` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/cards/character/aino/mod.rs:206-217`
+
+下面给出 角色牌定义 `AINO` 的实现:
+
+文件: crates/cards/src/cards/character/aino/mod.rs:206-217
 
 ```rust
 /// 爱诺的角色牌定义（第一张卡样板）。
@@ -128,9 +161,12 @@ pub static AINO: CharacterDef<Tags> = CharacterDef {
 };
 ```
 
-**卡牌源码表 `SOURCE_FILES`**
+以上是 角色牌定义 `AINO` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/source/mod.rs:23-27`
+
+下面给出 卡牌源码表 `SOURCE_FILES` 的实现:
+
+文件: crates/cards/src/source/mod.rs:23-27
 
 ```rust
 /// 已接入的**卡牌**源码文件清单（手写登记，按 path 字典序升序）。
@@ -140,9 +176,12 @@ pub static AINO: CharacterDef<Tags> = CharacterDef {
 pub static SOURCE_FILES: &[&SourceFile] = &[&crate::cards::character::aino::SOURCE];
 ```
 
-**`source_files`**
+以上是 卡牌源码表 `SOURCE_FILES` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/source/mod.rs:29-32`
+
+下面给出 `source_files` 的实现:
+
+文件: crates/cards/src/source/mod.rs:29-32
 
 ```rust
 /// 全部已登记的卡牌源码文件（只读；顺序 = [SOURCE_FILES]）。
@@ -151,9 +190,12 @@ pub fn source_files() -> &'static [&'static SourceFile] {
 }
 ```
 
-**`source_of`**
+以上是 `source_files` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/source/mod.rs:34-37`
+
+下面给出 `source_of` 的实现:
+
+文件: crates/cards/src/source/mod.rs:34-37
 
 ```rust
 /// 按 path 精确查找（path 口径 = 宏路径分段拼出的相对 crate 根路径）。
@@ -162,9 +204,12 @@ pub fn source_of(path: &str) -> Option<&'static SourceFile> {
 }
 ```
 
-**`source_files_under`**
+以上是 `source_of` 的定义; 具体行为以该文件为准.
 
-`new/crates/cards/src/source/mod.rs:39-45`
+
+下面给出 `source_files_under` 的实现:
+
+文件: crates/cards/src/source/mod.rs:39-45
 
 ```rust
 /// 按路径前缀筛出某目录下的文件（path 口径同上；只读迭代器）。
@@ -176,6 +221,9 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 }
 ```
 
+以上是 `source_files_under` 的定义; 具体行为以该文件为准.
+
+
 
 ## 4. 不变量与禁止
 
@@ -186,27 +234,25 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 - 资源 / 形状不搬: `CardId` / `CardFamily` / 类型 / 标签 / `CostComponent` / `CharacterDef` / `SkillDef` 等留在 `definitions` (D241) .
 - 每张卡必须声明 `card_game_version!`; 数值 = 该卡"已同步到的最新版本"; 新版本没调整只改数字 (D245 / D246) .
 - 源码自声明后还要在 `SOURCE_FILES` 加一行 (漏加不编译失败, 但 `source_of` 找不到) ; 清单按 path 升序.
-- 文案按 D120 只填中文; 四语文本在 `definitions/generated/data/descriptions.json` (测试语料) .
+- 文案按 D120 只填中文; 四语文本由生成数据提供 (测试语料) .
 - 数字口径: `Nat` / 常量; crate 级 `deny(clippy::arithmetic_side_effects)`.
 
 > [!WARNING]
 > 禁止从参考实现取具体卡牌信息 (D122) ; 卡牌数据取自"游戏内文本描述".
 
-## 5. 依据 (规则书与 D 编号) 
+## 5. 依据 (规则书条款 / 决策编号)
 
-| 主题 | 依据 |
-|---|---|
-| 角色牌结构照参考项目; 文案只填中文 | D120 |
-| 参考实现只允许看实现方法, 禁止取具体信息 | D122 |
-| 第一张卡 (爱诺) 样板结构口径 | D162 |
-| 具体卡牌路径一卡一目录 | D163 |
-| 具体卡牌拆到独立 crate, 目录不变 | D240 |
-| 资源与形状留 definitions, 只搬具体实例 | D241 |
-| 源码嵌入宏与机制留 definitions, 只有 `SOURCE_FILES` 跟卡牌走 | D242 |
-| simulation 默认不含具体卡牌 | D243 |
-| 版本同步宏口径 (只写"已同步到")  | D244 / D245 / D246 |
-| 卡牌多版本 (未实现)  | D248 (留空 #24)  |
-| 卡牌数据依据 | 规则书 / 卡面文本 (文件头注释)  |
+- 角色牌结构照参考项目; 文案只填中文: D120
+- 参考实现只允许看实现方法, 禁止取具体信息: D122
+- 第一张卡 (爱诺) 样板结构口径: D162
+- 具体卡牌路径一卡一目录: D163
+- 具体卡牌拆到独立 crate, 目录不变: D240
+- 资源与形状留 definitions, 只搬具体实例: D241
+- 源码嵌入宏与机制留 definitions, 只有 `SOURCE_FILES` 跟卡牌走: D242
+- simulation 默认不含具体卡牌: D243
+- 版本同步宏口径 (只写"已同步到"): D244 / D245 / D246
+- 卡牌多版本 (未实现): D248 (留空 #24)
+- 卡牌数据依据: 规则书 / 卡面文本 (文件头注释)
 
 ## 6. 常见误用
 
@@ -219,32 +265,34 @@ pub fn source_files_under(prefix: &str) -> impl Iterator<Item = &'static SourceF
 - 现在就开始写"多版本卡牌": D248 未实现 (留空 #24) .
 - 爱诺的 4 个效果体是 `todo!`: 调用即 panic, 只作数据样板.
 
-## 7. 测试
+## 7. 测试在哪
 
 - `cargo test --offline -p gi-genius-invokation-cards`: 当前 11 条.
 - 代表用例: 
 
-| 用例 | 覆盖点 |
-|---|---|
-| `cards/src/cards/character/aino/mod.rs::cards::character::aino::tests::aino_basic_data_matches_in_game_text` | 爱诺基础数据 |
-| `...::aino_tags_are_three_zero_sized_tags` | 标签零大小元组 |
-| `...::aino_skills_match_in_game_text` | 4 技能 / 消耗 / 文案 |
-| `...::game_version_matches_declared_sync_version` | 版本宏 |
-| `...::source_embeds_this_file_verbatim` | 源码嵌入源文件内容 |
-| `...::source_is_registered_in_source_registry` | 源码表登记 |
-| `cards/src/source/mod.rs::source::tests::registry_lists_card_files_in_path_order` | 清单顺序 |
-| `cards/src/source/mod.rs::source::tests::dependency_direction_is_cards_to_definitions` | 依赖方向守卫 |
+- `cards/src/cards/character/aino/mod.rs::cards::character::aino::tests::aino_basic_data_matches_in_game_text`: 爱诺基础数据
+- `...::aino_tags_are_three_zero_sized_tags`: 标签零大小元组
+- `...::aino_skills_match_in_game_text`: 4 技能 / 消耗 / 文案
+- `...::game_version_matches_declared_sync_version`: 版本宏
+- `...::source_embeds_this_file_verbatim`: 源码嵌入源文件内容
+- `...::source_is_registered_in_source_registry`: 源码表登记
+- `cards/src/source/mod.rs::source::tests::registry_lists_card_files_in_path_order`: 清单顺序
+- `cards/src/source/mod.rs::source::tests::dependency_direction_is_cards_to_definitions`: 依赖方向守卫
 
 ## 8. 待接入与待实测
 
-| 编号 | 事项 |
-|---|---|
-| #24 | 卡牌多版本 (区间不重叠) + 加载时选一个版本 (D248) 未实现; 按卡独立选版本, 默认最新 (D249 / D251) 待做 |
-| #32 | 卡面"翻倍"类效果需要在 cards 层声明 `DamageArgs::with_modifiers`; 卡牌尚未接入 |
-| #92 | `has_combat_action_tag` 的数据来源在 cards 层 (flow 只收 bool)  |
-| #81 / #109 | 料理 (含复苏料理) 的调度归 cards + flow; definitions 只给纯操作与 `flow::revive` |
-| 无编号 | 注册机制缺: `cards/mod.rs` 明说"没有集中注册表, 等注册机制 (缺, P3) 建好再接"; 爱诺暂未注册 |
-| 无编号 | 爱诺 4 个效果体是占位: 伤害结算入口 / 状态生成 / 召唤物区 / 被动触发注册等接口在文件注释里列出 |
+- #24: 卡牌多版本 (区间不重叠) + 加载时选一个版本 (D248) 未实现; 按卡独立选版本, 默认最新 (D249 / D251) 待做
+- #32: 卡面"翻倍"类效果需要在 cards 层声明 `DamageArgs::with_modifiers`; 卡牌尚未接入
+- #92: `has_combat_action_tag` 的数据来源在 cards 层 (flow 只收 bool)
+- #81 / #109: 料理 (含复苏料理) 的调度归 cards + flow; definitions 只给纯操作与 `flow::revive`
+- 无编号: 注册机制缺: `cards/mod.rs` 明说"没有集中注册表, 等注册机制 (缺, P3) 建好再接"; 爱诺暂未注册
+- 无编号: 爱诺 4 个效果体是占位: 伤害结算入口 / 状态生成 / 召唤物区 / 被动触发注册等接口在文件注释里列出
+
+---
+
+## 小结
+
+卡牌层只放具体某张卡的数据与效果, 资源与形状仍留在 definitions. 新卡从目录, 版本宏, 源码声明三处登记.
 
 ---
 

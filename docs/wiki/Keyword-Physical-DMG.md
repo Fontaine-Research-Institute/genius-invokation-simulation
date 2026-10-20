@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Physical DMG |
-| K code | K100 |
+> Keyword: Physical DMG
+>
+> K code: K100
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 - [[卡牌定义-爱诺-EN|Aino]]
+
+## Summary
+
+Physical DMG is the keyword K100.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+The implemented cards that use it are listed above, 1 in total.

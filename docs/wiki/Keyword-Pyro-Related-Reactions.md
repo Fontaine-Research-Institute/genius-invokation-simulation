@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Pyro-Related Reactions |
-| K code | K213 |
+> Keyword: Pyro-Related Reactions
+>
+> K code: K213
 
 ## Effect
 
@@ -29,3 +28,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Pyro-Related Reactions is the keyword K213.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Electro-Related Reactions |
-| K code | K214 |
+> Keyword: Electro-Related Reactions
+>
+> K code: K214
 
 ## Effect
 
@@ -30,3 +29,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Electro-Related Reactions is the keyword K214.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

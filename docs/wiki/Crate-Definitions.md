@@ -6,7 +6,7 @@
 
 ---
 
-## 1. 职责
+## 1. 职责 (这一层解决什么问题)
 
 承载"除具体卡牌以外的全部游戏定义": 牌族 / 类型 / 标签, 被花资源 (骰池) , 三级统一基础操作, 状态与串联流程, 关键字与"一步", 触发调度, 元素反应, 统一记录, 编译期源码嵌入, 版本同步, 以及 `build.rs` 生成的数据与富文本渲染.
 
@@ -19,62 +19,63 @@
 
 分层 (D51 / D53 / D54) : base (L1 牌族 + id + 元素 + 视角) → families (L2 类型枚举 + 定义载体 + 区域 + 操作) → tags (L3 标签, 顶层目录) .
 
-| 目录 | 一句话 |
-|---|---|
-| `src/base/` | `CardFamily` (id 区域) + `CardId` / `SkillId` / `Element` / `Perspective` |
-| `src/families/` | 每个牌族的框架: 类型枚举 + 定义载体 + 区域状态 + 底层操作 (行动牌: 支援区 / 手牌卡状态 / 当前费用 / 牌库 / 查询; 角色: 伤害 / 伤害修正链 / 技能流程 / 形态与成长 / 装备栏 / 状态区; 召唤物: 定义 + 召唤物区; 状态: 类型枚举 + 定义; 敌人: 定义)  |
-| `src/tags/` | L3 标签: 顶层目录, 按"牌族 / 类型"分组; 一个标签一个文件, 一个零大小类型 (D54) , 共 52 个 |
-| `src/resources/` | 被花的东西: `dice/` 骰池 —— 纯计数 (不是实体, D47) , 三块表示 (D49) , 生成 / 支付 / 转化 / 查询 / 折叠展开 |
-| `src/rules/` | 三级统一基础操作: `RuleRow` 静态规则表 + `ops/` 纯函数 (槽位 / 上限 / 开局 / 料理 / 伤害 / 查询 / 结算顺序; 排除自走牌)  |
-| `src/timeline/` | 触发 / 事件调度: 泛型注册表 (时机键 + 条件函数指针 + 执行函数指针, D186) + 有序派发 + 结算帧 (D196)  |
-| `src/reactions/` | 14 个元素反应身份 (11 基础 + 3 月反应) + 效果函数指针表 + 效果请求 (`EffectOp`)  |
-| `src/records/` | 统一记录器 `Record<T>` / `Recorder<T>` / `ShowRecord` (D222–D225)  |
-| `src/source/` | 编译期源码嵌入: `card_source!` / `module_source!`, `SourceFile` / `SourceOwner`, use 依赖解析 (D210–D216 / D242)  |
-| `src/version/` | `GameVersion` + `card_game_version!` (D244–D246)  |
-| `src/generated/` | `build.rs` 生成的数据表 + 访问器 + `Localized` (D56) + 富文本 `render` (解析由 richtext 提供)  |
-| `src/state/` | `DefState` (`me` / `opp` + `round` + `first_player`) / `PlayerDefs` + 终局判定 + `state::flows` (开局 / 切换 / 击倒 / 复苏 / 结束阶段 / 回合开始 / 下落标记)  |
-| `src/flow/` | 端到端动作入口: 使用技能 / 打牌 / 切换角色 / 元素调和 / 特技 / 回合骨架 / `pending` 执行器 / `recorded` 包装 / 钩子 |
-| `src/keywords/` | 关键字函数 + 一步 `Step` (D204) + 目标选择器 (含"自己", D205 / D206) + 反应子结算 + `trace` / `record` |
+- `src/base/`: `CardFamily` (id 区域) + `CardId` / `SkillId` / `Element` / `Perspective`
+- `src/families/`: 每个牌族的框架: 类型枚举 + 定义载体 + 区域状态 + 底层操作 (行动牌: 支援区 / 手牌卡状态 / 当前费用 / 牌库 / 查询; 角色: 伤害 / 伤害修正链 / 技能流程 / 形态与成长 / 装备栏 / 状态区; 召唤物: 定义 + 召唤物区; 状态: 类型枚举 + 定义; 敌人: 定义)
+- `src/tags/`: L3 标签: 顶层目录, 按"牌族 / 类型"分组; 一个标签一个文件, 一个零大小类型 (D54) , 共 52 个
+- `src/resources/`: 被花的东西: `dice/` 骰池 —— 纯计数 (不是实体, D47) , 三块表示 (D49) , 生成 / 支付 / 转化 / 查询 / 折叠展开
+- `src/rules/`: 三级统一基础操作: `RuleRow` 静态规则表 + `ops/` 纯函数 (槽位 / 上限 / 开局 / 料理 / 伤害 / 查询 / 结算顺序; 排除自走牌)
+- `src/timeline/`: 触发 / 事件调度: 泛型注册表 (时机键 + 条件函数指针 + 执行函数指针, D186) + 有序派发 + 结算帧 (D196)
+- `src/reactions/`: 14 个元素反应身份 (11 基础 + 3 月反应) + 效果函数指针表 + 效果请求 (`EffectOp`)
+- `src/records/`: 统一记录器 `Record<T>` / `Recorder<T>` / `ShowRecord` (D222–D225)
+- `src/source/`: 编译期源码嵌入: `card_source!` / `module_source!`, `SourceFile` / `SourceOwner`, use 依赖解析 (D210–D216 / D242)
+- `src/version/`: `GameVersion` + `card_game_version!` (D244–D246)
+- `src/generated/`: `build.rs` 生成的数据表 + 访问器 + `Localized` (D56) + 富文本 `render` (解析由 richtext 提供)
+- `src/state/`: `DefState` (`me` / `opp` + `round` + `first_player`) / `PlayerDefs` + 终局判定 + `state::flows` (开局 / 切换 / 击倒 / 复苏 / 结束阶段 / 回合开始 / 下落标记)
+- `src/flow/`: 端到端动作入口: 使用技能 / 打牌 / 切换角色 / 元素调和 / 特技 / 回合骨架 / `pending` 执行器 / `recorded` 包装 / 钩子
+- `src/keywords/`: 关键字函数 + 一步 `Step` (D204) + 目标选择器 (含"自己", D205 / D206) + 反应子结算 + `trace` / `record`
 
-**数据文件**: `generated/data/{terms,keywords,descriptions}.json` (入库) ; `build.rs` 编译期生成静态表到 `$OUT_DIR/generated_data.rs`, 运行期不读文件; 标签数据是 `generated::TAGS.<字段>` 字段访问 (D67) .
+**数据表**: 生成数据在编译期由 `build.rs` 读入并产出静态表, 运行期不读文件; 标签数据是 `generated::TAGS.<字段>` 字段访问 (D67).
 
 ## 3. 公开入口
 
 模块全部 `pub`: `base` / `families` / `flow` / `generated` / `keywords` / `reactions` / `records` / `resources` / `rules` / `source` / `state` / `tags` / `timeline` / `version`.crate 根不做 `pub use`; 对外统一经 `simulation` 门面; crate 根导出三个宏: 
 
-| 入口 | 用途 |
-|---|---|
-| `card_source!(path: ["character", "aino"])` | 卡牌文件源码自声明 (自动绑定模块的 `pub const ID`, D215)  |
-| `module_source!(path: [...], name: MODULE_NAME)` | 非卡牌模块源码自声明 + 多语名字 |
-| `card_game_version!(6, 2)` | 声明"本卡已同步到的最新版本" (D244–D246)  |
+- `card_source!(path: ["character", "aino"])`: 卡牌文件源码自声明 (自动绑定模块的 `pub const ID`, D215)
+- `module_source!(path: [...], name: MODULE_NAME)`: 非卡牌模块源码自声明 + 多语名字
+- `card_game_version!(6, 2)`: 声明"本卡已同步到的最新版本" (D244–D246)
 
 **主要公开类型 / 入口**
 
-| 模块 | 入口示例 |
-|---|---|
-| `state` | `DefState::new / from_players`, `DefState::{me, opp, round, first_player}`, `state::flows::*`, `state::terminal::{settlement_outcome, Outcome, ROUND_LIMIT}` |
-| `flow` | `use_skill_me/opp`, `play_card_*` (含 `_with_timing` / `_food` / `_arcane`) , `switch_character_*`, `tuning_*`, `use_technique_*`, `turn::*`, `pending::{execute_pending, execute_frames}`, `recorded::*`, `fold_states` |
-| `keywords` | `Step`, `execute_step_me/opp`, `execute_steps_*`, 关键字函数 (`cause_damage` / `heal` / `apply_status` / `summon` / `draw_cards` / `gain_dice` …) , `TargetSelector` |
-| `timeline` | `TriggerRegistry` / `Trigger` / `dispatch` / `resolve` / `Resolution` (帧 + `insert` / `snapshot`)  |
-| `records` | `Recorder<T>` / `Record<T>` / `ShowRecord` |
-| `rules` | `rows()` / `RuleRow` / `ops::*` 纯函数 |
-| `resources::dice` | `DicePool` / `DieFace` / `CostComponent` / `DiceGenSpec` / `can_afford` / `pay` / `all_dice` |
-| `source` | `SourceFile` / `SourceOwner` / `source_files()` / `source_of(path)` |
-| `version` | `GameVersion`; `version::Nat` 再导出 engine 的 `Nat` |
+- `state`: `DefState::new / from_players`, `DefState::{me, opp, round, first_player}`, `state::flows::*`, `state::terminal::{settlement_outcome, Outcome, ROUND_LIMIT}`
+- `flow`: `use_skill_me/opp`, `play_card_*` (含 `_with_timing` / `_food` / `_arcane`) , `switch_character_*`, `tuning_*`, `use_technique_*`, `turn::*`, `pending::{execute_pending, execute_frames}`, `recorded::*`, `fold_states`
+- `keywords`: `Step`, `execute_step_me/opp`, `execute_steps_*`, 关键字函数 (`cause_damage` / `heal` / `apply_status` / `summon` / `draw_cards` / `gain_dice` …) , `TargetSelector`
+- `timeline`: `TriggerRegistry` / `Trigger` / `dispatch` / `resolve` / `Resolution` (帧 + `insert` / `snapshot`)
+- `records`: `Recorder<T>` / `Record<T>` / `ShowRecord`
+- `rules`: `rows()` / `RuleRow` / `ops::*` 纯函数
+- `resources::dice`: `DicePool` / `DieFace` / `CostComponent` / `DiceGenSpec` / `can_afford` / `pay` / `all_dice`
+- `source`: `SourceFile` / `SourceOwner` / `source_files()` / `source_of(path)`
+- `version`: `GameVersion`; `version::Nat` 再导出 engine 的 `Nat`
 
 **Cargo feature**
 
-| feature | 默认 | 含义 |
-|---|---|---|
-| `embed-source` | 是 | 编译期嵌入各文件源码 (D213) ; 关闭时 `SOURCE.content` 为空, 汇总表为空 |
-| `records` | 是 | 统一记录器 (D223 / D224) ; 关闭时 `Recorder` 零大小, `push` 空操作 |
-| `stats` | 否 | 各块 `stats/` 统计 (D187) ; 关闭时统计变空操作 |
-| `rules` | 否 | 打开 `engine/rules` 并编译 `GameRules` 适配 (`state/terminal.rs`, D24)  |
+- `embed-source`
+  - 默认: 是
+  - 含义: 编译期嵌入各文件源码 (D213) ; 关闭时 `SOURCE.content` 为空, 汇总表为空
+- `records`
+  - 默认: 是
+  - 含义: 统一记录器 (D223 / D224) ; 关闭时 `Recorder` 零大小, `push` 空操作
+- `stats`
+  - 默认: 否
+  - 含义: 各块 `stats/` 统计 (D187) ; 关闭时统计变空操作
+- `rules`
+  - 默认: 否
+  - 含义: 打开 `engine/rules` 并编译 `GameRules` 适配 (`state/terminal.rs`, D24)
 
 ### 3.1 真实源码
-**源码文件 `SourceFile`**
 
-`new/crates/definitions/src/source/mod.rs:149-162`
+下面给出 源码文件 `SourceFile` 的实现:
+
+文件: crates/definitions/src/source/mod.rs:149-162
 
 ```rust
 /// 一份**编译期嵌入的完整源代码**（D213 / D214 / D215 / D216）。
@@ -93,9 +94,12 @@ pub struct SourceFile {
 }
 ```
 
-**卡牌源码声明宏 `card_source!`**
+以上是 源码文件 `SourceFile` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/source/mod.rs:270-307`
+
+下面给出 卡牌源码声明宏 `card_source!` 的实现:
+
+文件: crates/definitions/src/source/mod.rs:270-307
 
 ```rust
 /// 卡牌文件宏（D214 / D215 / D216 / D242）。
@@ -138,9 +142,12 @@ macro_rules! card_source {
 }
 ```
 
-**模块源码声明宏 `module_source!`**
+以上是 卡牌源码声明宏 `card_source!` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/source/mod.rs:329-356`
+
+下面给出 模块源码声明宏 `module_source!` 的实现:
+
+文件: crates/definitions/src/source/mod.rs:329-356
 
 ```rust
 /// 非卡牌模块文件宏（D216）。
@@ -173,9 +180,12 @@ macro_rules! module_source {
 }
 ```
 
-**版本声明宏 `card_game_version!`**
+以上是 模块源码声明宏 `module_source!` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/version/macros.rs:5-28`
+
+下面给出 版本声明宏 `card_game_version!` 的实现:
+
+文件: crates/definitions/src/version/macros.rs:5-28
 
 ```rust
 /// 声明「本卡 / 本模块已同步（核对）到的最新游戏版本」（D245 / D246）。
@@ -204,9 +214,12 @@ macro_rules! card_game_version {
 }
 ```
 
-**根状态 `DefState`**
+以上是 版本声明宏 `card_game_version!` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/state/def_state.rs:58-82`
+
+下面给出 根状态 `DefState` 的实现:
+
+文件: crates/definitions/src/state/def_state.rs:58-82
 
 ```rust
 /// **一局对局的完整状态**：我方全部区 + 敌方全部区（两个具名实例，D34）+ 回合数。
@@ -236,9 +249,12 @@ pub struct DefState {
 }
 ```
 
-**`DefState::me` (只读) **
+以上是 根状态 `DefState` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/state/def_state.rs:111-114`
+
+下面给出 `DefState::me` (只读) 的实现:
+
+文件: crates/definitions/src/state/def_state.rs:111-114
 
 ```rust
     /// 我方的全部区（**只读指针**，D183）。
@@ -247,9 +263,12 @@ pub struct DefState {
     }
 ```
 
-**`DefState::opp` (只读) **
+以上是 `DefState::me` (只读) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/state/def_state.rs:116-119`
+
+下面给出 `DefState::opp` (只读) 的实现:
+
+文件: crates/definitions/src/state/def_state.rs:116-119
 
 ```rust
     /// 敌方的全部区（**只读指针**，D183）。
@@ -258,9 +277,12 @@ pub struct DefState {
     }
 ```
 
-**`DefState::round` (只读) **
+以上是 `DefState::opp` (只读) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/state/def_state.rs:121-126`
+
+下面给出 `DefState::round` (只读) 的实现:
+
+文件: crates/definitions/src/state/def_state.rs:121-126
 
 ```rust
     /// 当前回合数（0 = 还没开始第一回合；1 = 第 1 回合）。
@@ -271,9 +293,12 @@ pub struct DefState {
     }
 ```
 
-**`DefState::first_player` (只读) **
+以上是 `DefState::round` (只读) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/state/def_state.rs:136-141`
+
+下面给出 `DefState::first_player` (只读) 的实现:
+
+文件: crates/definitions/src/state/def_state.rs:136-141
 
 ```rust
     /// **本回合的先手牌手**（[`None`] = 还没裁定；只读指针，D183）。
@@ -284,9 +309,12 @@ pub struct DefState {
     }
 ```
 
-**端到端入口 `use_skill_me`**
+以上是 `DefState::first_player` (只读) 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/flow/skill_use.rs:430-446`
+
+下面给出 端到端入口 `use_skill_me` 的实现:
+
+文件: crates/definitions/src/flow/skill_use.rs:430-446
 
 ```rust
 /// **使用技能**（我方使用；下落标记读根状态）。
@@ -308,9 +336,12 @@ pub fn use_skill_me(
 }
 ```
 
-**端到端入口 `use_skill_opp`**
+以上是 端到端入口 `use_skill_me` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/flow/skill_use.rs:477-486`
+
+下面给出 端到端入口 `use_skill_opp` 的实现:
+
+文件: crates/definitions/src/flow/skill_use.rs:477-486
 
 ```rust
 /// **使用技能**（敌方使用；与 use_skill_me 共用一份实现，D35）。
@@ -325,9 +356,12 @@ pub fn use_skill_opp(
 }
 ```
 
-**一步 `Step`**
+以上是 端到端入口 `use_skill_opp` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/step.rs:44-48`
+
+下面给出 一步 `Step` 的实现:
+
+文件: crates/definitions/src/keywords/step.rs:44-48
 
 ```rust
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
@@ -337,9 +371,12 @@ pub struct Step {
 }
 ```
 
-**执行一步 `execute_step_me`**
+以上是 一步 `Step` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/step.rs:116-123`
+
+下面给出 执行一步 `execute_step_me` 的实现:
+
+文件: crates/definitions/src/keywords/step.rs:116-123
 
 ```rust
 /// **执行一步**（我方视角）。
@@ -352,9 +389,12 @@ pub fn execute_step_me(state: &DefState, step: &Step, env: &EffectEnv<'_>) -> St
 }
 ```
 
-**顺序执行多步 `execute_steps_me`**
+以上是 执行一步 `execute_step_me` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/step.rs:173-177`
+
+下面给出 顺序执行多步 `execute_steps_me` 的实现:
+
+文件: crates/definitions/src/keywords/step.rs:173-177
 
 ```rust
 /// **顺序执行多步**（我方视角）：每步之间执行上一步派发出来的待执行（插入只在步边界，D204）。
@@ -364,9 +404,12 @@ pub fn execute_steps_me(state: &DefState, steps: &[Step], env: &EffectEnv<'_>) -
 }
 ```
 
-**触发登记项 `Trigger`**
+以上是 顺序执行多步 `execute_steps_me` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/trigger.rs:44-67`
+
+下面给出 触发登记项 `Trigger` 的实现:
+
+文件: crates/definitions/src/timeline/trigger.rs:44-67
 
 ```rust
 /// 一条**触发登记项**（纯数据；`K` / `E` 都是 `Copy` 时整体 `Copy`）。
@@ -395,9 +438,12 @@ pub struct Trigger<K, E = Effect> {
 }
 ```
 
-**单侧派发 `dispatch`**
+以上是 触发登记项 `Trigger` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/dispatch.rs:60-96`
+
+下面给出 单侧派发 `dispatch` 的实现:
+
+文件: crates/definitions/src/timeline/dispatch.rs:60-96
 
 ```rust
 /// **单侧派发**：从一个牌手的注册表里取出「这个时机、条件成立」的登记项，按结算顺序排好。
@@ -439,9 +485,12 @@ where
 }
 ```
 
-**双方派发 `resolve`**
+以上是 单侧派发 `dispatch` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/dispatch.rs:98-118`
+
+下面给出 双方派发 `resolve` 的实现:
+
+文件: crates/definitions/src/timeline/dispatch.rs:98-118
 
 ```rust
 /// **双方合并派发**（`结算顺序.md` §一 第 1 条「当前牌手优先」）：**当前牌手**的注册表先，对方的后。
@@ -467,9 +516,12 @@ where
 }
 ```
 
-**结算帧 `Resolution`**
+以上是 双方派发 `resolve` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/suspend.rs:125-133`
+
+下面给出 结算帧 `Resolution` 的实现:
+
+文件: crates/definitions/src/timeline/suspend.rs:125-133
 
 ```rust
 /// **结算帧栈**：插入式结算的当前状态（D196）。
@@ -483,9 +535,12 @@ pub struct Resolution<E> {
 }
 ```
 
-**插入子结算 `Resolution::insert`**
+以上是 结算帧 `Resolution` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/suspend.rs:168-178`
+
+下面给出 插入子结算 `Resolution::insert` 的实现:
+
+文件: crates/definitions/src/timeline/suspend.rs:168-178
 
 ```rust
     /// **插入子结算**：在当前帧当前位置压入新帧（父帧的 `cursor` 不动）。
@@ -501,9 +556,12 @@ pub struct Resolution<E> {
     }
 ```
 
-**只读快照 `Resolution::snapshot`**
+以上是 插入子结算 `Resolution::insert` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/timeline/suspend.rs:202-217`
+
+下面给出 只读快照 `Resolution::snapshot` 的实现:
+
+文件: crates/definitions/src/timeline/suspend.rs:202-217
 
 ```rust
     /// **只读快照**：当前结算嵌套状态（当前帧 / 剩余步骤 / 插入点）。
@@ -524,9 +582,12 @@ pub struct Resolution<E> {
     }
 ```
 
-**记录条目 `Record<T>`**
+以上是 只读快照 `Resolution::snapshot` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:34-41`
+
+下面给出 记录条目 `Record<T>` 的实现:
+
+文件: crates/definitions/src/records/mod.rs:34-41
 
 ```rust
 /// 一条记录：**属于哪一步** + 任意内容（内容类型由使用方定义）。
@@ -539,9 +600,12 @@ pub struct Record<T> {
 }
 ```
 
-**显示由内容类型定义 `ShowRecord`**
+以上是 记录条目 `Record<T>` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:50-54`
+
+下面给出 显示由内容类型定义 `ShowRecord` 的实现:
+
+文件: crates/definitions/src/records/mod.rs:50-54
 
 ```rust
 /// **内容类型自己定义如何显示**（记录器不预设种类 / 字段）。
@@ -551,9 +615,12 @@ pub trait ShowRecord {
 }
 ```
 
-**记录器 `Recorder<T>`**
+以上是 显示由内容类型定义 `ShowRecord` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:56-63`
+
+下面给出 记录器 `Recorder<T>` 的实现:
+
+文件: crates/definitions/src/records/mod.rs:56-63
 
 ```rust
 /// **记录器**：泛型容器，按写入顺序保存 Record。
@@ -566,9 +633,12 @@ pub struct Recorder<T> {
 }
 ```
 
-**唯一写入入口 `Recorder::push`**
+以上是 记录器 `Recorder<T>` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/records/mod.rs:88-91`
+
+下面给出 唯一写入入口 `Recorder::push` 的实现:
+
+文件: crates/definitions/src/records/mod.rs:88-91
 
 ```rust
     /// **唯一写入入口**：把一条内容记到某一步。
@@ -577,9 +647,12 @@ pub struct Recorder<T> {
     }
 ```
 
-**骰池 `DicePool`**
+以上是 唯一写入入口 `Recorder::push` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/resources/dice/mod.rs:351-362`
+
+下面给出 骰池 `DicePool` 的实现:
+
+文件: crates/definitions/src/resources/dice/mod.rs:351-362
 
 ```rust
 /// 骰池 = 三块（D49）：万能 / 折叠的同色组 / 已展开的具体色。
@@ -596,9 +669,12 @@ pub struct DicePool {
 }
 ```
 
-**够不够付 `can_afford`**
+以上是 骰池 `DicePool` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/resources/dice/mod.rs:649-698`
+
+下面给出 够不够付 `can_afford` 的实现:
+
+文件: crates/definitions/src/resources/dice/mod.rs:649-698
 
 ```rust
     /// 够不够付（**可能就行**，D144）：折叠组按「可能是什么色」计入上界。
@@ -653,9 +729,12 @@ pub struct DicePool {
     }
 ```
 
-**确定性扣减 `pay`**
+以上是 够不够付 `can_afford` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/resources/dice/mod.rs:700-731`
+
+下面给出 确定性扣减 `pay` 的实现:
+
+文件: crates/definitions/src/resources/dice/mod.rs:700-731
 
 ```rust
     /// 扣减（确定性，不产生分支；D47/D144）。付不起 -> None。
@@ -692,9 +771,12 @@ pub struct DicePool {
     }
 ```
 
-**统一规则行 `RuleRow`**
+以上是 确定性扣减 `pay` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/mod.rs:242-281`
+
+下面给出 统一规则行 `RuleRow` 的实现:
+
+文件: crates/definitions/src/rules/mod.rs:242-281
 
 ```rust
 /// **统一规则行**：三级共用同一形状。
@@ -739,9 +821,12 @@ pub struct RuleRow {
 }
 ```
 
-**遍历规则表 `rows`**
+以上是 统一规则行 `RuleRow` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/mod.rs:434-442`
+
+下面给出 遍历规则表 `rows` 的实现:
+
+文件: crates/definitions/src/rules/mod.rs:434-442
 
 ```rust
 /// 遍历全表（顺序：牌族 -> 类型 -> 标签）。
@@ -755,9 +840,12 @@ pub fn rows() -> impl Iterator<Item = &'static RuleRow> {
 }
 ```
 
-**关键字查询 `keyword`**
+以上是 遍历规则表 `rows` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/generated/mod.rs:85-95`
+
+下面给出 关键字查询 `keyword` 的实现:
+
+文件: crates/definitions/src/generated/mod.rs:85-95
 
 注释中的关键字代码已替换为名称, 代码行未改
 
@@ -775,9 +863,12 @@ pub fn keyword(code: KeywordCode) -> Option<&'static KeywordDef> {
 }
 ```
 
-**全部关键字 `keywords_all`**
+以上是 关键字查询 `keyword` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/generated/mod.rs:97-100`
+
+下面给出 全部关键字 `keywords_all` 的实现:
+
+文件: crates/definitions/src/generated/mod.rs:97-100
 
 注释中的关键字代码已替换为名称, 代码行未改
 
@@ -788,9 +879,12 @@ pub fn keywords_all() -> &'static [KeywordDef] {
 }
 ```
 
-**游戏版本 `GameVersion`**
+以上是 全部关键字 `keywords_all` 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/version/mod.rs:26-35`
+
+下面给出 游戏版本 `GameVersion` 的实现:
+
+文件: crates/definitions/src/version/mod.rs:26-35
 
 ```rust
 /// 游戏版本号（D244）：major.minor，如 6.2。
@@ -805,10 +899,13 @@ pub struct GameVersion {
 }
 ```
 
+以上是 游戏版本 `GameVersion` 的定义; 具体行为以该文件为准.
 
-**关键字函数: 造成伤害**
 
-`new/crates/definitions/src/keywords/keyword.rs:241-292`
+
+下面给出 关键字函数: 造成伤害 的实现:
+
+文件: crates/definitions/src/keywords/keyword.rs:241-292
 
 ```rust
 /// **造成伤害**：对选择器解析出的每个角色走伤修链（加伤 -> 护盾 -> 减伤 -> 扣血 / 附着 / 反应）。
@@ -865,9 +962,12 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**关键字函数: 治疗**
+以上是 关键字函数: 造成伤害 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/keywords/keyword.rs:298-325`
+
+下面给出 关键字函数: 治疗 的实现:
+
+文件: crates/definitions/src/keywords/keyword.rs:298-325
 
 ```rust
 /// **治疗**：对每个目标角色 hp_add 并派发「生命值变动 -> 治疗后」。
@@ -900,9 +1000,12 @@ pub fn heal(state: &DefState, env: &EffectEnv<'_>, args: &HealArgs) -> KeywordRe
 }
 ```
 
-**规则 ops: 装备校验**
+以上是 关键字函数: 治疗 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/ops/equip.rs:180-214`
+
+下面给出 规则 ops: 装备校验 的实现:
+
+文件: crates/definitions/src/rules/ops/equip.rs:180-214
 
 ```rust
 /// 装备判定（纯函数，不改任何状态）。
@@ -942,9 +1045,12 @@ pub fn check_equip(
 }
 ```
 
-**规则 ops: 结算顺序判定**
+以上是 规则 ops: 装备校验 的定义; 具体行为以该文件为准.
 
-`new/crates/definitions/src/rules/ops/order.rs:38-59`
+
+下面给出 规则 ops: 结算顺序判定 的实现:
+
+文件: crates/definitions/src/rules/ops/order.rs:38-59
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -971,6 +1077,9 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 }
 ```
 
+以上是 规则 ops: 结算顺序判定 的定义; 具体行为以该文件为准.
+
+
 
 ## 4. 不变量与禁止
 
@@ -987,24 +1096,22 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 - feature 关闭不改变语义 (`records` / `stats` / `embed-source`) .
 - 不持有全局状态: 注册表 / 记录器 / 骰池都是普通值字段.
 
-## 5. 依据 (规则书与 D 编号) 
+## 5. 依据 (规则书条款 / 决策编号)
 
-| 领域 | 依据 |
-|---|---|
-| 牌族 / 类型 / 标签三级 | D51 / D53 / D54 / D55; `分工计划.md` §4.4.0.0 |
-| base / id / 敌我 / 区 | D29 / D34 / D36 / D37 / D41 / D42 |
-| 骰池 (纯计数 / 三块 / 展开 / 支付)  | D46–D49, D139–D148, D168–D172 |
-| 三级统一基础操作 | D176–D179; 规则书·进行行动 / 游戏区域 / 特殊词条 |
-| 状态与区 | D95 / D96, D101–D119, D182 / D183 |
-| 伤害 / 反应 / 结算顺序 | 规则书·元素反应 (规则 + 效果两篇) , 特殊词条; `结算顺序.md`; D127–D136, D164–D167, D193–D198 |
-| 技能 / 准备技能 / 特技 | 规则书·进行行动[使用技能]与特殊词条; D7 / D15 / D19 / D123–D126 / D165 / D166 |
-| 关键字 + 一步 | D203–D209; 规则书·特殊词条 |
-| 触发调度 / 函数指针 | D185 / D186 |
-| 记录 | D222–D225 |
-| 源码嵌入 | D210–D216 / D242 |
-| 版本同步 | D244–D246 |
-| 生成数据 / 本地化 / 渲染 | D56 / D61–D68 / D74–D79 |
-| 门面与拆分 | D240–D243 |
+- 牌族 / 类型 / 标签三级: D51 / D53 / D54 / D55; `分工计划.md` §4.4.0.0
+- base / id / 敌我 / 区: D29 / D34 / D36 / D37 / D41 / D42
+- 骰池 (纯计数 / 三块 / 展开 / 支付): D46–D49, D139–D148, D168–D172
+- 三级统一基础操作: D176–D179; 规则书·进行行动 / 游戏区域 / 特殊词条
+- 状态与区: D95 / D96, D101–D119, D182 / D183
+- 伤害 / 反应 / 结算顺序: 规则书·元素反应 (规则 + 效果两篇) , 特殊词条; `结算顺序.md`; D127–D136, D164–D167, D193–D198
+- 技能 / 准备技能 / 特技: 规则书·进行行动[使用技能]与特殊词条; D7 / D15 / D19 / D123–D126 / D165 / D166
+- 关键字 + 一步: D203–D209; 规则书·特殊词条
+- 触发调度 / 函数指针: D185 / D186
+- 记录: D222–D225
+- 源码嵌入: D210–D216 / D242
+- 版本同步: D244–D246
+- 生成数据 / 本地化 / 渲染: D56 / D61–D68 / D74–D79
+- 门面与拆分: D240–D243
 
 > [!NOTE]
 > 依据优先级 (`RULES.md` 第三节) : 规则书 > 卡面 / 权威关键字 > 参考实现 (只看方法) .规则书与旧决策冲突时以规则书为准, 改不动的标 `// 待接入`.
@@ -1021,43 +1128,45 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 - 关闭 `records` / `stats` 后让结算结果改变.
 - 新增模块文件用 `module_source!` 后忘记在 `source::SOURCE_FILES` 加一行 (编译能过, `source_of` 找不到) .
 
-## 7. 测试
+## 7. 测试在哪
 
 - `cargo test --offline -p gi-genius-invokation-definitions`: 当前 917 条单元测试 (lib target; doctest 0; 默认 features) .
 - `--features rules` 额外编译 `state/terminal.rs` 的 `GameRules` 适配测试 (D24) ; CI 对 workspace 使用 `--features rules,dedup,opt-all`.
 - 规模分布 (按测试名前缀, 随开发变化) : `families::character` 304, `families::action_card` 98, `resources::dice` 45, `rules::ops` 42, `state::flows` 33, `flow::*` 约 130, `keywords::*` 约 80, `timeline::*` 约 35, `reactions::*` 约 30, `generated` 24, `state::*` 29, `records` 4, `source` 7, `version` 3, `tags` 1.
 - 代表用例: 
 
-| 用例 | 覆盖点 |
-|---|---|
-| `state/def_state.rs::state::def_state::tests::clone_is_a_deep_snapshot` | 状态深拷贝 |
-| `flow/skill_use.rs::flow::skill_use::tests::after_skill_pending_is_inserted_at_the_current_settlement_position` | 插入式结算 |
-| `flow/turn.rs::flow::turn::tests::declare_round_end_records_first_declarer_and_opens_the_end_phase` | 回合骨架 |
-| `keywords/step.rs::keywords::step::tests::felis_burst_is_one_atomic_step` | 一步原子 |
-| `keywords/step.rs::keywords::step::tests::insertion_happens_only_between_two_steps` | 步间插入 |
-| `timeline/suspend.rs::timeline::suspend::tests::inserted_sub_resolution_returns_to_the_insertion_point` | 结算帧恢复 |
-| `rules/mod.rs::rules::tests::every_row_has_evidence_or_basis` | 规则表依据 |
-| `resources/dice/parse.rs::resources::dice::parse::tests::content_any_slot_is_random` | 骰子生成 |
-| `generated/text/tests.rs::generated::text::tests::every_generated_text_parses_strictly` | 全量文本解析 |
-| `tags/mod.rs::tags::tests::every_tag_is_a_distinct_zero_sized_type` | 52 个标签全零大小且类型名互不相同 |
+- `state/def_state.rs::state::def_state::tests::clone_is_a_deep_snapshot`: 状态深拷贝
+- `flow/skill_use.rs::flow::skill_use::tests::after_skill_pending_is_inserted_at_the_current_settlement_position`: 插入式结算
+- `flow/turn.rs::flow::turn::tests::declare_round_end_records_first_declarer_and_opens_the_end_phase`: 回合骨架
+- `keywords/step.rs::keywords::step::tests::felis_burst_is_one_atomic_step`: 一步原子
+- `keywords/step.rs::keywords::step::tests::insertion_happens_only_between_two_steps`: 步间插入
+- `timeline/suspend.rs::timeline::suspend::tests::inserted_sub_resolution_returns_to_the_insertion_point`: 结算帧恢复
+- `rules/mod.rs::rules::tests::every_row_has_evidence_or_basis`: 规则表依据
+- `resources/dice/parse.rs::resources::dice::parse::tests::content_any_slot_is_random`: 骰子生成
+- `generated/text/tests.rs::generated::text::tests::every_generated_text_parses_strictly`: 全量文本解析
+- `tags/mod.rs::tags::tests::every_tag_is_a_distinct_zero_sized_type`: 52 个标签全零大小且类型名互不相同
 
 ## 8. 待接入与待实测
 
 > [!NOTE]
 > 本 crate 规则落点最多; 下表只列代表项.完整清单见 `留空.md`, 以 #103 第六轮总账为准 (更早条目写作时按当轮状态记, 之后部分已接线, 属低报) .
 
-| 编号 | 事项 |
-|---|---|
-| #15 | 三级统一基础操作待接入: 结算顺序实际调度, 结束阶段扣持续回合 / 可用次数, 起手换牌, 首发选择, 击倒 / 免于击倒 / 形态转换, 支援满 4, 召唤满 4, 元素幻变时序 |
-| #17–#32 | 伤害修正链顺序, 结晶护盾上限, 元素精通, 伤害免疫与加伤先后, 乘算取整, 下落 vs 重击等 |
-| #33–#39 | 第一回合先手, 结束阶段先手口径, 切换角色错误优先级, 元素调和来源骰限制, 不可调和语义 |
-| #42–#44 | 终局判定接进 flow, `GameRules` 占位, definitions 的 `rules` feature 是否进 CI (待确认)  |
-| #45–#50 | F10 抓牌后的手牌费用表 / `drawn_marks`, 下落标记端到端接线 |
-| #51–#57 | 两套插入式结算类型并存 (技术债) , 反应效果执行时机, 非伤害附着的消耗口径, trace 路径不结算反应等 |
-| #62–#66 | 覆盖报告剩余项: L12'最近角色', 自行巧局三条 (另一模式不做) , Z13 / Z14 / L9 等 |
-| #67–#102 | 支援持续回合递减时机, 秘传揭令归属, 超限处理, 饱腹解除, 特技交互, 复苏后出战 / 时机等 |
-| #105–#122 | 收尾轮: Z6 生产写入路径, L9 幻变钩子未接进开局, 伤害类型转换已补, 双负语义已落地 (#121)  |
-| 无编号 | `build.rs` 手写 JSON 解析器与 D74'改用 JSON 库'冲突; `src/lib.rs` / `src/families/mod.rs` 模块文档仍写旧范围 (见 [[Architecture]] 末节)  |
+- #15: 三级统一基础操作待接入: 结算顺序实际调度, 结束阶段扣持续回合 / 可用次数, 起手换牌, 首发选择, 击倒 / 免于击倒 / 形态转换, 支援满 4, 召唤满 4, 元素幻变时序
+- #17–#32: 伤害修正链顺序, 结晶护盾上限, 元素精通, 伤害免疫与加伤先后, 乘算取整, 下落 vs 重击等
+- #33–#39: 第一回合先手, 结束阶段先手口径, 切换角色错误优先级, 元素调和来源骰限制, 不可调和语义
+- #42–#44: 终局判定接进 flow, `GameRules` 占位, definitions 的 `rules` feature 是否进 CI (待确认)
+- #45–#50: F10 抓牌后的手牌费用表 / `drawn_marks`, 下落标记端到端接线
+- #51–#57: 两套插入式结算类型并存 (技术债) , 反应效果执行时机, 非伤害附着的消耗口径, trace 路径不结算反应等
+- #62–#66: 覆盖报告剩余项: L12'最近角色', 自行巧局三条 (另一模式不做) , Z13 / Z14 / L9 等
+- #67–#102: 支援持续回合递减时机, 秘传揭令归属, 超限处理, 饱腹解除, 特技交互, 复苏后出战 / 时机等
+- #105–#122: 收尾轮: Z6 生产写入路径, L9 幻变钩子未接进开局, 伤害类型转换已补, 双负语义已落地 (#121)
+- 无编号: `build.rs` 手写 JSON 解析器与 D74'改用 JSON 库'冲突; `src/lib.rs` / `src/families/mod.rs` 模块文档仍写旧范围 (见 [[Architecture]] 末节)
+
+---
+
+## 小结
+
+定义层承载除具体卡牌外的全部游戏定义, 对外入口保持纯函数. 具体卡牌在 cards crate, 通过 simulation 门面可选接入.
 
 ---
 

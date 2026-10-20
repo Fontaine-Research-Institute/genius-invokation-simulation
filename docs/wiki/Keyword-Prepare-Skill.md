@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Prepare Skill |
-| K code | K53 |
+> Keyword: Prepare Skill
+>
+> K code: K53
 
 ## Effect
 
@@ -26,3 +25,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Prepare Skill is the keyword K53.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Phantasm Performance |
-| K code | K1052 |
+> Keyword: Phantasm Performance
+>
+> K code: K1052
 
 ## Effect
 
@@ -26,3 +25,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Phantasm Performance is the keyword K1052.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

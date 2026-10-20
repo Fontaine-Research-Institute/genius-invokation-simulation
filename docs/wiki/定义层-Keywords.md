@@ -2,123 +2,34 @@
 
 > 中文 · [[定义层-Keywords-EN|English]]
 
-*本页范围: `keywords/*` 关键字层 (目标选择器 / 关键字函数 / 一步原子 / 反应子结算 / 迁移 / 轨迹) .*
+*本页范围: 关键字层: 目标选择器, 关键字操作, 一步原子, 反应子结算, 迁移与轨迹.*
 
 ---
 
 ## 1. 职责
 
-`keywords/*` 是**关键字层**: 把卡面写法拆成"目标选择器 + 关键字操作 (`Step` 一步) + 关键字函数", 在 `&DefState` 上执行并返回"分支 + 精确概率 + 待执行 + 反应子结算".本层**不执行**自己派发出来的触发 (D186) , **步内不插入** (D204) .
+关键字层把卡面文本拆成数据: 目标选择器筛候选, 关键字操作说明发生什么, 关键字函数在状态上执行它.
+
+它不执行自己派发的触发, 也不在步内插入.
 
 ## 2. 关键概念与类型
 
-| 文件 | 职责 |
-|---|---|
-| `crates/definitions/src/keywords/target.rs` | `TargetSelector` 把卡面写法解析成候选实体集合 (含"距离最近"`NearestToActive`)  |
-| `keywords/op.rs` | 关键字操作的数据表达: `KeywordOp` + 各 `*Args` + `KeywordBranch` / `KeywordResult` |
-| `keywords/keyword.rs` | 一个关键字一个函数 (伤害 / 治疗 / 附着 / 状态 / 召唤 / 抽牌 / 弃置 / 骰子 / 生成卡 / 切换 / 充能 / 手牌卡状态 / 置底)  |
-| `keywords/step.rs` | `Step` 一步原子: 按书写顺序跑 ops, 步内不插, 步末 flush, 步边界插入反应 |
-| `keywords/effect.rs` | `EffectEnv` (效果主体 / 视角 / 伤害依赖 / 双方触发 / 精通 / 增伤 / 反应摘要 / 发号器)  |
-| `keywords/reaction.rs` | 反应子结算: `ReactionRequest`, `ReactionFrames`, `settle_reaction(s)` / `settle_inserted` |
-| `keywords/migrate.rs` | 旧写法 -> 新写法: `SkillEffectPlan` / `EffectOp` -> `Step` / `KeywordOp` |
-| `keywords/trace.rs` | 回放轨迹: `Trace` / `StepTrace` / `BranchTrace` / `OpTrace` / `ReactionTrace` + `*_traced` 入口 |
-| `keywords/record.rs` | 关键字记录 (`KeywordRecord`) 与 recorded 入口 |
+目标选择器只筛候选. 选哪个要么是全部, 要么是均匀随机展开成分支.
 
-### 2.1 目标选择器 (含"最近目标") 
+一步是原子单位: 操作按书写顺序执行, 步末才允许执行待执行效果.
 
-`TargetSelector` 只描述**候选集合**, 不决定"选哪个" (D25/D26) ; 需要随机时由 `TargetPick::OneUniform` 在关键字函数里展开成"每支 1/N"的分支 (D190) .`SideScope::{Own, Opponent, Both}` 相对**视角方** (D29/D34) .
-
-| 变体 | 语义 / 备注 |
-|---|---|
-| `Subject` | 效果主体自身, 实体号从 `ResolveContext::subject` 取 (D205/D206)  |
-| `Reacted` | 反应承载角色 (上下文 `with_reacted`; 没给 -> 空集)  |
-| `Active(side)` / `Characters(side)` / `Standby(side)` | 出战 / 全部 / 后台角色 (按角色区槽位顺序)  |
-| `NearestToActive { reference, candidates }` | 距离最近 (L12) : reference 方出战角色槽位下标与 candidates 方各角色槽位下标的绝对差最小者; 并列取槽位更靠前; 被击倒角色不参与 (hp==0) .预设 `nearest_opponent_to_own_active()`.待实测: 是否镜像, 击倒角色是否占位 (留空 #62/#69)  |
-| `AfterActive{side,offset}` / `BeforeActive{side,offset}` | 出战角色之后 / 之前第 n 个角色, 槽位循环偏移; offset=0 = 出战本身; 是否跳过击倒角色待实测 |
-| `HpRank{side,order,n,tie}` | 当前生命值排名第 n (1 起) : 三级排序 血量 -> 是否出战 (`tie.active_first`) -> 槽位方向 (D228/D229/D230)  |
-| `LostHpRank{side,order,n,tie}` | 受伤量排名 (实际最大生命值 − 当前生命值; 必须用运行期 `max_hp`, D237) ; 排序同三级; 击倒角色不参与 |
-| `AllExceptReacted(side)` | 该方所有角色去掉反应承载角色 |
-| `HandCards(side)` / `HandCardIndex{side,index}` | 手牌候选 / 第 index 张 (手牌无序, 按容器顺序; 待复核)  |
-| `Summons` / `Supports` / `Equipments(side)` | 召唤物 / 支援牌 / 该方所有角色装备 |
-| `PileTop(side)` / `PileCards(side)` | 牌库顶 / 牌库全部卡 |
-
-`resolve(state, selector, context) -> TargetSet` (纯读) ; `TargetSet` 是**分侧实体列表** (`of(me/opp)` / `me()` / `opp()` / `len()` / `is_empty()` / `contains()` / `iter()`) , 不排序, 不选策略.辅助: `player_of(state, side)`, `locate(state, entity)`, `sides_of(scope, viewer)`.并列规则 `HpTie { active_first, direction }` 默认 `DEFAULT` (出战优先 + 左到右, 待实测) .
-
-### 2.2 执行上下文 `EffectEnv`
-
-`keywords/effect.rs`: 私有 `subject` / `viewer` / `reacted` / `alloc` + `damage`, `triggers` (`TriggerBook`: 双方区 / 角色族 / 支援 / 装备) , `mastery`, `increases`, `effect_context`, `reaction_modifiers`, `step_start_me_hand` / `step_start_opp_hand` (动态张数在一步开始时取样, D204) .`TriggerBook::empty()` 提供全空表; `fork` / `with_viewer` / `with_step_start_hands` 生成新上下文.
-
-### 2.3 一步 `Step` (D204 / D208) 
-
-| 类型 / 入口 | 文件 | 说明 |
-|---|---|---|
-| `Step { ops: Vec<KeywordOp> }` | `keywords/step.rs` | 一组关键字操作; `new` / `empty` / `ops()` / `len()` / `is_empty()` |
-| `StepOutcome { branches, alloc }` | `keywords/step.rs` | `single()` / `probability_total()` |
-| `execute_step_me` / `execute_step_opp` | `keywords/step.rs` | 执行一步: 按 ops 顺序, 不做任何 insert / execute_pending |
-| `execute_steps_me` / `execute_steps_opp` | `keywords/step.rs` | 多步顺序执行; 每步末执行上一步派发的待执行 (插入只在步边界)  |
-
-语义: **步内按 ops 书写顺序执行, 不做任何 insert / execute_pending**; `Repeat` 仍属同一步 (D208/D209) .**反应**: 一步内判出的反应不立即执行, 统一在步边界 `settle_inserted` 插入; 反应派发的待执行接在本步待执行**之前** (D258/D259) .
-
-### 2.4 关键字操作与返回
-
-| 类型 | 文件 | 说明 |
-|---|---|---|
-| `KeywordOp` | `keywords/op.rs` | `Damage / Heal / AttachElement / Status / Summon / DrawCards / Discard / GainDice / ConvertDice / CreateCard / SwitchCharacter / ForceSwitch / ConsumeEnergy / CardStatus / PutHandToPileBottom / Repeat` |
-| `DamageArgs` | `keywords/op.rs` | `{ targets, amount, ty, source_kind, pick, modifiers }`; `TargetPick::All / OneUniform`; 穿透伤害整段跳过 |
-| `StatusArgs` | `keywords/op.rs` | `{ targets, place: Character/CombatStatus/HandCard, card, layers, duration, stack_cap }`; `stack_cap` 层数相加后截断 (Z15, 留空 #70)  |
-| `SummonArgs` | `keywords/op.rs` | `{ side, card, uses, points, effect_kind, stack_limit }`; `stack_limit` 按可用次数截断 (留空 #71)  |
-| `DrawCardsArgs` / `DiscardArgs` / `GainDiceArgs` / `ConvertDiceArgs` / `CreateCardArgs` | `keywords/op.rs` | 抽牌 / 弃置 / 骰子增减 / 转化 / 生成卡; `DrawCount::Fixed / HandAtStepStartPlus` |
-| `SwitchCharacterArgs` / `ForceSwitchArgs` / `ConsumeEnergyArgs` / `CardStatusArgs` / `RepeatArgs` / `PutHandToPileBottomArgs` | `keywords/op.rs` | 切换 / 强制切换 / 充能 / 卡牌状态 (Z13) / 重复 (D209) / 置底 (顺序由 `OrderFn` 注入)  |
-
-| 返回类型 | 文件 | 说明 |
-|---|---|---|
-| `KeywordResult { branches, alloc }` | `keywords/op.rs` | `unchanged` / `single` / `probability_total` / `states` |
-| `KeywordBranch { state, probability, pending, reactions }` | `keywords/op.rs` | `new` / `determined` / `with_reactions` / `with_pending` |
-
-### 2.5 关键字函数 (`keyword.rs`) 
-
-成对统一签名: `fn(state: &DefState, env: &EffectEnv<'_>, args: &XxxArgs) -> KeywordResult`.
-
-| 函数 | 参数 | 说明 |
-|---|---|---|
-| `cause_damage` | `DamageArgs` | 走 `damage::damage_with_chain` (伤害链 + 附着 + 反应预测) ; 不重写伤害语义 |
-| `heal` | `HealArgs` | 走治疗原语 |
-| `attach_element` | `AttachElementArgs` | 非伤害形式附着; 可能判反应 (非伤害反应, 结算时忽略伤害类效果)  |
-| `apply_status` | `StatusArgs` | 角色 / 出战 / 手牌三处状态; 层数 / 持续回合 / stack_cap |
-| `summon` | `SummonArgs` | 生成 / 合并召唤物 |
-| `draw_cards` / `discard` | `DrawCardsArgs` / `DiscardArgs` | 抽牌 / 弃置 (牌库区原语, D190 展开分支)  |
-| `gain_dice` / `convert_dice` | `GainDiceArgs` / `ConvertDiceArgs` | 骰子增减 / 转化 |
-| `create_card` | `CreateCardArgs` | 生成一张卡入手 |
-| `switch_character` / `force_switch` | `SwitchCharacterArgs` / `ForceSwitchArgs` | 切换 / 强制切换 |
-| `consume_energy` | `ConsumeEnergyArgs` | 消耗充能 (全部 / 指定)  |
-| `apply_card_status` | `CardStatusArgs` | 给手牌 / 牌库卡加状态 (Z13; 手牌卡状态触发在区层)  |
-| `put_hand_to_pile_bottom` | `PutHandToPileBottomArgs` | 全部手牌置底 (顺序由 `OrderFn` 注入, D209)  |
+反应在步内判定, 但在步边界通过专用帧结算.
 
 ## 3. 公开入口
 
-### 索引
+### 3.1 目标选择器
 
-本小节的源码块为当前仓库的实现源码 (含 `use` / `derive` / `impl` 行, 路径见小节标题) ; 超长函数只列文档注释 + 签名 + 函数体开头几行, `// ...` 表示其余函数体省略.
+相对侧用作用域表达, 不用侧编号.
 
-| 模块 | 说明 |
-|---|---|
-| 目标选择器 | `keywords/target.rs`: `SideScope` / `HpOrder` / `LostHpOrder` / `SlotOrder` / `HpTie` / `ResolveContext` / `TargetSelector` / `TargetSet` / `resolve` / `player_of` / `locate` / `sides_of` |
-| 操作数据 | `keywords/op.rs`: `KeywordOp` + 各 `*Args` (`DamageArgs` / `StatusArgs` / `SummonArgs` / `DrawCardsArgs` …) / `KeywordBranch` / `KeywordResult` |
-| 一步 | `keywords/step.rs`: `Step` / `StepOutcome` / `execute_step_me/opp` / `execute_steps_me/opp` |
-| 关键字函数 | `keywords/keyword.rs`: `cause_damage` / `heal` / `attach_element` / `apply_status` / `summon` / `draw_cards` / `discard` / `gain_dice` / `convert_dice` / `create_card` / `switch_character` / `force_switch` / `consume_energy` / `apply_card_status` / `put_hand_to_pile_bottom` |
-| 反应子结算 | `keywords/reaction.rs`: `ReactionRequest` / `ReactionFrames` / `settle_reaction` / `settle_reactions` / `settle_inserted` |
-| 执行上下文 | `keywords/effect.rs`: `TriggerBook` / `EffectEnv` |
-| 迁移 | `keywords/migrate.rs`: `MigratedStep` / `step_from_skill_effect_plan` / `keyword_op_from_effect_op` / `step_from_effect_ops` / `step_from_reaction_ops` / `discard_self_step` |
 
-### 源码: `keywords/target.rs`
-
-*注释中的关键字代码已替换为名称, 代码行未改*
+文件: crates/definitions/src/keywords/target.rs
 
 ```rust
-use crate::families::character::character::CharacterState;
-use crate::state::{DefState, PlayerDefs};
-use gi_genius_invokation_engine::{nadd, nsub, EntityId, Nat};
-
 /// **相对侧**（相对视角方；不是敌我编号 / 不是下标，D29 / D34）。
 ///
 /// - [SideScope::Own]：视角方自己这一边（卡面「我方」）；
@@ -176,7 +87,14 @@ pub struct HpTie {
     /// 其余角色按槽位方向排（出战优先之后再看）。
     pub direction: SlotOrder,
 }
+```
 
+解析需要视角, 效果主体, 以及可选的反应承载角色.
+
+
+文件: crates/definitions/src/keywords/target.rs
+
+```rust
 /// **解析上下文**：效果主体（自己）+ 视角方 + 反应承载角色（可选）。
 ///
 /// 由 [crate::keywords::effect::EffectEnv] 提供；关键字函数自己不拼实体号（D206）。
@@ -206,7 +124,14 @@ impl ResolveContext {
         self
     }
 }
+```
 
+这是完整的选择器枚举. 每个变体只描述候选.
+
+
+文件: crates/definitions/src/keywords/target.rs
+
+```rust
 /// **目标选择器**（关键字函数的参数）。
 ///
 /// 每个变体都只描述「候选集合怎么筛」，不描述「选哪一个」：随机 / 选择策略由上层在
@@ -224,11 +149,11 @@ pub enum TargetSelector {
     /// **所有后台角色**（出战角色以外的角色）。
     Standby(SideScope),
     /// **距离最近**：从 reference 方的出战角色出发，选 candidates 方**位置最接近**的角色
-    /// （距离最近 / L12）。
+    /// （权威关键字 距离最近 / L12）。
     ///
-    /// 依据：权威关键字「距离我方出战角色最近的角色」——「对方场上距离我方出战角色
+    /// 依据：权威关键字 距离最近「距离我方出战角色最近的角色」——「对方场上距离我方出战角色
     /// 『最近』的角色，指的是位置与我方出战角色最接近的敌方角色。如果存在多个位置最接近的
-    /// 角色，则其中靠前的角色被视为『最近』。」（tcgkeywords 4lang；英文 foremost /
+    /// 角色，则其中靠前的角色被视为『最近』。「（tcgkeywords 4lang；英文 foremost /
     /// 日文 一番左側）。规则书正文**没有**这个词条（L12 = C 档），所以：
     /// - 距离口径 = 出战角色在**本队槽位里的下标**与候选角色槽位下标之**绝对差**；
     /// - 并列 = 槽位更靠前（下标更小 / 左侧）的候选优先；
@@ -329,7 +254,14 @@ pub enum TargetSelector {
     /// 牌组里的全部卡牌（候选集合 = 当前牌库内容，按牌库位置顺序）。
     PileCards(SideScope),
 }
+```
 
+解析结果是分侧列表, 不排序也不选.
+
+
+文件: crates/definitions/src/keywords/target.rs
+
+```rust
 /// **解析出来的具体实体集合**（按两个具名实例分开；D34：不编号）。
 ///
 /// 顺序 = 角色区 / 手牌 / 召唤物 / 支援区自己的容器顺序（可复现）；不是策略顺序。
@@ -405,13 +337,18 @@ impl TargetSet {
             )
     }
 }
+```
 
+解析与辅助函数都是纯读.
+
+
+文件: crates/definitions/src/keywords/target.rs
+
+```rust
 /// 把选择器**解析成具体实体集合**（纯读；不采样、不排序策略）。
 pub fn resolve(state: &DefState, selector: TargetSelector, context: &ResolveContext) -> TargetSet {
     let mut set = TargetSet::new();
     match selector {
-        TargetSelector::Subject => {
-            if let Some(side) = locate(state, context.subject) {
     // ...
 
 /// 把相对侧展开成「具体两侧」：(候选数组, 前 count 个有效)。
@@ -437,27 +374,17 @@ pub fn player_of(state: &DefState, side: Perspective) -> &PlayerDefs {
 pub fn locate(state: &DefState, entity: EntityId) -> Option<Perspective> {
     for side in [Perspective::Me, Perspective::Opp] {
         let player = player_of(state, side);
-        let in_equipment = player
-            .equipment()
     // ...
 ```
 
-### 源码: `keywords/op.rs`
+### 3.2 操作与参数
+
+伤害参数携带选择器, 数值, 类型, 来源类别, 选取策略与乘算修饰.
+
+
+文件: crates/definitions/src/keywords/op.rs
 
 ```rust
-use crate::base::{CardId, Element};
-use crate::families::character::damage_chain::bonus::DamageModifiers;
-use crate::families::character::damage_chain::executor::EntityAlloc;
-use crate::families::character::types::DamageType;
-use crate::families::summon::def::SummonEffectKind;
-use crate::flow::pending::PendingSet;
-use crate::reactions::effect::HandCardStatus;
-use crate::resources::dice::DieFace;
-use crate::state::DefState;
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::Nat;
-use super::target::{SideScope, TargetSelector};
-
 /// **伤害来源类别**（卡面「造成的伤害」属于哪一类：普通攻击 / 元素战技 / 元素爆发 /
 /// 状态 / 召唤物 / 反应…）。
 ///
@@ -544,7 +471,14 @@ impl DamageArgs {
         self
     }
 }
+```
 
+其它操作各自有小的参数结构.
+
+
+文件: crates/definitions/src/keywords/op.rs
+
+```rust
 /// **治疗**的参数。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct HealArgs {
@@ -552,13 +486,6 @@ pub struct HealArgs {
     pub targets: TargetSelector,
     /// 治疗量。
     pub amount: Nat,
-}
-
-impl HealArgs {
-    /// 建治疗参数。
-    pub const fn new(targets: TargetSelector, amount: Nat) -> HealArgs {
-        HealArgs { targets, amount }
-    }
 }
 
 /// **附着元素**的参数（非伤害形式的元素附着）。
@@ -626,24 +553,22 @@ pub struct SummonArgs {
     /// 新召唤物 / 合并后的可用次数**截断到上限**。规则书没写清超限处理 → **TODO / 待实测**。
     pub stack_limit: Option<Nat>,
 }
+```
 
+
+文件: crates/definitions/src/keywords/op.rs
+
+```rust
 /// **抽几张**的表达（有动态量：沙中遗事抓「原手牌数 + 1」）。
 ///
 /// 动态度在**一步开始时**取（D204：一步是原子结算单位），所以「先把手牌放回牌组、
-/// 再抓原手牌数 + 1」这种写法不会因为手牌已经离手而算错。
+/// 再抓原手牌数 + 1「这种写法不会因为手牌已经离手而算错。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum DrawCount {
     /// 固定张数。
     Fixed(Nat),
     /// **本步开始时**那一方手牌数 + 偏移（沙中遗事 = +1）。
     HandAtStepStartPlus(Nat),
-}
-
-impl DrawCount {
-    /// 固定一张。
-    pub const fn one() -> DrawCount {
-        DrawCount::Fixed(Nat::new(1))
-    }
 }
 
 /// **抽牌**的参数。
@@ -699,7 +624,12 @@ pub struct CreateCardArgs {
     /// 行动牌 id（行动牌牌族）。
     pub card: CardId,
 }
+```
 
+
+文件: crates/definitions/src/keywords/op.rs
+
+```rust
 /// **切换角色**（普通切换，把后台角色切为出战角色；费用由骰池另算）。
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct SwitchCharacterArgs {
@@ -748,7 +678,14 @@ pub struct CardStatusArgs {
     /// 规则书未写清手牌状态的超限处理 -> **TODO / 待实测**。
     pub stack_cap: Option<Nat>,
 }
+```
 
+重复用函数指针, 调用方可以按序号生成操作, 不用闭包.
+
+
+文件: crates/definitions/src/keywords/op.rs
+
+```rust
 /// **按序号生成操作用的关键字函数指针**（D186 / D209：登记函数指针，不登记闭包）。
 ///
 /// 输入 = 这一次是第几次（0 起），输出 = 这一次要执行的操作清单。
@@ -773,13 +710,6 @@ pub struct RepeatArgs {
     pub count: Nat,
     /// 第 i 次要执行的操作（序号 0 起依次传入；D209）。
     pub plan: RepeatOpFn,
-}
-
-impl RepeatArgs {
-    /// 按序号生成操作的重复（D209：「序号 -> 关键字」）。
-    pub const fn indexed(count: Nat, plan: RepeatOpFn) -> RepeatArgs {
-        RepeatArgs { count, plan }
-    }
 }
 
 /// **把某一方全部手牌置于牌组底**（沙中遗事；D208）。
@@ -807,17 +737,14 @@ pub fn default_put_bottom_order(index: Nat, total: Nat) -> Nat {
         index
     )
 }
+```
 
-impl PutHandToPileBottomArgs {
-    /// 用默认顺序建参数。
-    pub const fn new(side: SideScope) -> PutHandToPileBottomArgs {
-        PutHandToPileBottomArgs {
-            side,
-            order: default_put_bottom_order,
-        }
-    }
-}
+操作枚举是一步里一个动作的数据形式.
 
+
+文件: crates/definitions/src/keywords/op.rs
+
+```rust
 /// **一条关键字操作**（一步里的一个操作；数据，不含实体号）。
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum KeywordOp {
@@ -854,7 +781,14 @@ pub enum KeywordOp {
     /// 重复执行一组操作（D208：同属一步）。
     Repeat(RepeatArgs),
 }
+```
 
+每个结果携带带精确概率的分支, 待执行, 以及反应请求.
+
+
+文件: crates/definitions/src/keywords/op.rs
+
+```rust
 /// **一支关键字结算分支**：局面 + 精确概率 + 待执行 + 待插入的反应子结算（D190）。
 #[derive(Clone, Debug)]
 pub struct KeywordBranch {
@@ -943,20 +877,14 @@ impl KeywordResult {
 }
 ```
 
-### 源码: `keywords/step.rs`
+### 3.3 一步
+
+一步只是一个操作列表, 自身没有状态.
+
+
+文件: crates/definitions/src/keywords/step.rs
 
 ```rust
-use crate::families::character::damage_chain::executor::EntityAlloc;
-use crate::flow::pending::execute_pending;
-use crate::state::DefState;
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::{nadd, Nat};
-use super::effect::EffectEnv;
-use super::keyword::{
-use super::op::{KeywordBranch, KeywordOp, KeywordResult, RepeatArgs};
-use super::reaction::{settle_inserted, ReactionRequest};
-use super::target::Perspective;
-
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Step {
@@ -989,7 +917,14 @@ impl Step {
         self.ops.is_empty()
     }
 }
+```
 
+执行一步返回分支与推进后的发号器.
+
+
+文件: crates/definitions/src/keywords/step.rs
+
+```rust
 /// **一步的执行结果**：结算分支 + 推进后的发号器。
 ///
 /// 分支里的待执行**还没有执行**（D204：步内不插入；调用方在步边界统一执行）。
@@ -1047,54 +982,32 @@ pub fn execute_steps_opp(state: &DefState, steps: &[Step], env: &EffectEnv<'_>) 
 }
 ```
 
-### 源码: `keywords/keyword.rs`
+### 3.4 关键字函数
+
+每个关键字函数形状相同: 状态, 环境, 参数, 结果.
+
+
+文件: crates/definitions/src/keywords/keyword.rs
 
 ```rust
-use crate::base::CardId;
-use crate::families::action_card::status::{StateForm, StateIdentity};
-use crate::families::action_card::zones::hand::HandState;
-use crate::families::action_card::zones::pile::PileState;
-use crate::families::action_card::zones::CardInstance;
-use crate::families::character::character::CharacterState;
-use crate::families::character::damage::{damage_with_chain, ChainDamageEnv};
-use crate::families::character::damage_chain::bonus::{predict_reaction, DamageBonus};
-use crate::families::character::damage_chain::chain::DamageChainEnv;
-use crate::families::character::damage_chain::executor::{
-use crate::families::character::damage_chain::statuses;
-use crate::families::character::trigger::heal_with_triggers;
-use crate::families::summon::zones::SummonEntry;
-use crate::flow::pending::{FlowPending, PendingSet};
-use crate::state::{DefState, PlayerDefs};
-use gi_genius_invokation_engine::nat::ExactNat128;
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::{nadd, nsub, EntityId, Nat};
-use super::effect::EffectEnv;
-use super::op::{
-use super::reaction::ReactionRequest;
-use super::target::{player_of, resolve, Perspective};
-
 /// **造成伤害**：对选择器解析出的每个角色走伤修链（加伤 -> 护盾 -> 减伤 -> 扣血 / 附着 / 反应）。
 ///
 /// 每次伤害都派发「生命值变动」待执行（不执行，步末统一做，D204）。
 pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) -> KeywordResult {
     let targets = resolve(state, args.targets, &env.resolve_context());
     let candidates = character_targets(state, &targets);
-    fan_out(state, env, candidates, args.pick, |current, side, target| {
-        let target_state = character_state(current, side, target)?;
     // ...
 
 /// **治疗**：对每个目标角色 hp_add 并派发「生命值变动 -> 治疗后」。
 pub fn heal(state: &DefState, env: &EffectEnv<'_>, args: &HealArgs) -> KeywordResult {
     let targets = resolve(state, args.targets, &env.resolve_context());
     let candidates = character_targets(state, &targets);
-    fan_out(state, env, candidates, TargetPick::All, |current, side, target| {
-        let target_state = character_state(current, side, target)?;
     // ...
 
 /// **附着元素**（非伤害形式）：改元素附着集合，**并且也判反应**（R2 / 规则书 S5.2 第 2 条）。
 ///
 /// 规则书·元素反应·规则 第（2）条：「以非伤害的形式施加特定类型的『元素附着』时也会引发
-/// 『元素反应』。结算这类『元素反应』效果时，会忽略所有伤害类效果。」
+/// 『元素反应』。结算这类『元素反应』效果时，会忽略所有伤害类效果。「
 ///
 /// 顺序（结算顺序.md §三）：附着 -> 判定反应 -> 结算反应效果 -> 继续原步骤。
 /// 本关键字只做到「判定 + 记反应子结算」：反应效果由步边界插入执行（D204 步内不插），
@@ -1109,8 +1022,6 @@ pub fn attach_element(
 ) -> KeywordResult {
     let targets = resolve(state, args.targets, &env.resolve_context());
     let candidates = character_targets(state, &targets);
-    fan_out(state, env, candidates, TargetPick::All, |current, side, target| {
-        let mut target_state = character_state(current, side, target)?;
     // ...
 
 /// **施加状态**：角色状态 / 出战状态 / 手牌状态三种承载。
@@ -1123,24 +1034,18 @@ pub fn attach_element(
 pub fn apply_status(state: &DefState, env: &EffectEnv<'_>, args: &StatusArgs) -> KeywordResult {
     let Some(identity) = statuses::status_of_card(args.card) else {
         return KeywordResult::unchanged(state, env.alloc());
-    };
-    let targets = resolve(state, args.targets, &env.resolve_context());
     // ...
 
 /// **召唤 / 生成召唤物**（同名合并、满 4 拒绝由召唤物区自持；本层只写回）。
 pub fn summon(state: &DefState, env: &EffectEnv<'_>, args: &SummonArgs) -> KeywordResult {
     let (sides, count) = super::target::sides_of(args.side, env.viewer());
     let mut current = state.clone();
-    let mut pending = PendingSet::new();
-    let mut alloc = env.alloc();
     // ...
 
 /// **抽牌**：每张抽取的折叠分支原样展开（PileState::draw_many 的精确概率）。
 pub fn draw_cards(state: &DefState, env: &EffectEnv<'_>, args: &DrawCardsArgs) -> KeywordResult {
     let (sides, count) = super::target::sides_of(args.side, env.viewer());
     let mut branches: Vec<KeywordBranch> = vec![KeywordBranch::determined(state.clone())];
-    for side in sides.iter().take(count) {
-        let draw_count = match args.count {
     // ...
 
 /// **弃置**：按「支援区 -> 手牌 -> 召唤物 -> 装备栏」找到实体所在的区并弃置。
@@ -1149,8 +1054,6 @@ pub fn draw_cards(state: &DefState, env: &EffectEnv<'_>, args: &DrawCardsArgs) -
 pub fn discard(state: &DefState, env: &EffectEnv<'_>, args: &DiscardArgs) -> KeywordResult {
     let targets = resolve(state, args.targets, &env.resolve_context());
     let mut current = state.clone();
-    let mut pending = PendingSet::new();
-    for (side, entity) in targets.iter() {
     // ...
 
 /// **获得骰子**。
@@ -1186,18 +1089,7 @@ pub fn convert_dice(
 pub fn create_card(state: &DefState, env: &EffectEnv<'_>, args: &CreateCardArgs) -> KeywordResult {
     let (sides, count) = super::target::sides_of(args.side, env.viewer());
     let mut current = state.clone();
-    let mut alloc = env.alloc();
-    for side in sides.iter().take(count) {
-        let entity = alloc.next();
-        alloc = EntityAlloc::starting_at(alloc_after_one(entity));
-        let player = player_of(&current, *side);
-        let (hand, added) = player.hand().add(CardInstance::new(entity, args.card));
-        if added {
-            current = set_player(&current, *side, player.clone().with_hand(hand));
-        }
-    }
-    KeywordResult::single(current, PendingSet::new(), alloc)
-}
+    // ...
 
 /// **切换角色**（把选择器解析到的我方后台角色切为出战角色；不付骰子费用）。
 ///
@@ -1209,8 +1101,6 @@ pub fn switch_character(
 ) -> KeywordResult {
     let targets = resolve(state, args.to, &env.resolve_context());
     let mut current = state.clone();
-    let mut pending = PendingSet::new();
-    for (side, entity) in targets.iter() {
     // ...
 
 /// **强制切换**：把解析到的出战角色强制换成角色区里的下一个后台角色（超载类效果）。
@@ -1221,8 +1111,6 @@ pub fn force_switch(
 ) -> KeywordResult {
     let targets = resolve(state, args.targets, &env.resolve_context());
     let mut current = state.clone();
-    let mut pending = PendingSet::new();
-    for (side, entity) in targets.iter() {
     // ...
 
 /// **消耗充能**（元素爆发：全部；其它：固定点数）。
@@ -1233,18 +1121,7 @@ pub fn consume_energy(
 ) -> KeywordResult {
     let targets = resolve(state, args.targets, &env.resolve_context());
     let mut current = state.clone();
-    for (side, entity) in targets.iter() {
-        if let Some(target_state) = character_state(&current, side, entity) {
-            let amount = match args.amount {
-                EnergyAmount::All => target_state.energy(),
-                EnergyAmount::Fixed(value) => value,
-            };
-            let next_state = target_state.energy_sub(amount);
-            current = with_character(&current, side, entity, next_state);
-        }
-    }
-    KeywordResult::single(current, PendingSet::new(), env.alloc())
-}
+    // ...
 
 /// **赋予卡牌状态**：目标在手牌 -> 手牌卡状态表；目标在牌组 -> 牌库位置状态（mark）。
 ///
@@ -1256,8 +1133,6 @@ pub fn apply_card_status(
 ) -> KeywordResult {
     let identity = statuses::hand_status_identity(args.status);
     let targets = resolve(state, args.targets, &env.resolve_context());
-    fan_out(state, env, targets.iter().collect(), args.pick, |current, side, entity| {
-        let player = player_of(current, side);
     // ...
 
 /// **把某一方全部手牌置于牌组底**（沙中遗事；D208）。
@@ -1277,28 +1152,17 @@ pub fn put_hand_to_pile_bottom(
 ) -> KeywordResult {
     let (sides, count) = super::target::sides_of(args.side, env.viewer());
     let mut current = state.clone();
-    for side in sides.iter().take(count) {
-        let player = player_of(&current, *side);
     // ...
 ```
 
-### 源码: `keywords/reaction.rs`
+### 3.5 反应子结算
+
+反应请求是数据: 哪个反应, 谁触发, 谁承受, 以及是否来自非伤害附着.
+
+
+文件: crates/definitions/src/keywords/reaction.rs
 
 ```rust
-use crate::families::character::attachment::ReactionEvent;
-use crate::families::character::damage::DamageEnv;
-use crate::families::character::damage_chain::bonus::ReactionHit;
-use crate::families::character::damage_chain::executor::{
-use crate::flow::pending::{FlowPending, PendingSet};
-use crate::reactions::table;
-use crate::state::{DefState, PlayerDefs};
-use gi_genius_invokation_engine::prob::Fraction;
-use gi_genius_invokation_engine::Nat;
-use super::effect::EffectEnv;
-use super::keyword::{push_pending, set_player};
-use super::op::{KeywordBranch, KeywordResult};
-use super::target::{player_of, Perspective};
-
 /// **一次待执行的插入式子结算：一条已判定的反应**。
 ///
 /// 关键字函数只产出它（纯数据、Copy），一步在步边界统一结算（D204：步内不插）。
@@ -1375,7 +1239,14 @@ impl ReactionFrames {
         Nat::new(self.frames.len() as _)
     }
 }
+```
 
+结算单条反应, 一组反应, 或步边界插入, 都走这三个入口.
+
+
+文件: crates/definitions/src/keywords/reaction.rs
+
+```rust
 /// **执行一条反应子结算**：返回每支（局面 + 精确概率 + 待执行 + 发号器）。
 ///
 /// 没登记效果的反应 -> 恰好一支、局面不变（不 panic）。
@@ -1386,8 +1257,6 @@ pub fn settle_reaction(
 ) -> Vec<(KeywordBranch, EntityAlloc)> {
     let event = request.event();
     let Some(effect) = table::resolve(&event, env.effect_context) else {
-        return vec![(KeywordBranch::determined(state.clone()), env.alloc())];
-    };
     // ...
 
 /// **按顺序结算一组反应请求**（每条可能展开成多支；概率精确相乘；不折叠）。
@@ -1398,8 +1267,6 @@ pub fn settle_reactions(
 ) -> KeywordResult {
     let mut work = vec![Work {
         state: state.clone(),
-        probability: Fraction::ONE,
-        pending: PendingSet::new(),
     // ...
 
 /// **插入式结算**（R4 的「回到原步骤」）：把一批反应请求作为子结算插入当前位置执行。
@@ -1413,24 +1280,17 @@ pub fn settle_inserted(
 ) -> KeywordResult {
     let mut frames = ReactionFrames::new();
     frames.insert(requests.to_vec());
-    let mut work = vec![Work {
-        state: state.clone(),
     // ...
 ```
 
-### 源码: `keywords/effect.rs`
+### 3.6 执行上下文与迁移
+
+执行上下文借入双方的触发注册表, 不拥有它们.
+
+
+文件: crates/definitions/src/keywords/effect.rs
 
 ```rust
-use crate::families::action_card::areas::support::SupportTriggers;
-use crate::families::character::damage::DamageEnv;
-use crate::families::character::damage_chain::bonus::DamageModifiers;
-use crate::families::character::damage_chain::executor::{EntityAlloc, SideTriggers};
-use crate::families::character::trigger::CharacterTriggers;
-use crate::families::character::zones::equipment::EquipmentTriggers;
-use crate::reactions::effect::EffectContext;
-use gi_genius_invokation_engine::{EntityId, Nat};
-use super::target::{Perspective, ResolveContext};
-
 /// **双方的触发注册表集合**（只借；D34：两个具名侧各一组）。
 #[derive(Clone, Copy, Debug)]
 pub struct TriggerBook<'a> {
@@ -1479,75 +1339,14 @@ pub struct EffectEnv<'a> {
     /// **本步开始时**敌方手牌数。
     step_start_opp_hand: Nat,
 }
-
-impl<'a> EffectEnv<'a> {
-    /// 建上下文：默认双方零触发、零精通、零增伤、空反应摘要、发号从 0 开始。
-    pub fn new(subject: EntityId, viewer: Perspective, damage: DamageEnv<'a>) -> EffectEnv<'a> {
-        EffectEnv {
-            subject,
-            viewer,
-            reacted: None,
-            alloc: EntityAlloc::starting_at(Nat::ZERO),
-            damage,
-            triggers: TriggerBook::empty(),
-            mastery: Nat::ZERO,
-            increases: &[],
-            effect_context: &EMPTY_EFFECT_CONTEXT,
-            reaction_modifiers: DamageModifiers::NONE,
-            step_start_me_hand: Nat::ZERO,
-            step_start_opp_hand: Nat::ZERO,
-        }
-    }
-
-    /// 效果主体实体号（自己）。
-    pub fn subject(&self) -> EntityId {
-        self.subject
-    }
-
-    /// 视角方绑定（我方 / 我方是 me 还是 opp）。
-    pub fn viewer(&self) -> Perspective {
-        self.viewer
-    }
-
-    /// 反应承载角色（反应效果关键字用）。
-    pub fn reacted(&self) -> Option<EntityId> {
-        self.reacted
-    }
-
-    /// 反应效果伤害的乘算 / 除算来源（默认 NONE）。
-    pub fn reaction_modifiers(&self) -> DamageModifiers<'a> {
-        self.reaction_modifiers
-    }
-
-    /// 当前发号器（生成下一个实体号用）。
-    pub fn alloc(&self) -> EntityAlloc {
-        self.alloc
-    }
-
-    /// 解析上下文（目标选择器用）。
-    pub fn resolve_context(&self) -> ResolveContext {
-        ResolveContext {
-            viewer: self.viewer,
-            subject: self.subject,
-            reacted: self.reacted,
-        }
-    }
-
-    /// 换发号器（纯值；不改入参）。
-    pub fn with_alloc(mut self, alloc: EntityAlloc) -> EffectEnv<'a> {
-        self.alloc = alloc;
 ```
 
-### 源码: `keywords/migrate.rs`
+迁移把旧计划与反应操作转成一步, 并标出何时需要调用方提供反应承载角色.
+
+
+文件: crates/definitions/src/keywords/migrate.rs
 
 ```rust
-use crate::flow::skill_use::SkillEffectPlan;
-use crate::reactions::effect::{EffectOp, Side, StatusTarget, TargetScope};
-use gi_genius_invokation_engine::Nat;
-use super::op::{
-use super::step::Step;
-use super::target::{SideScope, TargetSelector};
-
 /// 迁移桥接的结果（一步 + 需要调用方给执行上下文的东西）。
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct MigratedStep {
@@ -1561,23 +1360,12 @@ pub struct MigratedStep {
 pub fn step_from_skill_effect_plan(plan: SkillEffectPlan) -> Step {
     match plan {
         SkillEffectPlan::None => Step::empty(),
-        SkillEffectPlan::Damage { amount, ty } => Step::new(vec![KeywordOp::Damage(
-            DamageArgs::new(
-                TargetSelector::opponent_active(),
-                amount,
-                ty,
-                DamageSourceKind::Other,
-            ),
-        )]),
-    }
-}
+    // ...
 
 /// **反应效果的一条底层操作** -> 一个关键字调用（迁移桥接）。
 pub fn keyword_op_from_effect_op(op: EffectOp) -> KeywordOp {
     match op {
         EffectOp::Damage { amount, ty, target } => KeywordOp::Damage(DamageArgs::new(
-            selector_of(target),
-            amount,
     // ...
 
 /// **一条反应分支**（操作清单）-> **一步**（D208：分支里的全部动作同属一步）。
@@ -1605,78 +1393,68 @@ pub fn discard_self_step() -> Step {
 ## 4. 不变量与禁止
 
 > [!IMPORTANT]
-> 关键字函数不拼实体号 (D206) : 自己用 `Subject`, 敌我用 `SideScope`; 实体号只在 `EffectEnv` / `ResolveContext`.
-> 只读局面: 所有关键字函数吃 `&DefState`, 返回新分支; 不修改 `EffectEnv` (发号器通过返回值带回) .
-> 步内不插入 (D204) : 只把派发结果装进 `pending: PendingSet`, 反应请求装进 `reactions`; 执行 / 插入只在步末 / 步边界.
+
+> 关键字函数不硬写实体号; 自己用 `Subject`, 双方用相对作用域.
+
+> 一步内部不插入, 也不执行待执行.
 
 > [!WARNING]
-> 不采样 (D190) : 随机点展开成"分支 + 精确 `Fraction`", 概率之和应为 1.
-> 反应执行不重写执行器: `settle_reaction` 复用 `damage_chain::executor::execute_reaction`; 非伤害反应先 `without_damage()` (S5.2) .
-> 动态张数在步开始时取样: 用 `EffectEnv.step_start_*_hand`, 不要在 op 执行中途读当前手牌.
 
-## 5. 依据 (规则书与 D 编号) 
+> 不要采样随机; 展开成带精确分数的分支.
 
-| 规则 / 决策 | 落点 |
-|---|---|
-| 游戏区域 I / 使用技能 (攻击对方出战角色)  | `Active(Opponent)` / `opponent_active()` |
-| 卡面"(下)(n)个角色""所有敌方后台角色""生命值最低" | `AfterActive` / `Standby` / `HpRank` |
-| 权威关键字"距离最近" (规则书正文无, L12)  | `NearestToActive` (留空 #62/#69)  |
-| S5.2 元素反应 / 非伤害附着也引发反应 (忽略伤害类效果)  | `attach_element` + `ReactionRequest.non_damage` |
-| 结算顺序 §二 插入式结算 (不是栈)  | `ReactionFrames` / `timeline::Resolution` |
-| S7.5 结算顺序 | `flow` 层排序; 关键字层只派发 |
-| D25 / D26 不做选择策略 | `TargetSelector` 只筛候选 + `TargetPick` |
-| D29 / D34 相对视角 / 成对入口 | `SideScope` + `execute_step_me/opp` |
-| D57 / D58 状态身份按地址比较 | `same_state_identity` |
-| D105 公共状态列表 | `StateList` / `StateEntry` / `Mark` |
-| D167 非伤害附着的元素消耗口径 | `attach_element` 待实测条目 |
-| D186 派发只排序 | `KeywordBranch.pending` / `reactions` |
-| D190 / D191 分支 + 精确概率 + 折叠回 | `KeywordBranch.probability`; 折叠由 `flow::fold_states` |
-| D204 / D208 / D209 一步原子 / Repeat 同属一步 / 注入顺序 | `step.rs` / `RepeatArgs` / `OrderFn` |
-| D205 / D206 自己是选择器, 实体号从上下文来 | `Subject` + `ResolveContext.subject` |
-| D228 / D229 / D230 生命排名三级并列 | `HpRank` / `HpTie` |
-| D237 受伤量 = 实际最大生命 − 当前生命 | `LostHpRank` (读运行期 `max_hp`)  |
-| D238 生命上限定义值 / 实际值 | 排名 / 受伤量一律用运行期值 |
-| D258 反应子结算专用帧 | `ReactionFrames` |
-| D259 反应在步边界执行 | `settle_inserted` / `run_step` |
-| Z13 手牌 6 状态 | `CardStatusArgs` + `reactions::effect::HandCardStatus` |
-| Z15 stack_cap | `StatusArgs.stack_cap` / `SummonArgs.stack_limit` |
+> 不要在操作中途读当前手牌; 用步开始时的快照.
+
+## 5. 依据
+
+- 游戏区域 I 与使用技能: 攻击对方出战角色;
+- 关键字条目 distance nearest: 距离对方出战角色最近的槽位;
+- S5.2: 非伤害附着也会引发反应, 结算时忽略伤害类效果;
+- 结算顺序: 插入式结算, 不是栈;
+- D25 与 D26: 选择器不做选择策略;
+- D29 与 D34: 相对视角与成对入口;
+- D105: 公共状态列表;
+- D186: 派发只排序;
+- D190 与 D191: 分支带精确概率;
+- D204, D208, D209: 一步原子, 重复, 注入顺序;
+- D205 与 D206: 自己是选择器;
+- D228, D229, D230: 生命排名三级并列;
+- D237 与 D238: 受伤量用运行期最大生命;
+- D258 与 D259: 反应专用帧, 步边界结算.
 
 ## 6. 常见误用
 
 > [!WARNING]
-> 在 `Step` 里塞"等触发效果执行完再继续"的假设; 步内不插, 把后续动作写成下一步.
-> 在关键字函数里直接执行 `pending` / `reactions`; 应由 `Step` / flow 在步末 / 步边界统一做.
-> 用定义数据 `CharacterDef::max_hp` 算生命排名 / 受伤量; 必须读运行期 `CharacterState::max_hp` (D237/D238) .
 
-- 给 `resolve` 传错视角: `SideScope::Own` 是视角方自己 (成对入口自动绑) , 不是全局"我方".
-- 期望 `TargetSelector` 帮你选随机目标: 随机由 `TargetPick::OneUniform` 在关键字层展开分支.
-- 用 `settle_reactions` 替代 `settle_inserted`: 前者按顺序结算一组请求 (不插入) , 后者是步边界插入执行入口.
-- 用 `Equipments` 当"某角色装备栏": 装备选择器是"该方所有角色装备栏里的装备".
-- 在 `migrate` 里期待 1:1 无损: `EffectOp::Status` 的 `uses / stack_cap` 无入参, 迁移时丢弃 (待接入) .
+> 给 `resolve` 传错视角; `Own` 是视角方自己, 不是全局我方.
+
+> 排名时用定义最大生命而不是运行期值.
+
+- 指望选择器随机选目标; 用选取策略;
+- 该用步边界插入时却用了 `settle_reactions`;
+- 把 `Equipments` 当成某个角色的装备栏.
 
 ## 7. 测试
 
-- `keywords/target.rs`: `active_standby_and_all_characters`, `both_side_scope_fills_two_named_sets`, `after_and_before_active_cycle_in_slot_order`, `nearest_to_active_uses_slot_distance`, `nearest_to_active_tie_breaks_to_foremost`, `nearest_to_active_is_empty_without_reference_or_candidates`, `hp_rank_takes_the_nth_by_current_hp_with_stable_ties`, `hp_rank_tie_breaks_by_active_then_direction`, `hp_rank_handles_single_and_empty_zones`, `subject_is_resolved_from_context_not_written_in_code`, `hand_and_pile_selectors`, `reaction_and_equipment_selectors`, `lost_hp_rank_uses_actual_max_hp_minus_current_hp`, `lost_hp_rank_ties_follow_the_same_three_levels`, `lost_hp_rank_uses_runtime_max_hp_not_definition`, `defeated_characters_are_excluded_from_hp_and_lost_hp_rankings`, `empty_zones_resolve_to_empty_sets`.
-- `keywords/keyword.rs`: `damage_self_hurts_only_the_subject`, `damage_args_multipliers_reach_the_damage_chain`, `damage_random_one_target_expands_to_exact_branches`, `heal_self_refills_only_the_subject`, `attach_element_writes_the_attachment_set`, `status_combat_and_hand_places_write_their_own_zones`, `consume_all_energy_and_switch_to_next_character`, `force_switch_rotates_opponent_active`, `dice_and_draw_keywords_use_the_zone_primitives`, `summon_status_and_create_card_apply_through_zones`, `put_hand_to_pile_bottom_keeps_later_cards_above`, `injected_order_changes_the_bottom_order`, `card_status_random_hand_card_expands_to_exact_probability_branches`, `stack_cap_clamps_layered_character_status`, `stack_cap_is_partial_when_remaining_room_is_smaller`, `stack_cap_applies_to_combat_and_hand_card_statuses`, `summon_stack_limit_clamps_uses`, `card_status_stack_cap_clamps_hand_and_pile_states`.
-- `keywords/step.rs`: `one_step_runs_ops_in_order_without_any_insertion`, `insertion_happens_only_between_two_steps`, `one_step_is_one_display_unit_even_with_many_ops`, `repeat_zero_does_nothing`, `repeat_three_passes_index_and_stays_inside_one_step`, `shazhong_yishi_step_puts_hand_under_pile_then_draws_hand_plus_one`, `yuezhao_full_glory_two_grants_are_one_step_with_exact_branches`, `felis_burst_is_one_atomic_step`.
-- `keywords/reaction.rs`: `reaction_frames_insert_and_return_like_resolution`, `non_damage_reaction_ignores_all_damage_effects`, `settle_reactions_keeps_probability_and_order`, `reaction_damage_uses_keyword_reaction_modifiers`.
-- `keywords/trace.rs` / `keywords/migrate.rs`: 各自模块内测试 (轨迹渲染 / 迁移等价与 `needs_reacted`) .
+- `keywords/target.rs`: 作用域, 最近, 生命排名, 击倒排除;
+- `keywords/keyword.rs`: 伤害, 治疗, 附着, 状态, 骰子, 卡牌状态, 叠加上限;
+- `keywords/step.rs`: 原子顺序, 边界插入, 重复, 动态张数;
+- `keywords/reaction.rs`: 帧, 非伤害反应, 概率与顺序.
 
-## 8. 待接入与待实测
+## 8. 待接入
 
 > [!NOTE]
-> 规则书没写的口径一律标"待实测", 不自行规定; 下列编号对应 `留空.md`.
 
-- "距离最近" : 距离是否镜像, 击倒角色是否占位, 并列口径 (留空 #62/#69) .
-- 生命 / 受伤排名并列口径 (出战优先, 左右方向) 规则书没写 (留空; D229/D230 已记待实测) .
-- `stack_cap` 超限处理 (留空 #70) ; 召唤物 `stack_limit` 按可用次数解释 (留空 #71) ; 手牌卡状态未加 stack_cap (留空 #72) .
-- 非伤害附着的"反应后附着怎么消耗"按 D167 同口径, 待实测; 风 / 岩天生不可附着不判反应 (`reaction.rs` 待复核) .
-- 反应效果造成的伤害是否再引发第二层反应 (`damage_chain/executor` 待复核) ; 反应效果给手牌加牌 / 状态后费用表未同步 (待接入) .
-- 迁移丢失项: `EffectOp::Status` 的 `uses / stack_cap` 无入参; `SkillEffectPlan` 伤害来源类别固定 `Other` (待由技能定义给) .
-- 关键字层没有'加支援牌'op (留空 #117 只做 flow 侧 `CardPlacement::Support`) .
-- 伤害类型转换在 `DamageChainEnv.type_override` (D270 / 留空 #120) , 关键字层不重复实现.
-- 手牌 6 状态身份 / 桥表 (Z13) 见 `reactions/effect.rs` + `damage_chain/statuses.rs` (留空 #115) .
+> 规则书没写的口径一律标待实测, 不自行规定.
+
+- 最近: 是否镜像, 击倒角色是否占位, 并列口径;
+- 叠加上限与超限处理规则书未写;
+- 反应伤害是否再引发第二层反应待复核;
+- 迁移会丢弃暂时没有参数的状态可用次数与叠加上限.
+
+## 小结
+
+选择器筛候选, 操作描述动作, 一步原子执行, 反应等到步边界. 实体号留在上下文, 随机性留在精确分支.
 
 ---
 
-最后核对: 2026-10-19 (代码: `crates/definitions/src/keywords/` 各文件; `keywords/target.rs`:TargetSelector) 
+最后核对: 2026-10-20 (代码: `crates/definitions/src/keywords/`)

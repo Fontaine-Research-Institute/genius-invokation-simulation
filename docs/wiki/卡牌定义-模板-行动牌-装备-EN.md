@@ -2,7 +2,7 @@
 
 > [[卡牌定义-模板-行动牌-装备|中文]] · English
 
-*Scope: writing template for action card · equipment; mirrors the character template [[卡牌定义-模板]] (Chinese reference).*
+*Scope: writing template for action card · equipment; mirrors the character template [[卡牌定义-模板-EN]].*
 
 > [!IMPORTANT]
 > General hard rules:
@@ -31,11 +31,15 @@
 >
 > Cost: 1 Hydro Elemental Die
 
+File: <file path>
+
 ```rust
 // Example Equipment definition code
 ```
 
 > <card-face description here>
+
+File: <file path>
 
 ```rust
 // Example Equipment implementation code
@@ -55,6 +59,10 @@
 > Card image path: `assets/action_card/<id>.jpg`; register each new image in `new/assets/SOURCES.md`.
 >
 > Do not use skill icons.
+
+## Summary
+
+The equipment template follows type, tags, cost, definition code, card text and implementation code. Put the card image and the two credit lines under the card name, and omit zero costs entirely.
 
 ---
 

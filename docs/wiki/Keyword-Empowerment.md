@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Empowerment |
-| K code | K3006 |
+> Keyword: Empowerment
+>
+> K code: K3006
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 - [[卡牌定义-爱诺-EN|Aino]]
+
+## Summary
+
+Empowerment is the keyword K3006.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+The implemented cards that use it are listed above, 1 in total.

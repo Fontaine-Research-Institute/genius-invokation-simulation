@@ -2,7 +2,7 @@
 
 > [[卡牌定义-模板-行动牌-支援|中文]] · English
 
-*Scope: writing template for action card · support; mirrors the character template [[卡牌定义-模板]] (Chinese reference).*
+*Scope: writing template for action card · support; mirrors the character template [[卡牌定义-模板-EN]].*
 
 > [!IMPORTANT]
 > General hard rules:
@@ -33,11 +33,15 @@
 >
 > [[Keyword-Duration|Duration (Rounds)]]: 1 Round
 
+File: <file path>
+
 ```rust
 // Example Support definition code
 ```
 
 > <card-face description here>
+
+File: <file path>
 
 ```rust
 // Example Support implementation code
@@ -57,6 +61,10 @@
 > Card image path: `assets/action_card/<id>.jpg`; register each new image in `new/assets/SOURCES.md`.
 >
 > Do not use skill icons.
+
+## Summary
+
+The support template adds an optional Duration line to the equipment template. Cost, Energy and Duration are metadata lines in the quote block; omit any absent field.
 
 ---
 

@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Taroumaru Enraged |
-| K code | K1021 |
+> Keyword: Taroumaru Enraged
+>
+> K code: K1021
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Taroumaru Enraged is the keyword K1021.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

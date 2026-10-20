@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Current Elemental Dice Cost |
-| K code | K3002 |
+> Keyword: Current Elemental Dice Cost
+>
+> K code: K3002
 
 ## Effect
 
@@ -25,3 +24,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Current Elemental Dice Cost is the keyword K3002.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

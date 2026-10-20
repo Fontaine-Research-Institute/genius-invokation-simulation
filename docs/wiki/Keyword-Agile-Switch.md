@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Agile Switch |
-| K code | K1042 |
+> Keyword: Agile Switch
+>
+> K code: K1042
 
 ## Effect
 
@@ -24,3 +23,9 @@
 ## Cards Using It
 
 - [[卡牌定义-爱诺-EN|Aino]]
+
+## Summary
+
+Agile Switch is the keyword K1042.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+The implemented cards that use it are listed above, 1 in total.

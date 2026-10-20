@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Hydro DMG |
-| K code | K102 |
+> Keyword: Hydro DMG
+>
+> K code: K102
 
 ## Effect
 
@@ -31,3 +30,9 @@
 ## Cards Using It
 
 - [[卡牌定义-爱诺-EN|Aino]]
+
+## Summary
+
+Hydro DMG is the keyword K102.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+The implemented cards that use it are listed above, 1 in total.

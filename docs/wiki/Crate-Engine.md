@@ -6,7 +6,7 @@
 
 ---
 
-## 1. 职责
+## 1. 职责 (这一层解决什么问题)
 
 机制原语 crate: 只提供数值, 标识, 实体, 区容器, 随机与选择, 精确分数, 统计这些"没有任何游戏语义"的底层零件.默认零依赖; 上层 (`definitions` / `cards` / `simulation`) 依赖它, 它不依赖任何业务 crate.
 
@@ -15,66 +15,85 @@
 
 ## 2. 关键概念与类型
 
-| 概念 | 位置 | 说明 |
-|---|---|---|
-| 饱和数值族 | `src/nat.rs`: `Nat8/16/32/64/128`, 默认 `Nat = Nat32` | 加 / 减 / 乘饱和 (溢出停 `MAX`, 减法到 `ZERO` 停, 不 panic) ; 除零 panic (D44 / D36 / D37)  |
-| 精确数值族 | `src/nat.rs`: `ExactNat8/16/32/64/128`, 默认 `ExactNat = ExactNat128` | 加 / 减 / 乘上溢 / 下溢都 panic (D153) ; 概率 / 分数用它 (D152 / D156)  |
-| 算术宏 | `src/nat.rs`: `nadd!` / `nsub!` / `nmul!` / `ndiv!` | 两族共用一套名字, 语义由类型决定 (D155)  |
-| 实体标识 | `src/id.rs`: `EntityId = Nat` | 单调不复用流水号; 引擎不记实体在哪个区 (D42)  |
-| 列表下标 | `src/id.rs`: `ActionId = u32` | 只是"列表第几项", 不参与数值运算 |
-| 实体表 | `src/entity.rs`: `EntityTable` | 只发号: `alloc` / `len` / `is_empty` |
-| 区容器 | `src/area.rs`: `Area` (多实体) , `SingleArea` (单实体 = 变量)  | 没有身份, 编号, 登记; 是状态字段的类型 (D42)  |
-| 选择原语 | `src/select.rs`: `SelectionSource<S>` + `enumerate_select` | 只收"列表 + 数量", 没有 `who` (D25) ; 列表形状归各块 `parse.rs` (D26)  |
-| 随机原语 | `src/random.rs`: `DedupFn` / `enumerate_random` / `enumerate_random_weighted` | 纯枚举, 不消费 PRNG; 分支概率是 `Fraction` (D149 / D158)  |
-| 精确分数 | `src/prob.rs`: `Fraction` / `total` / `normalize` / `pick_index` | 分子 / 分母 `ExactNat128`; 自动约分; 分母 0 panic |
-| 随机源 | `src/rng.rs`: `Rng` | SplitMix64; 对外只有 `next_u128` / `next_below_u128` (拒绝采样, D160)  |
-| 统计原语 | `src/stats.rs`: `Counter` / `Seq<T>` | 普通值字段, 区自持, 对外只读 (D181–D183)  |
-| 求解接口 | `src/rules.rs`: `GameRules<S>` / `GameResult<P>` / `ActionList` | 仅 feature `rules` 时编译 (D24) ; 含 `BothLose` (D267)  |
+- 饱和数值族
+  - 位置: `src/nat.rs`: `Nat8/16/32/64/128`, 默认 `Nat = Nat32`
+  - 说明: 加 / 减 / 乘饱和 (溢出停 `MAX`, 减法到 `ZERO` 停, 不 panic) ; 除零 panic (D44 / D36 / D37)
+- 精确数值族
+  - 位置: `src/nat.rs`: `ExactNat8/16/32/64/128`, 默认 `ExactNat = ExactNat128`
+  - 说明: 加 / 减 / 乘上溢 / 下溢都 panic (D153) ; 概率 / 分数用它 (D152 / D156)
+- 算术宏
+  - 位置: `src/nat.rs`: `nadd!` / `nsub!` / `nmul!` / `ndiv!`
+  - 说明: 两族共用一套名字, 语义由类型决定 (D155)
+- 实体标识
+  - 位置: `src/id.rs`: `EntityId = Nat`
+  - 说明: 单调不复用流水号; 引擎不记实体在哪个区 (D42)
+- 列表下标
+  - 位置: `src/id.rs`: `ActionId = u32`
+  - 说明: 只是"列表第几项", 不参与数值运算
+- 实体表
+  - 位置: `src/entity.rs`: `EntityTable`
+  - 说明: 只发号: `alloc` / `len` / `is_empty`
+- 区容器
+  - 位置: `src/area.rs`: `Area` (多实体) , `SingleArea` (单实体 = 变量)
+  - 说明: 没有身份, 编号, 登记; 是状态字段的类型 (D42)
+- 选择原语
+  - 位置: `src/select.rs`: `SelectionSource<S>` + `enumerate_select`
+  - 说明: 只收"列表 + 数量", 没有 `who` (D25) ; 列表形状归各块 `parse.rs` (D26)
+- 随机原语
+  - 位置: `src/random.rs`: `DedupFn` / `enumerate_random` / `enumerate_random_weighted`
+  - 说明: 纯枚举, 不消费 PRNG; 分支概率是 `Fraction` (D149 / D158)
+- 精确分数
+  - 位置: `src/prob.rs`: `Fraction` / `total` / `normalize` / `pick_index`
+  - 说明: 分子 / 分母 `ExactNat128`; 自动约分; 分母 0 panic
+- 随机源
+  - 位置: `src/rng.rs`: `Rng`
+  - 说明: SplitMix64; 对外只有 `next_u128` / `next_below_u128` (拒绝采样, D160)
+- 统计原语
+  - 位置: `src/stats.rs`: `Counter` / `Seq<T>`
+  - 说明: 普通值字段, 区自持, 对外只读 (D181–D183)
+- 求解接口
+  - 位置: `src/rules.rs`: `GameRules<S>` / `GameResult<P>` / `ActionList`
+  - 说明: 仅 feature `rules` 时编译 (D24) ; 含 `BothLose` (D267)
 
 **Cargo feature**
 
-| feature | 含义 |
-|---|---|
-| 默认 (空)  | 零外部依赖 |
-| `rules` | 编译 `src/rules.rs` (求解接口)  |
-| `dedup` | 启用概率去重 (只优化分支数, 不改分布)  |
-| `opt-all` | 全部计算优化 (当前 `= ["dedup"]`)  |
-| `dll` | 机制 dll 加载 (`dep:libloading`) ——`src/load.rs` 尚未实现, 打开会编译失败 |
+- 默认 (空): 零外部依赖
+- `rules`: 编译 `src/rules.rs` (求解接口)
+- `dedup`: 启用概率去重 (只优化分支数, 不改分布)
+- `opt-all`: 全部计算优化 (当前 `= ["dedup"]`)
+- `dll`: 机制 dll 加载 (`dep:libloading`) ——`src/load.rs` 尚未实现, 打开会编译失败
 
 ## 3. 公开入口
 
 `src/lib.rs` 导出 `Area` / `SingleArea` / `EntityTable` / `ActionId` / `EntityId` / `Nat` / `enumerate_random` / `DedupFn` / `enumerate_select` / `SelectionSource`; 其余模块按路径使用.
 
-| 入口 | 签名要点 |
-|---|---|
-| `Nat` / `ExactNat` | `ZERO` / `MAX` / `const fn new` / `get`; 饱和或精确的 `add/sub/mul`; 除零 panic |
-| `EntityTable` | `new` / `alloc(&mut self) -> EntityId` / `len` / `is_empty` |
-| `Area` / `SingleArea` | `push` / `take_at` (swap_remove) / `remove` / `as_slice`; `get` / `set` / `clear` |
-| `SelectionSource<S>` | `len` / `is_empty` / `apply(&self, &S, usize) -> (S, Fraction)` |
-| `enumerate_select` | `(state, list, count: Nat) -> Vec<(S, Fraction)>` |
-| `enumerate_random` | `(state, list, repeatable, all_same, times, dedup) -> Vec<(S, Fraction)>` |
-| `enumerate_random_weighted` | 增加 `weights: Option<&[Fraction]>` |
-| `Fraction` | `new(num, den)` (分母 0 panic) / `exact_add` / `exact_mul` / `exact_div` / `cmp_value` |
-| `Rng` | `from_seed(u64)` / `next_u128()` / `next_below_u128(n)` (`n == 0` panic)  |
-| `Counter` / `Seq<T>` | 计数增 / 减 / 清零; 序列 push / get / iter / as_slice |
-| `GameRules<S>` | `type Player` + `to_move` / `terminal` / `actions` / `evaluate` (feature `rules`)  |
+- `Nat` / `ExactNat`: `ZERO` / `MAX` / `const fn new` / `get`; 饱和或精确的 `add/sub/mul`; 除零 panic
+- `EntityTable`: `new` / `alloc(&mut self) -> EntityId` / `len` / `is_empty`
+- `Area` / `SingleArea`: `push` / `take_at` (swap_remove) / `remove` / `as_slice`; `get` / `set` / `clear`
+- `SelectionSource<S>`: `len` / `is_empty` / `apply(&self, &S, usize) -> (S, Fraction)`
+- `enumerate_select`: `(state, list, count: Nat) -> Vec<(S, Fraction)>`
+- `enumerate_random`: `(state, list, repeatable, all_same, times, dedup) -> Vec<(S, Fraction)>`
+- `enumerate_random_weighted`: 增加 `weights: Option<&[Fraction]>`
+- `Fraction`: `new(num, den)` (分母 0 panic) / `exact_add` / `exact_mul` / `exact_div` / `cmp_value`
+- `Rng`: `from_seed(u64)` / `next_u128()` / `next_below_u128(n)` (`n == 0` panic)
+- `Counter` / `Seq<T>`: 计数增 / 减 / 清零; 序列 push / get / iter / as_slice
+- `GameRules<S>`: `type Player` + `to_move` / `terminal` / `actions` / `evaluate` (feature `rules`)
 
 **边界行为 (写死) **
 
-| 情形 | 结果 |
-|---|---|
-| `times == 0` / `list.len() == 0` | 空 `Vec` |
-| `all_same == true` | 先选 1 项, 其余次数都取它; 结果条数 = `list.len()` (优先于下面判定)  |
-| `repeatable == false` 且 `times > list.len()` | 空 `Vec` (不 panic)  |
-| `count == 1` (选择)  | `list.len()` 支, 每支 `1/len` (精确分数)  |
-| `count > 1` (选择)  | 空 `Vec` (D25 未拍板, 不 panic)  |
-| 权重长度不等 / 权重之和为 0 | 空 `Vec` (不 panic)  |
-| 分数分母 0 / 除零 / `next_below_u128(0)` | panic (逻辑错误, D44)  |
+- `times == 0` / `list.len() == 0`: 空 `Vec`
+- `all_same == true`: 先选 1 项, 其余次数都取它; 结果条数 = `list.len()` (优先于下面判定)
+- `repeatable == false` 且 `times > list.len()`: 空 `Vec` (不 panic)
+- `count == 1` (选择): `list.len()` 支, 每支 `1/len` (精确分数)
+- `count > 1` (选择): 空 `Vec` (D25 未拍板, 不 panic)
+- 权重长度不等 / 权重之和为 0: 空 `Vec` (不 panic)
+- 分数分母 0 / 除零 / `next_below_u128(0)`: panic (逻辑错误, D44)
 
 ### 3.1 真实源码
-**Nat 族与生成宏**
 
-`new/crates/engine/src/nat.rs:23-137`
+下面给出 Nat 族与生成宏 的实现:
+
+文件: crates/engine/src/nat.rs:23-137
 
 ```rust
 /// 生成一个饱和数值类型（一族五个宽度；**默认用 `Nat`，不要直接手写这个宏的实例**）。
@@ -194,9 +213,12 @@ macro_rules! nat_type {
 }
 ```
 
-**默认数值类型 `Nat`**
+以上是 Nat 族与生成宏 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/nat.rs:164-167`
+
+下面给出 默认数值类型 `Nat` 的实现:
+
+文件: crates/engine/src/nat.rs:164-167
 
 ```rust
 /// **默认数值类型**：就是 32 位的 `Nat32`（别名，同一类型）。
@@ -205,9 +227,12 @@ macro_rules! nat_type {
 pub type Nat = Nat32;
 ```
 
-**两族共用的算术分派**
+以上是 默认数值类型 `Nat` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/nat.rs:344-362`
+
+下面给出 两族共用的算术分派 的实现:
+
+文件: crates/engine/src/nat.rs:344-362
 
 ```rust
 /// 两族共用的算术分派（D155）：宏 `nadd!` / `nsub!` / `nmul!` / `ndiv!` 统一展开到这里。
@@ -231,9 +256,12 @@ pub trait NatArith: Copy {
 }
 ```
 
-**加法宏 `nadd!`**
+以上是 两族共用的算术分派 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/nat.rs:426-435`
+
+下面给出 加法宏 `nadd!` 的实现:
+
+文件: crates/engine/src/nat.rs:426-435
 
 ```rust
 /// 加法宏（**两族共用**，语义由类型决定，见 [`NatArith`]；D155）。
@@ -248,9 +276,12 @@ macro_rules! nadd {
 }
 ```
 
-**除法宏 `ndiv!` (除零 panic) **
+以上是 加法宏 `nadd!` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/nat.rs:453-459`
+
+下面给出 除法宏 `ndiv!` (除零 panic) 的实现:
+
+文件: crates/engine/src/nat.rs:453-459
 
 ```rust
 /// 除法宏（**两族共用**：**除零 panic**，与 `Div` 运算符一致；加/减/乘的语义见 [`NatArith`]）。
@@ -262,18 +293,24 @@ macro_rules! ndiv {
 }
 ```
 
-**实体标识 `EntityId`**
+以上是 除法宏 `ndiv!` (除零 panic) 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/id.rs:13-14`
+
+下面给出 实体标识 `EntityId` 的实现:
+
+文件: crates/engine/src/id.rs:13-14
 
 ```rust
 /// 实体 id：从 0 起、单调、不复用的流水号（由实体表发放）。
 pub type EntityId = Nat;
 ```
 
-**列表下标 `ActionId`**
+以上是 实体标识 `EntityId` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/id.rs:16-20`
+
+下面给出 列表下标 `ActionId` 的实现:
+
+文件: crates/engine/src/id.rs:16-20
 
 ```rust
 /// 列表下标（**不是数值**）。
@@ -283,9 +320,12 @@ pub type EntityId = Nat;
 pub type ActionId = u32;
 ```
 
-**实体表 `EntityTable`**
+以上是 列表下标 `ActionId` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/entity.rs:10-15`
+
+下面给出 实体表 `EntityTable` 的实现:
+
+文件: crates/engine/src/entity.rs:10-15
 
 ```rust
 /// 实体表：**只发号**（从 0 起、单调、不复用）。
@@ -296,9 +336,12 @@ pub struct EntityTable {
 }
 ```
 
-**`EntityTable` 的方法**
+以上是 实体表 `EntityTable` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/entity.rs:17-41`
+
+下面给出 `EntityTable` 的方法 的实现:
+
+文件: crates/engine/src/entity.rs:17-41
 
 ```rust
 impl EntityTable {
@@ -328,9 +371,12 @@ impl EntityTable {
 }
 ```
 
-**多实体容器 `Area`**
+以上是 `EntityTable` 的方法 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/area.rs:12-18`
+
+下面给出 多实体容器 `Area` 的实现:
+
+文件: crates/engine/src/area.rs:12-18
 
 ```rust
 /// 多实体容器：只保证"放/取不频繁搬动 + 不设容量上限"。
@@ -342,9 +388,12 @@ pub struct Area {
 }
 ```
 
-**`Area` 的操作**
+以上是 多实体容器 `Area` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/area.rs:20-84`
+
+下面给出 `Area` 的操作 的实现:
+
+文件: crates/engine/src/area.rs:20-84
 
 ```rust
 impl Area {
@@ -414,9 +463,12 @@ impl Area {
 }
 ```
 
-**单实体容器 `SingleArea`**
+以上是 `Area` 的操作 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/area.rs:86-92`
+
+下面给出 单实体容器 `SingleArea` 的实现:
+
+文件: crates/engine/src/area.rs:86-92
 
 ```rust
 /// 单实体容器 = 一个"变量"：要么没有，要么只有一个实体。
@@ -428,9 +480,12 @@ pub struct SingleArea {
 }
 ```
 
-**`SingleArea` 的操作**
+以上是 单实体容器 `SingleArea` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/area.rs:94-119`
+
+下面给出 `SingleArea` 的操作 的实现:
+
+文件: crates/engine/src/area.rs:94-119
 
 ```rust
 impl SingleArea {
@@ -461,9 +516,12 @@ impl SingleArea {
 }
 ```
 
-**选择列表 `SelectionSource`**
+以上是 `SingleArea` 的操作 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/select.rs:17-29`
+
+下面给出 选择列表 `SelectionSource` 的实现:
+
+文件: crates/engine/src/select.rs:17-29
 
 ```rust
 /// 定义层提供的「选择列表」：引擎只要求能数出多少项、以及「取第 i 项后状态变成什么」。
@@ -481,9 +539,12 @@ pub trait SelectionSource<S> {
 }
 ```
 
-**选择原语 `enumerate_select`**
+以上是 选择列表 `SelectionSource` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/select.rs:31-70`
+
+下面给出 选择原语 `enumerate_select` 的实现:
+
+文件: crates/engine/src/select.rs:31-70
 
 ```rust
 /// ③-b 选择：**只收列表与数量，没有 who**（D25）。
@@ -528,9 +589,12 @@ where
 }
 ```
 
-**去重函数指针 `DedupFn`**
+以上是 选择原语 `enumerate_select` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/random.rs:28-40`
+
+下面给出 去重函数指针 `DedupFn` 的实现:
+
+文件: crates/engine/src/random.rs:28-40
 
 ```rust
 /// 去重函数指针（D1：去重**在调用点声明**，引擎只收函数指针）。
@@ -548,9 +612,12 @@ where
 pub type DedupFn = fn(Vec<(usize, Fraction)>) -> Vec<(usize, Fraction)>;
 ```
 
-**随机原语 `enumerate_random`**
+以上是 去重函数指针 `DedupFn` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/random.rs:42-69`
+
+下面给出 随机原语 `enumerate_random` 的实现:
+
+文件: crates/engine/src/random.rs:42-69
 
 ```rust
 /// ③-a 随机：是否可以重复选择某项 / 是否所有次数都选择同一项 / 选择次数。
@@ -583,9 +650,12 @@ where
 }
 ```
 
-**带分数列表的随机 `enumerate_random_weighted`**
+以上是 随机原语 `enumerate_random` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/random.rs:71-169`
+
+下面给出 带分数列表的随机 `enumerate_random_weighted` 的实现:
+
+文件: crates/engine/src/random.rs:71-169
 
 ```rust
 /// ③-a 随机（**可选分数列表**，D150）：在 [`enumerate_random`] 上多收一个权重列表。
@@ -689,9 +759,12 @@ where
 }
 ```
 
-**精确分数 `Fraction`**
+以上是 带分数列表的随机 `enumerate_random_weighted` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/prob.rs:54-62`
+
+下面给出 精确分数 `Fraction` 的实现:
+
+文件: crates/engine/src/prob.rs:54-62
 
 ```rust
 /// 分数：`num / den`（分子 / 分母，均 `ExactNat128`；D150 / D152 / D153 / D158）。
@@ -705,9 +778,12 @@ pub struct Fraction {
 }
 ```
 
-**`Fraction` 的构造与精确运算**
+以上是 精确分数 `Fraction` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/prob.rs:64-144`
+
+下面给出 `Fraction` 的构造与精确运算 的实现:
+
+文件: crates/engine/src/prob.rs:64-144
 
 ```rust
 impl Fraction {
@@ -793,9 +869,12 @@ impl Fraction {
 }
 ```
 
-**分数求和 `total`**
+以上是 `Fraction` 的构造与精确运算 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/prob.rs:214-217`
+
+下面给出 分数求和 `total` 的实现:
+
+文件: crates/engine/src/prob.rs:214-217
 
 ```rust
 /// 一组分数的和（精确族累加，溢出一律 panic；空切片 -> [`Fraction::ZERO`]）。
@@ -804,9 +883,12 @@ pub fn total(fractions: &[Fraction]) -> Fraction {
 }
 ```
 
-**分数归一化 `normalize`**
+以上是 分数求和 `total` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/prob.rs:219-237`
+
+下面给出 分数归一化 `normalize` 的实现:
+
+文件: crates/engine/src/prob.rs:219-237
 
 ```rust
 /// 一组分数的**归一化**（D150 / D156）：按各自占比变成**精确分数**（Σ = 1）。
@@ -830,9 +912,12 @@ pub fn normalize(fractions: &[Fraction]) -> Option<Vec<Fraction>> {
 }
 ```
 
-**按分数占比落一单 `pick_index`**
+以上是 分数归一化 `normalize` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/prob.rs:239-265`
+
+下面给出 按分数占比落一单 `pick_index` 的实现:
+
+文件: crates/engine/src/prob.rs:239-265
 
 ```rust
 /// 按分数占比选一个下标：`unit` 是 `[0, 2^128)` 的均匀随机整数（由 [`crate::rng::Rng`] 取）。
@@ -864,9 +949,12 @@ pub fn pick_index(fractions: &[Fraction], unit: u128) -> Option<usize> {
 }
 ```
 
-**随机源 `Rng`**
+以上是 按分数占比落一单 `pick_index` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/rng.rs:12-18`
+
+下面给出 随机源 `Rng` 的实现:
+
+文件: crates/engine/src/rng.rs:12-18
 
 ```rust
 /// 引擎的随机源（D149 / D151 / D160）：内部状态用 SplitMix64，对外只给 128 位随机整数。
@@ -878,9 +966,12 @@ pub struct Rng {
 }
 ```
 
-**`Rng` 的公开方法**
+以上是 随机源 `Rng` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/rng.rs:20-56`
+
+下面给出 `Rng` 的公开方法 的实现:
+
+文件: crates/engine/src/rng.rs:20-56
 
 ```rust
 impl Rng {
@@ -922,9 +1013,12 @@ impl Rng {
 }
 ```
 
-**计数器 `Counter`**
+以上是 `Rng` 的公开方法 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/stats.rs:25-40`
+
+下面给出 计数器 `Counter` 的实现:
+
+文件: crates/engine/src/stats.rs:25-40
 
 ```rust
 /// 计数器：一个 [`Nat`] 的**饱和**增 / 减 / 清零 / 读。
@@ -945,9 +1039,12 @@ pub struct Counter {
 }
 ```
 
-**`Counter` 的操作**
+以上是 计数器 `Counter` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/stats.rs:42-77`
+
+下面给出 `Counter` 的操作 的实现:
+
+文件: crates/engine/src/stats.rs:42-77
 
 ```rust
 impl Counter {
@@ -988,9 +1085,12 @@ impl Counter {
 }
 ```
 
-**有序可重复序列 `Seq<T>`**
+以上是 `Counter` 的操作 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/stats.rs:93-106`
+
+下面给出 有序可重复序列 `Seq<T>` 的实现:
+
+文件: crates/engine/src/stats.rs:93-106
 
 ```rust
 /// 有序**可重复**序列：允许重复、保持插入顺序。
@@ -1009,9 +1109,12 @@ pub struct Seq<T> {
 }
 ```
 
-**`Seq<T>` 的操作**
+以上是 有序可重复序列 `Seq<T>` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/stats.rs:108-149`
+
+下面给出 `Seq<T>` 的操作 的实现:
+
+文件: crates/engine/src/stats.rs:108-149
 
 ```rust
 impl<T: Clone> Seq<T> {
@@ -1058,9 +1161,12 @@ impl<T: Clone> Seq<T> {
 }
 ```
 
-**求解接口 `GameRules`**
+以上是 `Seq<T>` 的操作 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/rules.rs:18-37`
+
+下面给出 求解接口 `GameRules` 的实现:
+
+文件: crates/engine/src/rules.rs:18-37
 
 ```rust
 /// 对局规则接口：求解器只通过这四个函数看局面。
@@ -1085,9 +1191,12 @@ pub trait GameRules<S> {
 }
 ```
 
-**终局结果 `GameResult`**
+以上是 求解接口 `GameRules` 的定义; 具体行为以该文件为准.
 
-`new/crates/engine/src/rules.rs:39-54`
+
+下面给出 终局结果 `GameResult` 的实现:
+
+文件: crates/engine/src/rules.rs:39-54
 
 ```rust
 /// 终局结果（`P` = 定义层给的「谁」）。
@@ -1108,6 +1217,9 @@ pub enum GameResult<P> {
 }
 ```
 
+以上是 终局结果 `GameResult` 的定义; 具体行为以该文件为准.
+
+
 
 ## 4. 不变量与禁止
 
@@ -1122,25 +1234,23 @@ pub enum GameResult<P> {
 - 不新增数值类型 / 运算宏: 统计模块明确不扩展 `Nat` 族口径 (D181) .
 - 无全局可变状态, 无内部可变性 (统计容器也是) .
 
-## 5. 依据 (规则书与 D 编号) 
+## 5. 依据 (规则书条款 / 决策编号)
 
 引擎是机制层, 不读规则书; 行为依据全部来自决策日志.
 
-| 主题 | 依据 |
-|---|---|
-| 去重函数指针 + feature 开关 | D1 / D3 |
-| 求解接口默认不编译 | D24 |
-| 选择原语没有 who; 列表归各自 `parse.rs` | D25 / D26 |
-| 敌我不编号, 两个具名实例, 无 `Side` | D29 / D34 |
-| `Nat` 族 / `Nat = Nat32` / 非默认宽度要登记 | D36 / D37 |
-| 区 = 状态变量, 无区号, 无归属表 | D42 |
-| 除零 panic | D44 |
-| 随机分工 (枚举纯函数, 采样才用 RNG)  | D149 / D150 / D151 |
-| 精确分数 / 精确族 / 宏按类型分派 | D152 / D153 / D155 / D156 |
-| 对外精确, 全仓零 f64, 随机源 `u128` | D158 / D159 / D160 |
-| 统计原语 / 区自持 / 对外只读 | D181 / D182 / D183 |
-| `GameResult::BothLose` (双负)  | D267 / D268 |
-| 边界行为表 | `分工计划.md` §4.2'边界行为 (写死) ' |
+- 去重函数指针 + feature 开关: D1 / D3
+- 求解接口默认不编译: D24
+- 选择原语没有 who; 列表归各自 `parse.rs`: D25 / D26
+- 敌我不编号, 两个具名实例, 无 `Side`: D29 / D34
+- `Nat` 族 / `Nat = Nat32` / 非默认宽度要登记: D36 / D37
+- 区 = 状态变量, 无区号, 无归属表: D42
+- 除零 panic: D44
+- 随机分工 (枚举纯函数, 采样才用 RNG): D149 / D150 / D151
+- 精确分数 / 精确族 / 宏按类型分派: D152 / D153 / D155 / D156
+- 对外精确, 全仓零 f64, 随机源 `u128`: D158 / D159 / D160
+- 统计原语 / 区自持 / 对外只读: D181 / D182 / D183
+- `GameResult::BothLose` (双负): D267 / D268
+- 边界行为表: `分工计划.md` §4.2'边界行为 (写死) '
 
 ## 6. 常见误用
 
@@ -1154,35 +1264,37 @@ pub enum GameResult<P> {
 - 默认以为 `rules` 模块存在: 要 `--features rules`.
 - 打开 `dll` feature: `load.rs` 未实现, 会编译失败.
 
-## 7. 测试
+## 7. 测试在哪
 
 - 全部测试: `cargo test --offline -p gi-genius-invokation-engine`, 当前 184 条 (单元 + 3 个集成测试文件) .
 - 代表用例 (`文件::模块::测试名`) : 
 
-| 用例 | 覆盖点 |
-|---|---|
-| `engine/src/nat.rs::nat::tests::add_saturates_on_overflow` | 饱和族五个宽度 |
-| `engine/src/nat.rs::nat::exact_nat_tests::exact_width_nat128::add_overflow_by_method_panics` | 精确族溢出 panic |
-| `engine/src/prob.rs::prob::tests::normalize_gives_exact_proportions_summing_to_one` | 精确归一化 |
-| `engine/src/random.rs::random::tests::none_weights_is_bit_identical_to_plain_enumerate_random` | 加权与等概率一致 |
-| `engine/src/random.rs::random::tests::dedup_fn_is_ignored_without_feature` | dedup feature 关闭分布不变 |
-| `engine/src/rng.rs::rng::tests::next_u64_matches_splitmix64_reference_vectors` | 锁死 PRNG 算法 |
-| `engine/tests/entity_area.rs::alloc_keeps_growing_and_never_reuses` | 实体号单调不复用 |
-| `engine/tests/select.rs::count_two_is_empty_and_does_not_panic` | 多选未拍板时返回空 |
+- `engine/src/nat.rs::nat::tests::add_saturates_on_overflow`: 饱和族五个宽度
+- `engine/src/nat.rs::nat::exact_nat_tests::exact_width_nat128::add_overflow_by_method_panics`: 精确族溢出 panic
+- `engine/src/prob.rs::prob::tests::normalize_gives_exact_proportions_summing_to_one`: 精确归一化
+- `engine/src/random.rs::random::tests::none_weights_is_bit_identical_to_plain_enumerate_random`: 加权与等概率一致
+- `engine/src/random.rs::random::tests::dedup_fn_is_ignored_without_feature`: dedup feature 关闭分布不变
+- `engine/src/rng.rs::rng::tests::next_u64_matches_splitmix64_reference_vectors`: 锁死 PRNG 算法
+- `engine/tests/entity_area.rs::alloc_keeps_growing_and_never_reuses`: 实体号单调不复用
+- `engine/tests/select.rs::count_two_is_empty_and_does_not_panic`: 多选未拍板时返回空
 
 > [!NOTE]
 > `tools/check_*.py` 只扫 definitions 等上层 crate, 不扫 engine (§8.3) .
 
 ## 8. 待接入与待实测
 
-| 编号 | 事项 |
-|---|---|
-| #5 | 引擎 `DedupFn` 无上下文 (当前折叠是 definitions 侧后置合并, D87)  |
-| #13 | `GameRules::evaluate` 返回无符号 `ExactNat128`; 求解器若有负分局面需另立精确有符号类型 |
-| #14 | 浮点只允许出现在核心 crates 之外; `Fraction::to_f64` 已删除 |
-| #43 | `GameRules::to_move` / `actions` / `evaluate` 仍是占位 |
-| #44 | `definitions` 的 `rules` feature 是否进 CI——待确认 (`ci.yml` 已用 workspace features 覆盖)  |
-| 无编号 | `dll` feature 的 `src/load.rs` 不存在, 打开即编译失败 (D226 记录, CI 注释明确不开)  |
+- #5: 引擎 `DedupFn` 无上下文 (当前折叠是 definitions 侧后置合并, D87)
+- #13: `GameRules::evaluate` 返回无符号 `ExactNat128`; 求解器若有负分局面需另立精确有符号类型
+- #14: 浮点只允许出现在核心 crates 之外; `Fraction::to_f64` 已删除
+- #43: `GameRules::to_move` / `actions` / `evaluate` 仍是占位
+- #44: `definitions` 的 `rules` feature 是否进 CI——待确认 (`ci.yml` 已用 workspace features 覆盖)
+- 无编号: `dll` feature 的 `src/load.rs` 不存在, 打开即编译失败 (D226 记录, CI 注释明确不开)
+
+---
+
+## 小结
+
+引擎只提供机制原语, 不解释任何游戏语义. 概率与随机全部是精确整数, 上层按需组合这些原语.
 
 ---
 

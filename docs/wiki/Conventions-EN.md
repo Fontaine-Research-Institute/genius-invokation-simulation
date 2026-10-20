@@ -17,12 +17,10 @@
 
 **Locations**
 
-| Content | Location |
-|---|---|
-| Tag type + `data()` | `definitions/src/tags/action_card/support/location.rs` |
-| Single source of tag data | `TAGS` in `definitions/src/generated/mod.rs` (one field per tag) |
-| State identity | `identity_address()` in `definitions/src/status/def.rs` and `status/state.rs` |
-| Reaction identity | `ReactionIdentity::identity_address()` in `definitions/src/reactions/mod.rs` |
+- Tag type + `data()`: `definitions/src/tags/action_card/support/location.rs`
+- Single source of tag data: `TAGS` in `definitions/src/generated/mod.rs` (one field per tag)
+- State identity: `identity_address()` in `definitions/src/status/def.rs` and `status/state.rs`
+- Reaction identity: `ReactionIdentity::identity_address()` in `definitions/src/reactions/mod.rs`
 
 > [!WARNING]
 > Different zero-sized statics can share the same address; comparing `ptr::addr_eq` / `ptr::eq` on the ZSTs themselves merges distinct identities (measured in D200).
@@ -65,12 +63,18 @@
 
 ## 5. Nat and ExactNat
 
-| Requirement | Detail | Basis |
-|---|---|---|
-| Business numbers default to `Nat` = `Nat32` (saturating) | Other widths (`Nat8/16/64/128`) only for deliberate designs and must be registered in `不入库/nat-宽度统计.md` | D37 |
-| Probability-related values use `ExactNat` = `ExactNat128` (exact) | Add / sub / mul panic on overflow or underflow | D153 / D156 |
-| Arithmetic macros are shared by both families | `nadd!` / `nsub!` / `nmul!` / `ndiv!`; semantics follow the type | D155 |
-| No bare integers or bare `+ - * /` | `definitions` / `cards` deny `clippy::arithmetic_side_effects`; three scanners also advise | Section 8.3 |
+- Business numbers default to `Nat` = `Nat32` (saturating)
+  - Detail: Other widths (`Nat8/16/64/128`) only for deliberate designs and must be registered in `不入库/nat-宽度统计.md`
+  - Basis: D37
+- Probability-related values use `ExactNat` = `ExactNat128` (exact)
+  - Detail: Add / sub / mul panic on overflow or underflow
+  - Basis: D153 / D156
+- Arithmetic macros are shared by both families
+  - Detail: `nadd!` / `nsub!` / `nmul!` / `ndiv!`; semantics follow the type
+  - Basis: D155
+- No bare integers or bare `+ - * /`
+  - Detail: `definitions` / `cards` deny `clippy::arithmetic_side_effects`; three scanners also advise
+  - Basis: Section 8.3
 
 > [!WARNING]
 > Counterexamples: `let hp: u32 = 10;`, `let n = 2 + 3;`, using saturating `Nat` for probabilities, adding a `Nat64` without registration.
@@ -157,21 +161,19 @@
 
 ## 12. Related Pages
 
-| Page | Content |
-|---|---|
-| [[Architecture-EN]] | dependency direction, data flow, known documentation deviations |
-| [[Crate-Engine-EN]] | numeric, fraction, and random primitives |
-| [[定义层-Keywords-EN]] | steps and keyword functions |
-| [[定义层-Timeline-EN]] | trigger registration and insertion-based settlement |
-| [[定义层-Records-EN]] | recorder implementation |
+- [[Architecture-EN]]: dependency direction, data flow, known documentation deviations
+- [[Crate-Engine-EN]]: numeric, fraction, and random primitives
+- [[定义层-Keywords-EN]]: steps and keyword functions
+- [[定义层-Timeline-EN]]: trigger registration and insertion-based settlement
+- [[定义层-Records-EN]]: recorder implementation
 
 ---
 
 ## 13. Real Source Excerpts (matching the sections above)
 
-**Tag type (section 1)**
+The implementation of Tag type (section 1) follows:
 
-`new/crates/definitions/src/tags/action_card/support/location.rs:8-10`
+File: crates/definitions/src/tags/action_card/support/location.rs:8-10
 
 ```rust
 /// 「场地」：支援牌中的场地牌。
@@ -179,9 +181,12 @@
 pub struct Location;
 ```
 
-**Tag data entry `data()` (sections 1 / 2)**
+The code above defines Tag type (section 1); see the file for the full implementation.
 
-`new/crates/definitions/src/tags/action_card/support/location.rs:12-15`
+
+The implementation of Tag data entry `data()` (sections 1 / 2) follows:
+
+File: crates/definitions/src/tags/action_card/support/location.rs:12-15
 
 ```rust
 /// 本标签的静态文本（D67：数据唯一一份在 generated::TAGS；这里只给字段引用，不写字面量）。
@@ -190,9 +195,12 @@ pub fn data() -> &'static crate::generated::TagText {
 }
 ```
 
-**State identity trait (section 1)**
+The code above defines Tag data entry `data()` (sections 1 / 2); see the file for the full implementation.
 
-`new/crates/definitions/src/families/action_card/status/state.rs:43-78`
+
+The implementation of State identity trait (section 1) follows:
+
+File: crates/definitions/src/families/action_card/status/state.rs:43-78
 
 ```rust
 /// 状态身份（D95/D96/D110）：具体状态模块定义自己的零大小类型 + 一份静态实例；
@@ -233,9 +241,12 @@ pub trait StateIdentity: 'static + std::fmt::Debug {
 }
 ```
 
-**Identity address `identity_address()` (section 1)**
+The code above defines State identity trait (section 1); see the file for the full implementation.
 
-`new/crates/definitions/src/families/action_card/status/state.rs:55-66`
+
+The implementation of Identity address `identity_address()` (section 1) follows:
+
+File: crates/definitions/src/families/action_card/status/state.rs:55-66
 
 ```rust
     /// **身份地址** = 指向该身份**定义数据**的指针（D57 / D58 口径）。
@@ -252,9 +263,12 @@ pub trait StateIdentity: 'static + std::fmt::Debug {
     }
 ```
 
-**Shared arithmetic macro (sections 4 / 5 / 6)**
+The code above defines Identity address `identity_address()` (section 1); see the file for the full implementation.
 
-`new/crates/engine/src/nat.rs:426-435`
+
+The implementation of Shared arithmetic macro (sections 4 / 5 / 6) follows:
+
+File: crates/engine/src/nat.rs:426-435
 
 ```rust
 /// 加法宏（**两族共用**，语义由类型决定，见 [`NatArith`]；D155）。
@@ -269,9 +283,12 @@ macro_rules! nadd {
 }
 ```
 
-**Fraction construction (section 4)**
+The code above defines Shared arithmetic macro (sections 4 / 5 / 6); see the file for the full implementation.
 
-`new/crates/engine/src/prob.rs:77-86`
+
+The implementation of Fraction construction (section 4) follows:
+
+File: crates/engine/src/prob.rs:77-86
 
 ```rust
     /// 构造 `num / den`（**不约分**；需要规范化时用加 / 乘 / 除的结果）。
@@ -286,9 +303,12 @@ macro_rules! nadd {
     }
 ```
 
-**Step `Step` (section 7)**
+The code above defines Fraction construction (section 4); see the file for the full implementation.
 
-`new/crates/definitions/src/keywords/step.rs:44-48`
+
+The implementation of Step `Step` (section 7) follows:
+
+File: crates/definitions/src/keywords/step.rs:44-48
 
 ```rust
 /// **一步**：一组关键字操作（数据；顺序 = 显示 / 执行顺序）。
@@ -298,9 +318,12 @@ pub struct Step {
 }
 ```
 
-**Trigger entry `Trigger` (section 8)**
+The code above defines Step `Step` (section 7); see the file for the full implementation.
 
-`new/crates/definitions/src/timeline/trigger.rs:44-67`
+
+The implementation of Trigger entry `Trigger` (section 8) follows:
+
+File: crates/definitions/src/timeline/trigger.rs:44-67
 
 ```rust
 /// 一条**触发登记项**（纯数据；`K` / `E` 都是 `Copy` 时整体 `Copy`）。
@@ -329,9 +352,12 @@ pub struct Trigger<K, E = Effect> {
 }
 ```
 
-**Record entry `Record<T>` (section 9)**
+The code above defines Trigger entry `Trigger` (section 8); see the file for the full implementation.
 
-`new/crates/definitions/src/records/mod.rs:34-41`
+
+The implementation of Record entry `Record<T>` (section 9) follows:
+
+File: crates/definitions/src/records/mod.rs:34-41
 
 ```rust
 /// 一条记录：**属于哪一步** + 任意内容（内容类型由使用方定义）。
@@ -344,9 +370,12 @@ pub struct Record<T> {
 }
 ```
 
-**Record write `Recorder::push` (section 9)**
+The code above defines Record entry `Record<T>` (section 9); see the file for the full implementation.
 
-`new/crates/definitions/src/records/mod.rs:88-91`
+
+The implementation of Record write `Recorder::push` (section 9) follows:
+
+File: crates/definitions/src/records/mod.rs:88-91
 
 ```rust
     /// **唯一写入入口**：把一条内容记到某一步。
@@ -355,9 +384,12 @@ pub struct Record<T> {
     }
 ```
 
-**Cost component `CostComponent` (sections 2 / 5)**
+The code above defines Record write `Recorder::push` (section 9); see the file for the full implementation.
 
-`new/crates/definitions/src/resources/dice/mod.rs:157-168`
+
+The implementation of Cost component `CostComponent` (sections 2 / 5) follows:
+
+File: crates/definitions/src/resources/dice/mod.rs:157-168
 
 ```rust
 /// 花费 / 消耗的一位（D168：只有三类，枚举顺序 = 加费/减费优先级）。
@@ -374,9 +406,12 @@ pub enum CostComponent {
 }
 ```
 
-**Keyword function `cause_damage` (section 8)**
+The code above defines Cost component `CostComponent` (sections 2 / 5); see the file for the full implementation.
 
-`new/crates/definitions/src/keywords/keyword.rs:241-292`
+
+The implementation of Keyword function `cause_damage` (section 8) follows:
+
+File: crates/definitions/src/keywords/keyword.rs:241-292
 
 ```rust
 /// **造成伤害**：对选择器解析出的每个角色走伤修链（加伤 -> 护盾 -> 减伤 -> 扣血 / 附着 / 反应）。
@@ -433,9 +468,12 @@ pub fn cause_damage(state: &DefState, env: &EffectEnv<'_>, args: &DamageArgs) ->
 }
 ```
 
-**Settlement order constant (section 11)**
+The code above defines Keyword function `cause_damage` (section 8); see the file for the full implementation.
 
-`new/crates/definitions/src/rules/ops/order.rs:29-36`
+
+The implementation of Settlement order constant (section 11) follows:
+
+File: crates/definitions/src/rules/ops/order.rs:29-36
 
 ```rust
 /// 同一牌手内、不同来源类别的结算顺序（规则书第 2 条）。
@@ -448,9 +486,12 @@ pub const SOURCE_ORDER: [EffectSource; 5] = [
 ];
 ```
 
-**Order predicate `resolves_before` (section 11)**
+The code above defines Settlement order constant (section 11); see the file for the full implementation.
 
-`new/crates/definitions/src/rules/ops/order.rs:38-59`
+
+The implementation of Order predicate `resolves_before` (section 11) follows:
+
+File: crates/definitions/src/rules/ops/order.rs:38-59
 
 ```rust
 /// 同一时间点、同一牌手内：first 是否先于 second 结算（规则书第 2 条）。
@@ -477,6 +518,15 @@ pub fn resolves_before(first: EffectSource, second: EffectSource) -> bool {
 }
 ```
 
+The code above defines Order predicate `resolves_before` (section 11); see the file for the full implementation.
+
+
+
+---
+
+## Summary
+
+All conventions serve one goal: identity by pointer, one copy of data, pure entry points. Skim this page before writing code.
 
 ---
 

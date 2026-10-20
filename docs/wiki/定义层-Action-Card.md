@@ -14,11 +14,15 @@
 
 ### 2.1 定义 (`def.rs` / `mod.rs`) 
 
-| 类型 | 文件 | 要点 |
-|---|---|---|
-| `ActionCardType` | `action_card/mod.rs` | `Support` / `Equipment` / `Event`; 只是分类, 无编号语义 |
-| `ActionCardDef<Tags>` | `action_card/def.rs` | `id` / `card_type` / 4 语名字描述 / `tags` / `cost: &'static [CostComponent]` (基础费用) / `play_condition: PlayConditionFn` |
-| `PlayCondition` / `PlayConditionFn` | `action_card/def.rs` | `Ok` / `Rejected(&'static str)`; 函数指针 `fn(&DefState, ViewSide) -> PlayCondition` (D217 / D186)  |
+- **`ActionCardType`**
+  - 文件: `action_card/mod.rs`
+  - 要点: `Support` / `Equipment` / `Event`; 只是分类, 无编号语义
+- **`ActionCardDef<Tags>`**
+  - 文件: `action_card/def.rs`
+  - 要点: `id` / `card_type` / 4 语名字描述 / `tags` / `cost: &'static [CostComponent]` (基础费用) / `play_condition: PlayConditionFn`
+- **`PlayCondition` / `PlayConditionFn`**
+  - 文件: `action_card/def.rs`
+  - 要点: `Ok` / `Rejected(&'static str)`; 函数指针 `fn(&DefState, ViewSide) -> PlayCondition` (D217 / D186)
 
 > [!IMPORTANT]
 > 打出条件在**比较是否付得起之前**调用 (D217) : 不通过就拒绝, 状态一个字节不变; 通过后才走支付 → 离手 → 落位 → 派发.
@@ -57,14 +61,36 @@ HandCardStateTiming { StateAdded, StateRemoved }
 
 6 个手牌状态 (D116; 电击–无效化) : 
 
-| 关键字 | 名字 | 身份实例 | 形态 | 定义位置 |
-|---|---|---|---|---|
-| 电击 | 电击 | `ELECTRIC_SHOCK` | 布尔 | `families/character/damage_chain/statuses.rs` (历史入口)  |
-| 费用增加 | 费用增加 | `HAND_COST_INCREASE` | 层数 (待实测)  | `families/action_card/areas/hand_state.rs` |
-| 费用降低 | 费用降低 | `COST_REDUCTION` | 层数 | `families/character/damage_chain/statuses.rs` (历史入口)  |
-| 赋能 | 赋能 | `HAND_EMPOWERMENT` | 布尔 | `areas/hand_state.rs` |
-| 不可调和 | 不可调和 | `HAND_UNTUNABLE` | 布尔 | `areas/hand_state.rs` |
-| 无效化 | 无效化 | `HAND_INVALIDATION` | 布尔 | `areas/hand_state.rs` |
+- **电击**
+  - 名字: 电击
+  - 身份实例: `ELECTRIC_SHOCK`
+  - 形态: 布尔
+  - 定义位置: `families/character/damage_chain/statuses.rs` (历史入口)
+- **费用增加**
+  - 名字: 费用增加
+  - 身份实例: `HAND_COST_INCREASE`
+  - 形态: 层数 (待实测)
+  - 定义位置: `families/action_card/areas/hand_state.rs`
+- **费用降低**
+  - 名字: 费用降低
+  - 身份实例: `COST_REDUCTION`
+  - 形态: 层数
+  - 定义位置: `families/character/damage_chain/statuses.rs` (历史入口)
+- **赋能**
+  - 名字: 赋能
+  - 身份实例: `HAND_EMPOWERMENT`
+  - 形态: 布尔
+  - 定义位置: `areas/hand_state.rs`
+- **不可调和**
+  - 名字: 不可调和
+  - 身份实例: `HAND_UNTUNABLE`
+  - 形态: 布尔
+  - 定义位置: `areas/hand_state.rs`
+- **无效化**
+  - 名字: 无效化
+  - 身份实例: `HAND_INVALIDATION`
+  - 形态: 布尔
+  - 定义位置: `areas/hand_state.rs`
 
 - 枚举 `reactions::effect::HandCardStatus` (6 变体, 带 `ALL` / `k_code` / `from_k_code`) ; 桥表 `hand_status_identity(HandCardStatus) -> &'static dyn StateIdentity` 与反向 `hand_status_of_identity` 在 `damage_chain/statuses.rs` (Z13 收口) .
 - 增 / 删复用 `StateList` (布尔幂等, 层数相加) , 并派发 `StateAdded` / `StateRemoved`; `remove_card(entity)` 在牌离开手牌时清掉它的状态.
@@ -118,7 +144,9 @@ ARCANE_EDICT                                     // 状态身份（布尔；秘�
 
 ### 3.1 定义载体
 
-**`ActionCardDef`** — `crates/definitions/src/families/action_card/def.rs`
+
+先看 `ActionCardDef` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
 /// 一张**行动牌**的定义（纯数据；D217）。
@@ -144,7 +172,11 @@ pub struct ActionCardDef<Tags> {
 }
 ```
 
-**`new`** — `crates/definitions/src/families/action_card/def.rs`
+上面这段给出 `ActionCardDef` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `new` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
     /// 建一份行动牌定义（常量 / 测试用；7 个参数，不再拆构造器）。
@@ -169,7 +201,11 @@ pub struct ActionCardDef<Tags> {
     }
 ```
 
-**`check_play`** — `crates/definitions/src/families/action_card/def.rs`
+上面这段给出 `new` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `check_play` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
     /// **问一次打出条件**（D217）：把本定义的函数指针套用到「局面 + 视角方」上。
@@ -180,7 +216,11 @@ pub struct ActionCardDef<Tags> {
     }
 ```
 
-**`PlayCondition`** — `crates/definitions/src/families/action_card/def.rs`
+上面这段给出 `check_play` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `PlayCondition` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
 /// **一次打出条件的结论**（D217）。
@@ -196,7 +236,11 @@ pub enum PlayCondition {
 }
 ```
 
-**`PlayConditionFn`** — `crates/definitions/src/families/action_card/def.rs`
+上面这段给出 `PlayCondition` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `PlayConditionFn` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/def.rs
 
 ```rust
 /// **打出条件函数**（D217 / D186）：吃一局状态 + 视角方，返回结论。
@@ -204,33 +248,15 @@ pub enum PlayCondition {
 /// 用**函数指针**（不是闭包）：签名里没有可变引用，也没有捕获环境 ——
 /// 条件**改不了任何状态**、也不依赖调用顺序（纯函数由签名保证）。
 pub type PlayConditionFn = fn(&DefState, ViewSide) -> PlayCondition;
-
-/// 一张**行动牌**的定义（纯数据；D217）。
-///
-/// 泛型参数 `Tags` 是标签集合（形态本轮未定，见 `lib.rs`；没有标签用 `()`）。
-/// 一份定义可以写成 `static` 常量：`new` 与全部访问器都是 `const fn`。
-#[derive(Clone, Copy, Debug)]
-pub struct ActionCardDef<Tags> {
-    /// 行动牌的卡 id（行动牌牌族 id 区域内唯一）。
-    id: CardId,
-    /// 类型（支援 / 装备 / 事件，D51）；决定落位落点。
-    card_type: ActionCardType,
-    /// 4 语名字（本块只填中文，D120）。
-    name: Localized,
-    /// 4 语描述（本块只填中文，D120）。
-    description: Localized,
-    /// 标签集合（D54：标签是零大小类型；集合形态本轮未定）。
-    tags: Tags,
-    /// **基础费用**（静态切片；费用修正链未接，见「待接入」）。
-    cost: &'static [CostComponent],
-    /// **打出条件**（D217）：尝试打出时、**比较是否付得起之前**调用。
-    play_condition: PlayConditionFn,
-}
 ```
+
+上面这段给出 `PlayConditionFn` 的公开形状, 具体实现在同一文件里.
 
 ### 3.2 支援区
 
-**`SupportValue`** — `crates/definitions/src/families/action_card/areas/support.rs`
+
+先看 `SupportValue` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// 支援牌的「值」（分工计划 §4.4.15）：三选一、互斥。
@@ -245,7 +271,11 @@ pub enum SupportValue {
 }
 ```
 
-**`SupportDuration`** — `crates/definitions/src/families/action_card/areas/support.rs`
+上面这段给出 `SupportValue` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SupportDuration` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// 支援牌的**持续回合表达**（Z14：显式区分「有限回合」与「整局」）。
@@ -262,7 +292,11 @@ pub enum SupportDuration {
 }
 ```
 
-**`SupportEntry`** — `crates/definitions/src/families/action_card/areas/support.rs`
+上面这段给出 `SupportDuration` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SupportEntry` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// 一张支援牌：卡 id（= 行动牌 id，唯一）+ 实体号 + 值 + 持续回合。
@@ -283,7 +317,11 @@ pub struct SupportEntry {
 }
 ```
 
-**`support_duration_of`** — `crates/definitions/src/families/action_card/areas/support.rs`
+上面这段给出 `SupportEntry` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `support_duration_of` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
     /// 某张支援牌的**显式持续回合表达**（Z14；不在区里 -> None）。
@@ -292,7 +330,11 @@ pub struct SupportEntry {
     }
 ```
 
-**`SupportZone`** — `crates/definitions/src/families/action_card/areas/support.rs`
+上面这段给出 `support_duration_of` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SupportZone` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
 /// **支援区**：最多 4 张，按排列顺序（= 进场先后）。
@@ -308,7 +350,11 @@ pub struct SupportZone {
 }
 ```
 
-**`add_with_triggers`** — `crates/definitions/src/families/action_card/areas/support.rs`
+上面这段给出 `SupportZone` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `add_with_triggers` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
     /// **加一张支援牌**（规则书·游戏区域 III）：未满 -> 直接进；满 4 -> **选择弃置一张**（多分支）。
@@ -326,7 +372,11 @@ pub struct SupportZone {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/areas/support.rs）
 ```
 
-**`tick_end_phase_with_triggers`** — `crates/definitions/src/families/action_card/areas/support.rs`
+上面这段给出 `add_with_triggers` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `tick_end_phase_with_triggers` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/support.rs
 
 ```rust
     /// 把 `entity` 移出（纯函数内部用；统计 +1 弃置）。
@@ -349,9 +399,13 @@ pub struct SupportZone {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/areas/support.rs）
 ```
 
+上面这段给出 `tick_end_phase_with_triggers` 的公开形状, 具体实现在同一文件里.
+
 ### 3.3 手牌与手牌卡状态
 
-**`HandState`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+
+先看 `HandState` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
 /// 手牌区：一个多实体容器（元素 = 实体号 + 卡 id 一对），**无序、上限 10**。
@@ -368,7 +422,11 @@ pub struct HandState {
 }
 ```
 
-**`add`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+上面这段给出 `HandState` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `add` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
     /// 把一张**已存在**的卡牌实体加入手牌；返回 (新状态, 是否加入)。
@@ -392,7 +450,11 @@ pub struct HandState {
     }
 ```
 
-**`discard`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+上面这段给出 `add` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `discard` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
     /// 从手牌**舍弃**一张牌（移除，没有弃牌堆）。
@@ -411,7 +473,11 @@ pub struct HandState {
     }
 ```
 
-**`draw_opening`** — `crates/definitions/src/families/action_card/zones/hand/mod.rs`
+上面这段给出 `discard` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `draw_opening` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/hand/mod.rs
 
 ```rust
     /// **起手**（D17 / D90）：先按「秘传」标签向牌库抓，再补足到 OPENING_SIZE 张。
@@ -438,7 +504,11 @@ pub struct HandState {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/zones/hand/mod.rs）
 ```
 
-**`HandCardStates`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+上面这段给出 `draw_opening` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `HandCardStates` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
 /// **手牌卡状态表**：手牌实体 -> 状态列表。
@@ -454,7 +524,11 @@ pub struct HandCardStates {
 }
 ```
 
-**`add_state_with_triggers`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+上面这段给出 `HandCardStates` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `add_state_with_triggers` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
     /// 给一张手牌卡**加状态**（纯函数；不改入参）+ 派发「状态加上」。
@@ -472,7 +546,11 @@ pub struct HandCardStates {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/areas/hand_state.rs）
 ```
 
-**`remove_card`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+上面这段给出 `add_state_with_triggers` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `remove_card` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
     /// 一张手牌卡**离开手牌**：把它身上的状态整体清掉（卡片进出**手牌区**是手牌区的事实，
@@ -490,7 +568,11 @@ pub struct HandCardStates {
     }
 ```
 
-**`ExtraHandCardStatus`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+上面这段给出 `remove_card` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `ExtraHandCardStatus` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
 /// 本文件补的 4 个手牌状态（费用增加 / 赋能 / 不可调和 / 无效化）。
@@ -507,41 +589,22 @@ pub enum ExtraHandCardStatus {
 }
 ```
 
-**`HAND_COST_INCREASE`** — `crates/definitions/src/families/action_card/areas/hand_state.rs`
+上面这段给出 `ExtraHandCardStatus` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `HAND_COST_INCREASE` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/hand_state.rs
 
 ```rust
 /// 「费用增加」静态身份实例。
 pub static HAND_COST_INCREASE: HandCostIncrease = HandCostIncrease(&HAND_COST_INCREASE_TEXT);
-/// 「赋能」静态身份实例。
-pub static HAND_EMPOWERMENT: HandEmpowerment = HandEmpowerment(&HAND_EMPOWERMENT_TEXT);
-/// 「不可调和」静态身份实例。
-pub static HAND_UNTUNABLE: HandUntunable = HandUntunable(&HAND_UNTUNABLE_TEXT);
-/// 「无效化」静态身份实例。
-pub static HAND_INVALIDATION: HandInvalidation = HandInvalidation(&HAND_INVALIDATION_TEXT);
-
-macro_rules! impl_hand_status_identity {
-    ($identity:ident, $value:expr, $form:expr) => {
-        impl StateIdentity for $identity {
-            fn text(&self) -> &'static StateText {
-                self.0
-            }
-
-            fn form(&self) -> StateForm {
-                $form
-            }
-        }
-
-        impl $identity {
-            /// 把自身当状态身份指针用（D95 / D96）。
-            pub fn identity(&'static self) -> &'static dyn StateIdentity {
-                $value
-            }
-        }
-    };
-}
 ```
 
-**`hand_status_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `HAND_COST_INCREASE` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `hand_status_identity` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 手牌状态枚举 -> 状态身份（月感电 / 月绽放用；电击–无效化 共 6 种）。
@@ -557,7 +620,11 @@ pub fn hand_status_identity(status: HandCardStatus) -> &'static dyn StateIdentit
 }
 ```
 
-**`hand_status_of_identity`** — `crates/definitions/src/families/character/damage_chain/statuses.rs`
+上面这段给出 `hand_status_identity` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `hand_status_of_identity` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/character/damage_chain/statuses.rs
 
 ```rust
 /// 状态身份 -> 手牌状态枚举（反向查询；不是这 6 种之一 -> None）。
@@ -569,9 +636,13 @@ pub fn hand_status_of_identity(identity: &'static dyn StateIdentity) -> Option<H
 }
 ```
 
+上面这段给出 `hand_status_of_identity` 的公开形状, 具体实现在同一文件里.
+
 ### 3.4 牌库与查询
 
-**`PileState`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+
+先看 `PileState` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
 /// 牌库区：**位置为键的 entries + 段视图 + 公共状态列表**（D93/D105）。
@@ -599,7 +670,11 @@ pub struct PileState {
 }
 ```
 
-**`put_bottom`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+上面这段给出 `PileState` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `put_bottom` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// **置底**：把这张牌移到牌库最下面。
@@ -619,7 +694,11 @@ pub struct PileState {
     }
 ```
 
-**`put_bottom_many`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+上面这段给出 `put_bottom` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `put_bottom_many` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// **通用「把若干新牌放牌组底」**（D209）：放几张、按什么顺序放都由调用方指定。
@@ -642,7 +721,11 @@ pub struct PileState {
     // ...（其余实现从略；见 crates/definitions/src/families/action_card/zones/pile/mod.rs）
 ```
 
-**`draw_top`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+上面这段给出 `put_bottom_many` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `draw_top` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// 按类型 / 标签抽最上面一张；matches 是调用方注入的谓词（拿 CardId 查类型 / 标签，D20/D26）。
@@ -657,7 +740,11 @@ pub struct PileState {
     }
 ```
 
-**`draw_many`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+上面这段给出 `draw_top` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `draw_many` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// 抓 **n 张**（不够则少给）；返回折叠后的分支列表（D83/D84/D85）。
@@ -671,7 +758,11 @@ pub struct PileState {
     }
 ```
 
-**`add_pending_mark`** — `crates/definitions/src/families/action_card/zones/pile/mod.rs`
+上面这段给出 `draw_many` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `add_pending_mark` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/pile/mod.rs
 
 ```rust
     /// 记录一批「待赋状态的位置」（D188）：**不物化到牌上**，只存位置列表。
@@ -702,7 +793,11 @@ pub struct PileState {
     }
 ```
 
-**`CardMeta`** — `crates/definitions/src/families/action_card/zones/query.rs`
+上面这段给出 `add_pending_mark` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `CardMeta` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/query.rs
 
 ```rust
 /// 查询需要的**卡牌元数据接口**（调用方实现，框架不建注册表；D20 / D101）。
@@ -725,7 +820,11 @@ pub trait CardMeta {
 }
 ```
 
-**`cards_in_initial_deck`** — `crates/definitions/src/families/action_card/zones/query.rs`
+上面这段给出 `CardMeta` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `cards_in_initial_deck` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/zones/query.rs
 
 ```rust
 /// **初始牌组**里：类型 = `ty`（`None` = 不限）、标签含 `tag`（`None` = 不限）的卡。
@@ -750,9 +849,13 @@ pub fn cards_in_initial_deck(
 }
 ```
 
+上面这段给出 `cards_in_initial_deck` 的公开形状, 具体实现在同一文件里.
+
 ### 3.5 当前费用
 
-**`CurrentCost`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+
+先看 `CurrentCost` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
 /// 一次行动的**当前元素骰费用**：基础费用 + 已叠加的加费 / 减费。
@@ -767,7 +870,11 @@ pub struct CurrentCost {
 }
 ```
 
-**`with_delta`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+上面这段给出 `CurrentCost` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `with_delta` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
     /// 叠加一次加费 / 减费，返回新的当前费用（不改入参）。
@@ -783,7 +890,11 @@ pub struct CurrentCost {
     }
 ```
 
-**`with_increase`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+上面这段给出 `with_delta` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `with_increase` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
     /// 加费 `amount`（D178：0 费时新建 ② 同色）。
@@ -792,7 +903,11 @@ pub struct CurrentCost {
     }
 ```
 
-**`with_decrease`** — `crates/definitions/src/families/action_card/areas/cost.rs`
+上面这段给出 `with_increase` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `with_decrease` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/action_card/areas/cost.rs
 
 ```rust
     /// 减费 `amount`（D170：① -> ② -> ③ 依次减，剩余作废）。
@@ -801,9 +916,13 @@ pub struct CurrentCost {
     }
 ```
 
+上面这段给出 `with_decrease` 的公开形状, 具体实现在同一文件里.
+
 ### 3.6 秘传揭令
 
-**`ArcaneEdictStatus`** — `crates/definitions/src/families/status/arcane_edict.rs`
+
+先看 `ArcaneEdictStatus` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
 /// 「秘传揭令」状态的身份类型（没有独立卡牌数据 -> 不建 StatusDef；身份 = 静态文本地址）。
@@ -824,24 +943,22 @@ impl StateIdentity for ArcaneEdictStatus {
 }
 ```
 
-**`ARCANE_EDICT`** — `crates/definitions/src/families/status/arcane_edict.rs`
+上面这段给出 `ArcaneEdictStatus` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `ARCANE_EDICT` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
 /// 「秘传揭令」的状态身份（布尔形态：存在即代表有）。
 pub static ARCANE_EDICT: ArcaneEdictStatus = ArcaneEdictStatus;
-
-impl StateIdentity for ArcaneEdictStatus {
-    fn text(&self) -> &'static StateText {
-        &ARCANE_EDICT_TEXT
-    }
-
-    fn form(&self) -> StateForm {
-        StateForm::Boolean
-    }
-}
 ```
 
-**`ArcaneEdict`** — `crates/definitions/src/families/status/arcane_edict.rs`
+上面这段给出 `ARCANE_EDICT` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `ArcaneEdict` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
 /// 每位牌手一份的**秘传揭令容器**（使用机会 + 已打出张数）。
@@ -854,7 +971,11 @@ pub struct ArcaneEdict {
 }
 ```
 
-**`can_play`** — `crates/definitions/src/families/status/arcane_edict.rs`
+上面这段给出 `ArcaneEdict` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `can_play` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
     /// 现在能不能打出秘传（复用规则层的判定顺序：先看已打出张数，再看揭令）。
@@ -863,7 +984,11 @@ pub struct ArcaneEdict {
     }
 ```
 
-**`record_play`** — `crates/definitions/src/families/status/arcane_edict.rs`
+上面这段给出 `can_play` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `record_play` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/families/status/arcane_edict.rs
 
 ```rust
     /// 打出秘传：允许时记录「已打出 +1」并按 秘传揭令 消耗揭令；不允许 -> None（状态不变）。
@@ -882,12 +1007,16 @@ pub struct ArcaneEdict {
     }
 ```
 
+上面这段给出 `record_play` 的公开形状, 具体实现在同一文件里.
+
 ### 3.7 本页引用的关键字 / 规则 ops
 
 > [!NOTE]
 > 以下为本文引用的关键字层 / 规则 ops 的真实源码 (签名与文档注释取自仓库) .
 
-**`apply_delta`** — `crates/definitions/src/resources/dice/mod.rs`
+
+先看 `apply_delta` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/resources/dice/mod.rs
 
 ```rust
 /// 对费用做加减（D170/D172/D178）：顺序**写死**为 ① SpecificElement → ② SameColor → ③ AnyColor。
@@ -907,7 +1036,11 @@ pub fn apply_delta(cost: &[CostComponent], delta: CostDelta) -> Vec<CostComponen
 }
 ```
 
-**`CostDelta`** — `crates/definitions/src/resources/dice/mod.rs`
+上面这段给出 `apply_delta` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `CostDelta` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/resources/dice/mod.rs
 
 ```rust
 /// 费用增减（D170/D172）。
@@ -926,14 +1059,22 @@ pub enum CostDelta {
 }
 ```
 
-**`SUPPORT_CAP`** — `crates/definitions/src/rules/ops/support.rs`
+上面这段给出 `CostDelta` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `SUPPORT_CAP` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/support.rs
 
 ```rust
 /// 一方支援区上限（分工计划 §4.4.15 已定）。
 pub const SUPPORT_CAP: Nat = Nat::new(4);
 ```
 
-**`support_enter`** — `crates/definitions/src/rules/ops/support.rs`
+上面这段给出 `SUPPORT_CAP` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `support_enter` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/support.rs
 
 ```rust
 /// 进场判定（纯函数）。
@@ -946,7 +1087,11 @@ pub fn support_enter(occupied: Nat) -> SupportEnter {
 }
 ```
 
-**`can_play`** — `crates/definitions/src/rules/ops/arcane.rs`
+上面这段给出 `support_enter` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `can_play` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/arcane.rs
 
 ```rust
 /// 打出判定：played_this_game = 本局该牌手已打出的秘传张数，
@@ -962,7 +1107,11 @@ pub fn can_play(played_this_game: Nat, edict_available: bool) -> ArcanePlay {
 }
 ```
 
-**`consumes_edict`** — `crates/definitions/src/rules/ops/arcane.rs`
+上面这段给出 `can_play` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `consumes_edict` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/arcane.rs
 
 ```rust
 /// 打出后是否消耗秘传揭令（关键字 #70：会消耗）。
@@ -971,7 +1120,11 @@ pub fn consumes_edict() -> bool {
 }
 ```
 
-**`duration_after_end_phase`** — `crates/definitions/src/rules/ops/lifetime.rs`
+上面这段给出 `consumes_edict` 的公开形状, 具体实现在同一文件里.
+
+
+先看 `duration_after_end_phase` 的定义, 下面贴它的声明.
+文件: crates/definitions/src/rules/ops/lifetime.rs
 
 ```rust
 /// 经过一个结束阶段后的持续回合（减到 0 为止）。
@@ -979,6 +1132,8 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
     nsub!(duration, DURATION_PER_END_PHASE)
 }
 ```
+
+上面这段给出 `duration_after_end_phase` 的公开形状, 具体实现在同一文件里.
 
 ## 4. 不变量与禁止
 
@@ -1001,18 +1156,16 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 
 ## 5. 依据 (规则书与 D 编号) 
 
-| 主题 | 依据 |
-|---|---|
-| 支援区上限 4 / 满 4 选择弃置 / 按排列顺序结算 | 规则书"游戏区域 III"; 留空 #67 / #93 |
-| 手牌上限 10 / 只有手牌中的行动牌可打出与调和 | 规则书"游戏区域 VI" |
-| 起手 5 张, 秘传必在起手 | 规则书"游戏准备"+ D17 / D90 |
-| 牌库位置标记 / 抽牌折叠 / 舍弃与置底语义 | D52 / D80 / D82 / D83 / D84 / D86 / D89 / D93 / D94 / D97 / D98 |
-| 延迟展开 (未观测不物化)  | D188 / D189 / D190 / D191 |
-| 查询: 注入 `CardMeta`, 排除三类, 按段分组 | D20 / D101 |
-| 当前费用 = 基础 + 加费 / 减费; 加费 / 减费顺序 | D11 / D168 / D169 / D170 / D172 / D178 |
-| 打出条件先于付费 | D217 |
-| 秘传揭令每位牌手一份 | 规则书"特殊词条 秘传"+ 秘传揭令; D264; 留空 #68 / #98 / #99 |
-| 手牌 6 状态身份 | D116; 电击–无效化; 留空 #10 / #106 / #115 |
+- 支援区上限 4 / 满 4 选择弃置 / 按排列顺序结算: 规则书"游戏区域 III"; 留空 #67 / #93
+- 手牌上限 10 / 只有手牌中的行动牌可打出与调和: 规则书"游戏区域 VI"
+- 起手 5 张, 秘传必在起手: 规则书"游戏准备"+ D17 / D90
+- 牌库位置标记 / 抽牌折叠 / 舍弃与置底语义: D52 / D80 / D82 / D83 / D84 / D86 / D89 / D93 / D94 / D97 / D98
+- 延迟展开 (未观测不物化): D188 / D189 / D190 / D191
+- 查询: 注入 `CardMeta`, 排除三类, 按段分组: D20 / D101
+- 当前费用 = 基础 + 加费 / 减费; 加费 / 减费顺序: D11 / D168 / D169 / D170 / D172 / D178
+- 打出条件先于付费: D217
+- 秘传揭令每位牌手一份: 规则书"特殊词条 秘传"+ 秘传揭令; D264; 留空 #68 / #98 / #99
+- 手牌 6 状态身份: D116; 电击–无效化; 留空 #10 / #106 / #115
 
 ### 5.1 文档与代码不一致 (供复核) 
 
@@ -1038,16 +1191,14 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 
 ## 7. 测试
 
-| 文件 | 代表测试 |
-|---|---|
-| `action_card/def.rs` | `check_play_binds_the_viewer_side`, `check_play_is_a_pure_read_only_function`, `cost_is_a_borrowed_static_slice_not_a_copy` |
-| `areas/support.rs` | `full_zone_gives_one_branch_per_discard_candidate`, `full_zone_branches_dispatch_discard_then_enter`, `end_phase_duration_ticks_and_depleted_support_is_discarded`, `whole_game_duration_skips_tick_and_round_duration_still_ticks` |
-| `areas/hand_state.rs` | `add_state_creates_entry_and_merges_by_state_list_rules`, `extra_hand_status_identities_have_names_forms_and_queries`, `remove_state_and_card` |
-| `areas/cost.rs` | `increase_on_zero_cost_creates_same_color`, `decrease_drains_specific_then_same_color_then_any`, `deltas_are_replayable_and_ordered` |
-| `zones/hand/mod.rs` | `add_fills_up_to_ten_then_rejects`, `opening_hand_draws_five_then_runs_out`, `opening_hand_prefers_arcane_cards` |
-| `zones/pile/mod.rs` | `draw_many_unmarked_folds_to_combinations`, `draw_many_marks_fold_by_combination_d98`, `pending_marks_expand_when_drawn`, `states_follow_insert_and_discard` |
-| `zones/query.rs` | `query_all_excludes_non_discoverable_three_tags`, `multi_segment_query_maps_segment_by_segment`, `filter_by_tag_matches_any_of_card_tags_by_pointer` |
-| `families/status/arcane_edict.rs` | `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict` |
+- `action_card/def.rs`: `check_play_binds_the_viewer_side`, `check_play_is_a_pure_read_only_function`, `cost_is_a_borrowed_static_slice_not_a_copy`
+- `areas/support.rs`: `full_zone_gives_one_branch_per_discard_candidate`, `full_zone_branches_dispatch_discard_then_enter`, `end_phase_duration_ticks_and_depleted_support_is_discarded`, `whole_game_duration_skips_tick_and_round_duration_still_ticks`
+- `areas/hand_state.rs`: `add_state_creates_entry_and_merges_by_state_list_rules`, `extra_hand_status_identities_have_names_forms_and_queries`, `remove_state_and_card`
+- `areas/cost.rs`: `increase_on_zero_cost_creates_same_color`, `decrease_drains_specific_then_same_color_then_any`, `deltas_are_replayable_and_ordered`
+- `zones/hand/mod.rs`: `add_fills_up_to_ten_then_rejects`, `opening_hand_draws_five_then_runs_out`, `opening_hand_prefers_arcane_cards`
+- `zones/pile/mod.rs`: `draw_many_unmarked_folds_to_combinations`, `draw_many_marks_fold_by_combination_d98`, `pending_marks_expand_when_drawn`, `states_follow_insert_and_discard`
+- `zones/query.rs`: `query_all_excludes_non_discoverable_three_tags`, `multi_segment_query_maps_segment_by_segment`, `filter_by_tag_matches_any_of_card_tags_by_pointer`
+- `families/status/arcane_edict.rs`: `fresh_container_allows_arcane_and_records_play`, `consumed_edict_blocks_arcane_with_no_edict`
 
 ## 8. 待接入与待实测
 
@@ -1061,5 +1212,10 @@ pub fn duration_after_end_phase(duration: Nat) -> Nat {
 - **元素幻变**等行动牌级钩子: 留空 #108 (已接投掷, 开局流程未接) .
 - **复苏料理**: 留空 #109 / #119 (与 [[定义层-Character]] 的饱腹, `flow/revive.rs` 组合) .
 
+## 小结
+
+行动牌族只提供定义载体与五个承载 (手牌, 牌库, 支援区, 手牌卡状态, 当前费用), 不写具体卡牌.
+所有区操作都是纯函数, 费用算法复用骰子层的 apply_delta; 打出条件在比较是否付得起之前判定.
+秘传揭令是每位牌手一份的容器, 不是状态卡.
 ---
 最后核对: 2026-10-19 (代码: `crates/definitions/src/families/action_card/areas/support.rs::SupportZone::add_with_triggers`) 

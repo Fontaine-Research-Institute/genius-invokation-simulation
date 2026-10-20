@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Tide-Turning Sacred Lord |
-| K code | K1049 |
+> Keyword: Tide-Turning Sacred Lord
+>
+> K code: K1049
 
 ## Effect
 
@@ -26,3 +25,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Tide-Turning Sacred Lord is the keyword K1049.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.

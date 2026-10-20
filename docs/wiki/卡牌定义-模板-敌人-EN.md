@@ -2,7 +2,7 @@
 
 > [[卡牌定义-模板-敌人|中文]] · English
 
-*Scope: writing template for enemy; mirrors the character template [[卡牌定义-模板]] (Chinese reference).*
+*Scope: writing template for enemy; mirrors the character template [[卡牌定义-模板-EN]].*
 
 > [!IMPORTANT]
 > General hard rules:
@@ -27,6 +27,8 @@
 
 > Enemy
 
+File: <file path>
+
 ```rust
 // Example Enemy definition code
 ```
@@ -37,11 +39,15 @@
 >
 > Cost: 1 Hydro Elemental Die
 
+File: <file path>
+
 ```rust
 // Skill definition code
 ```
 
 > <skill description here>
+
+File: <file path>
 
 ```rust
 // Skill implementation code
@@ -55,11 +61,15 @@
 >
 > 2 [[Keyword-Energy|Energy]]
 
+File: <file path>
+
 ```rust
 // Elemental Burst definition code
 ```
 
 > <Elemental Burst description here>
+
+File: <file path>
 
 ```rust
 // Elemental Burst implementation code
@@ -69,11 +79,15 @@
 
 > Passive Skill
 
+File: <file path>
+
 ```rust
 // Passive skill definition code
 ```
 
 > <passive description here>
+
+File: <file path>
 
 ```rust
 // Passive skill implementation code
@@ -95,6 +109,10 @@
 > Card image path: `assets/enemy/<id>.jpg`; register each new image in `new/assets/SOURCES.md`.
 >
 > Do not use skill icons.
+
+## Summary
+
+The enemy template writes the enemy type and definition code first, then each skill in the character skill form, and the enemy card description last. Keep each skill's definition and implementation code separate with file labels.
 
 ---
 

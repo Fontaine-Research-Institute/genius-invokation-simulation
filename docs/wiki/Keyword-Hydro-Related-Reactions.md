@@ -8,10 +8,9 @@
 
 ## Keyword Data
 
-| Item | Value |
-|---|---|
-| Keyword | Hydro-Related Reactions |
-| K code | K212 |
+> Keyword: Hydro-Related Reactions
+>
+> K code: K212
 
 ## Effect
 
@@ -32,3 +31,9 @@
 ## Cards Using It
 
 To be added.
+
+## Summary
+
+Hydro-Related Reactions is the keyword K212.
+The effect text is quoted from the keyword data; related rulebook entries are still to be added.
+No implemented card uses it yet.
